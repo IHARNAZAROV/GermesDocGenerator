@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const ExcelJS = require('exceljs');
 const { generateWord } = require("./generator/word-generator");
@@ -146,17 +146,37 @@ ipcMain.on('app:close-confirmed', () => {
 });
 
 // ============================================================
+//  IPC — select output folder dialog
+// ============================================================
+ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Выбрать папку для сохранения',
+    defaultPath: defaultPath || undefined,
+    properties: ['openDirectory', 'createDirectory'],
+  });
+  if (result.canceled || result.filePaths.length === 0) return null;
+  return result.filePaths[0];
+});
+
+// ============================================================
+//  IPC — open file with default OS application
+// ============================================================
+ipcMain.handle('shell:openFile', async (_event, filePath) => {
+  await shell.openPath(filePath);
+});
+
+// ============================================================
 //  IPC — generate "Доверенность ПНД" from current form data
 // ============================================================
-ipcMain.handle('word:generateDoverennost', async (_event, data) => {
+ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir) => {
   const fs = require('fs');
 
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Доверенность_ПНД.docx');
-  const outputDir    = path.join(__dirname, 'output');
-  const outputPath   = path.join(outputDir, 'Доверенность ПНД.docx');
+  const templatePath  = path.join(__dirname, 'templates', 'working', 'Доверенность_ПНД.docx');
+  const resolvedDir   = outputDir || path.join(__dirname, 'output');
+  const outputPath    = path.join(resolvedDir, 'Доверенность ПНД.docx');
 
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  if (!fs.existsSync(resolvedDir)) {
+    fs.mkdirSync(resolvedDir, { recursive: true });
   }
 
   return generateWord(templatePath, outputPath, data);

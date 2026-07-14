@@ -19,6 +19,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer → main: confirm close after save
   closeApp: ()                                 => ipcRenderer.send('app:close-confirmed'),
 
+  // Folder selection dialog
+  selectFolder: (defaultPath)                  => ipcRenderer.invoke('dialog:selectFolder', defaultPath),
+
+  // Open file with default OS app
+  openFile: (filePath)                         => ipcRenderer.invoke('shell:openFile', filePath),
+
   // Document generation
-  generateDoverennost: (data)                  => ipcRenderer.invoke('word:generateDoverennost', data),
+  generateDoverennost: (data, outputDir)       => ipcRenderer.invoke('word:generateDoverennost', data, outputDir),
 });

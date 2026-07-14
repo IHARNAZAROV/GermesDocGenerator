@@ -12,6 +12,9 @@ const btnGenerate     = document.getElementById('btn-generate');
 const btnPreview      = document.getElementById('btn-preview');
 const btnSelectAll    = document.getElementById('btn-select-all');
 const btnDeselectAll  = document.getElementById('btn-deselect-all');
+const btnBrowse       = document.getElementById('btn-browse');
+const saveFolderInput = document.getElementById('save-folder');
+const chkOpenAfter    = document.getElementById('chk-open-after');
 const filePathDisplay = document.getElementById('file-path-display');
 const fileSuccess     = document.getElementById('file-success');
 const fileName        = document.getElementById('file-name');
@@ -582,6 +585,18 @@ errorClose.addEventListener('click', hideError);
 btnSelectAll.addEventListener('click', handleSelectAll);
 btnDeselectAll.addEventListener('click', handleDeselectAll);
 
+// ============================================================
+//  Browse output folder
+// ============================================================
+btnBrowse.addEventListener('click', async () => {
+  const current = saveFolderInput.value.trim() || undefined;
+  const chosen = await window.electronAPI.selectFolder(current);
+  if (chosen) saveFolderInput.value = chosen;
+});
+
+// ============================================================
+//  Generate documents
+// ============================================================
 btnGenerate.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
@@ -591,16 +606,17 @@ async function handleGenerate() {
   const midName   = (document.getElementById('seller-Отчество')?.value  || '').trim();
 
   const sellerFullName  = [lastName, firstName, midName].filter(Boolean).join(' ');
-  const sellerBirthDate = (document.getElementById('seller-Дата рождения')?.value         || '').trim();
-  const sellerAddress   = (document.getElementById('seller-Адрес регистрации')?.value     || '').trim();
+  const sellerBirthDate = (document.getElementById('seller-Дата рождения')?.value           || '').trim();
+  const sellerAddress   = (document.getElementById('seller-Адрес регистрации')?.value       || '').trim();
   const sellerId        = (document.getElementById('seller-Идентификационный номер')?.value || '').trim();
-  const currentDate     = (document.getElementById('deal-Дата договора')?.value           || '').trim();
+  const currentDate     = (document.getElementById('deal-Дата договора')?.value             || '').trim();
 
-  const data = { sellerFullName, sellerBirthDate, sellerAddress, sellerId, currentDate };
+  const data      = { sellerFullName, sellerBirthDate, sellerAddress, sellerId, currentDate };
+  const outputDir = saveFolderInput.value.trim() || null; // null → main process uses default output/
 
   let result;
   try {
-    result = await window.electronAPI.generateDoverennost(data);
+    result = await window.electronAPI.generateDoverennost(data, outputDir);
   } catch (err) {
     showToast('✖ Ошибка формирования доверенности: ' + err.message, 'error');
     return;
@@ -608,6 +624,9 @@ async function handleGenerate() {
 
   if (result && result.success) {
     showToast('✔ Доверенность успешно сформирована');
+    if (chkOpenAfter && chkOpenAfter.checked) {
+      window.electronAPI.openFile(result.path);
+    }
   } else {
     showToast('✖ Ошибка формирования доверенности: ' + (result?.error || 'неизвестная ошибка'), 'error');
   }
