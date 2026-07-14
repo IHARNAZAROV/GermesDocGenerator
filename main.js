@@ -145,40 +145,19 @@ ipcMain.on('app:close-confirmed', () => {
   if (mainWindow) mainWindow.destroy();
 });
 
-ipcMain.handle("generate-test-word", async () => {
+// ============================================================
+//  IPC — generate "Доверенность ПНД" from current form data
+// ============================================================
+ipcMain.handle('word:generateDoverennost', async (_event, data) => {
+  const fs = require('fs');
 
-    const path = require("path");
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Доверенность_ПНД.docx');
+  const outputDir    = path.join(__dirname, 'output');
+  const outputPath   = path.join(outputDir, 'Доверенность ПНД.docx');
 
-    const templatePath = path.join(
-        __dirname,
-        "templates",
-        "Доверенность ПНД.docx"
-    );
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
-    const outputPath = path.join(
-        __dirname,
-        "output",
-        "Доверенность.docx"
-    );
-
-    const data = {
-
-        sellerFullName: "Петров Сергей Викторович",
-
-        sellerBirthDate: "12.05.1981",
-
-        sellerAddress: "г. Лида, ул. Советская, 12",
-
-        sellerId: "3120581A012PB4",
-
-        currentDate: "15.07.2026"
-
-    };
-
-    return generateWord(
-        templatePath,
-        outputPath,
-        data
-    );
-
+  return generateWord(templatePath, outputPath, data);
 });

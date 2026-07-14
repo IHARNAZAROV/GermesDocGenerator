@@ -18,4 +18,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Renderer → main: confirm close after save
   closeApp: ()                                 => ipcRenderer.send('app:close-confirmed'),
+
+  // Document generation
+  generateDoverennost: (data)                  => ipcRenderer.invoke('word:generateDoverennost', data),
 });

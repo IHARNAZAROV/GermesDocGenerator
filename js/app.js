@@ -582,9 +582,36 @@ errorClose.addEventListener('click', hideError);
 btnSelectAll.addEventListener('click', handleSelectAll);
 btnDeselectAll.addEventListener('click', handleDeselectAll);
 
-btnGenerate.addEventListener('click', () => {
-  showToast('Функция генерации договоров будет доступна в следующей версии');
-});
+btnGenerate.addEventListener('click', handleGenerate);
+
+async function handleGenerate() {
+  // Read values directly from current form state — never re-read Excel
+  const lastName  = (document.getElementById('seller-Фамилия')?.value  || '').trim();
+  const firstName = (document.getElementById('seller-Имя')?.value       || '').trim();
+  const midName   = (document.getElementById('seller-Отчество')?.value  || '').trim();
+
+  const sellerFullName  = [lastName, firstName, midName].filter(Boolean).join(' ');
+  const sellerBirthDate = (document.getElementById('seller-Дата рождения')?.value         || '').trim();
+  const sellerAddress   = (document.getElementById('seller-Адрес регистрации')?.value     || '').trim();
+  const sellerId        = (document.getElementById('seller-Идентификационный номер')?.value || '').trim();
+  const currentDate     = (document.getElementById('deal-Дата договора')?.value           || '').trim();
+
+  const data = { sellerFullName, sellerBirthDate, sellerAddress, sellerId, currentDate };
+
+  let result;
+  try {
+    result = await window.electronAPI.generateDoverennost(data);
+  } catch (err) {
+    showToast('✖ Ошибка формирования доверенности: ' + err.message, 'error');
+    return;
+  }
+
+  if (result && result.success) {
+    showToast('✔ Доверенность успешно сформирована');
+  } else {
+    showToast('✖ Ошибка формирования доверенности: ' + (result?.error || 'неизвестная ошибка'), 'error');
+  }
+}
 btnPreview.addEventListener('click', () => {
   showToast('Предварительный просмотр будет доступен в следующей версии');
 });
