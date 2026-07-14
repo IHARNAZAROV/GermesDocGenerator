@@ -6,13 +6,20 @@
 const btnChooseFile   = document.getElementById('btn-choose-file');
 const btnSave         = document.getElementById('btn-save');
 const btnSaveAs       = document.getElementById('btn-save-as');
+const btnClear        = document.getElementById('btn-clear');
+const btnCheck        = document.getElementById('btn-check');
+const btnGenerate     = document.getElementById('btn-generate');
+const btnPreview      = document.getElementById('btn-preview');
+const btnSelectAll    = document.getElementById('btn-select-all');
+const btnDeselectAll  = document.getElementById('btn-deselect-all');
 const filePathDisplay = document.getElementById('file-path-display');
+const fileSuccess     = document.getElementById('file-success');
+const fileName        = document.getElementById('file-name');
+const statusText      = document.getElementById('status-text');
 const errorBanner     = document.getElementById('error-banner');
 const errorText       = document.getElementById('error-text');
 const errorClose      = document.getElementById('error-close');
 const loader          = document.getElementById('loader');
-const emptyState      = document.getElementById('empty-state');
-const cardsGrid       = document.getElementById('cards-grid');
 const toastContainer  = document.getElementById('toast-container');
 
 // ============================================================
@@ -126,69 +133,38 @@ const FIELD_MAP = {
   'buyer-Семейное положение':       'buyer-Семейное положение',
 };
 
-// Reverse map: inputId → mapKey (for looking up rowMap entries when saving)
+// Reverse map: inputId → mapKey (for save lookup)
 const SAVE_MAP = Object.fromEntries(
   Object.entries(FIELD_MAP).map(([mapKey, inputId]) => [inputId, mapKey])
 );
 
 // ============================================================
-//  Cards auto-expanded after Excel load
-// ============================================================
-const AUTO_OPEN_CARDS = new Set(['deal', 'property', 'buyer']);
-
-// In-session collapse state
-const cardOpenState = {};
-
-// ============================================================
 //  Application state
 // ============================================================
-let currentFilePath = null; // path of the currently open file
-let rowMap          = {};   // mapKey → Excel row number  (from _rowMap)
-let originalValues  = {};   // inputId → value at load / last save
-let dirtyInputIds   = new Set(); // set of inputIds that have been changed
+let currentFilePath = null;
+let rowMap          = {};
+let originalValues  = {};
+let dirtyInputIds   = new Set();
 
 // ============================================================
 //  Universal helpers
 // ============================================================
-
-/** Returns true when a value should be treated as empty. */
 function isFieldEmpty(value) {
   if (value === null || value === undefined) return true;
   return String(value).trim() === '';
 }
 
-/**
- * Returns true when every input inside a card section is empty.
- * @param {string} cardId – e.g. 'deal', 'owner2'
- */
-function isSectionEmpty(cardId) {
-  const card = document.getElementById('card-' + cardId);
-  if (!card) return true;
-  for (const input of card.querySelectorAll('input[type="text"]')) {
-    if (!isFieldEmpty(input.value)) return false;
-  }
-  return true;
-}
-
 // ============================================================
 //  Toast notifications
 // ============================================================
-
-/**
- * Show a self-dismissing in-app notification.
- * @param {string} message
- * @param {'success'|'error'} type
- */
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
   toastContainer.appendChild(toast);
-
   requestAnimationFrame(() => {
     requestAnimationFrame(() => toast.classList.add('toast-visible'));
   });
-
   setTimeout(() => {
     toast.classList.remove('toast-visible');
     setTimeout(() => toast.remove(), 320);
@@ -196,20 +172,22 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================================
-//  Error banner helpers
+//  Error / loader helpers
 // ============================================================
 function showError(message) {
   errorText.textContent = message;
   errorBanner.hidden = false;
 }
-
 function hideError() {
   errorBanner.hidden = true;
   errorText.textContent = '';
 }
-
 function showLoader() { loader.hidden = false; }
 function hideLoader() { loader.hidden = true; }
+
+function setStatus(text) {
+  if (statusText) statusText.textContent = text;
+}
 
 // ============================================================
 //  Input population
@@ -227,36 +205,28 @@ function clearAllInputs() {
 // ============================================================
 //  Dirty-state tracking
 // ============================================================
-
 function updateDirtyState() {
   const hasDirty = dirtyInputIds.size > 0;
   btnSave.disabled = !hasDirty;
   window.electronAPI.notifyDirtyChange(hasDirty);
+  setStatus(hasDirty ? 'Есть несохранённые изменения' : (currentFilePath ? 'Файл загружен' : 'Готов к работе'));
 }
 
-/**
- * Called on every input `input` event.
- * Compares current value against the saved baseline.
- */
 function onInputChange(inputId, currentValue) {
   const original = originalValues[inputId] ?? '';
   const current  = currentValue.trim();
-
-  const input = document.getElementById(inputId);
-  if (!input) return;
-
+  const el = document.getElementById(inputId);
+  if (!el) return;
   if (current !== original) {
     dirtyInputIds.add(inputId);
-    input.classList.add('input-dirty');
+    el.classList.add('input-dirty');
   } else {
     dirtyInputIds.delete(inputId);
-    input.classList.remove('input-dirty');
+    el.classList.remove('input-dirty');
   }
-
   updateDirtyState();
 }
 
-/** Snapshot current values as the new baseline and clear all dirty markers. */
 function commitCurrentValues() {
   for (const inputId of Object.values(FIELD_MAP)) {
     const el = document.getElementById(inputId);
@@ -268,7 +238,7 @@ function commitCurrentValues() {
   updateDirtyState();
 }
 
-// Attach change listeners to every input once at startup
+// Attach change listeners to every tracked input at startup
 for (const inputId of Object.values(FIELD_MAP)) {
   const el = document.getElementById(inputId);
   if (!el) continue;
@@ -277,7 +247,6 @@ for (const inputId of Object.values(FIELD_MAP)) {
 
 // ============================================================
 //  Build updates map for writing to Excel
-//  Returns: { [rowNumber]: value }
 // ============================================================
 function buildUpdates() {
   const updates = {};
@@ -291,18 +260,14 @@ function buildUpdates() {
 }
 
 // ============================================================
-//  Build default "Save As" filename
-//  Format: Сделка_<ФамилияПродавца>_<ДатаДоговора>.xlsx
+//  Default "Save As" filename
 // ============================================================
 function buildDefaultSaveAsName() {
   const lastName = (document.getElementById('seller-Фамилия')?.value || '').trim();
   const dealDate = (document.getElementById('deal-Дата договора')?.value || '').trim();
-
-  // Convert DD.MM.YYYY → YYYY-MM-DD for a clean filename
   let dateStr = dealDate;
   const dateParts = dealDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   if (dateParts) dateStr = `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}`;
-
   const parts = ['Сделка'];
   if (lastName) parts.push(lastName);
   if (dateStr)  parts.push(dateStr);
@@ -310,15 +275,15 @@ function buildDefaultSaveAsName() {
 }
 
 // ============================================================
-//  Save — overwrite the currently open file
+//  Save
 // ============================================================
 async function handleSave() {
   if (!currentFilePath || dirtyInputIds.size === 0) return;
-
   const updates = buildUpdates();
   try {
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
     commitCurrentValues();
+    setStatus('Изменения сохранены');
     showToast('✔ Изменения сохранены');
   } catch (err) {
     showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
@@ -326,14 +291,11 @@ async function handleSave() {
 }
 
 // ============================================================
-//  Save As — write to a new file; new file becomes current
+//  Save As
 // ============================================================
 async function handleSaveAs() {
   if (!currentFilePath) return;
-
-  const defaultName = buildDefaultSaveAsName();
-  const defaultPath = currentFilePath.replace(/[^/\\]+$/, defaultName);
-
+  const defaultPath = currentFilePath.replace(/[^/\\]+$/, buildDefaultSaveAsName());
   let targetPath;
   try {
     targetPath = await window.electronAPI.saveFileDialog(defaultPath);
@@ -341,24 +303,24 @@ async function handleSaveAs() {
     showToast('✖ Ошибка при открытии диалога: ' + err.message, 'error');
     return;
   }
-
-  if (!targetPath) return; // user cancelled
-
+  if (!targetPath) return;
   const updates = buildUpdates();
   try {
     await window.electronAPI.writeExcel(currentFilePath, targetPath, updates);
-    // New file becomes the current working file
     currentFilePath = targetPath;
-    filePathDisplay.textContent = targetPath;
+    filePathDisplay.value = targetPath;
+    const baseName = targetPath.split(/[\\/]/).pop();
+    fileName.textContent = baseName;
     commitCurrentValues();
-    showToast('✔ Файл успешно сохранен');
+    setStatus('Файл сохранён: ' + baseName);
+    showToast('✔ Файл успешно сохранён');
   } catch (err) {
     showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
   }
 }
 
 // ============================================================
-//  Close-app flow: main process asks us to save then close
+//  Close-app: main process asks renderer to save-then-close
 // ============================================================
 window.electronAPI.onRequestSaveBeforeClose(async () => {
   await handleSave();
@@ -366,60 +328,28 @@ window.electronAPI.onRequestSaveBeforeClose(async () => {
 });
 
 // ============================================================
-//  Collapsible card logic
+//  Owner tabs
 // ============================================================
-function setCardOpen(cardId, open) {
-  const card = document.getElementById('card-' + cardId);
-  if (!card) return;
-  const btn = card.querySelector('.card-title[data-toggle]');
-  card.classList.toggle('is-open', open);
-  if (btn) btn.setAttribute('aria-expanded', String(open));
-  cardOpenState[cardId] = open;
+const tabBtns  = document.querySelectorAll('.tab-btn[data-tab]');
+const tabPanes = document.querySelectorAll('.tab-pane');
+
+function switchTab(tabId) {
+  tabBtns.forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tabId));
+  tabPanes.forEach((pane) => pane.classList.toggle('active', pane.id === 'tab-pane-' + tabId));
 }
 
-function toggleCard(cardId) {
-  setCardOpen(cardId, !cardOpenState[cardId]);
-}
-
-document.querySelectorAll('.card-title[data-toggle]').forEach((btn) => {
-  btn.addEventListener('click', () => toggleCard(btn.getAttribute('data-toggle')));
+tabBtns.forEach((btn) => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
 // ============================================================
-//  Visibility pass — hide empty rows and empty cards
-// ============================================================
-function applyVisibility() {
-  const allCardIds = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
-
-  allCardIds.forEach((cardId) => {
-    const card = document.getElementById('card-' + cardId);
-    if (!card) return;
-
-    // Show all rows initially, then hide empty ones
-    card.querySelectorAll('.field-row[data-field-row]').forEach((row) => {
-      const input = row.querySelector('input[type="text"]');
-      row.hidden = input ? isFieldEmpty(input.value) : true;
-    });
-
-    if (isSectionEmpty(cardId)) {
-      card.hidden = true;
-      return;
-    }
-
-    card.hidden = false;
-    setCardOpen(cardId, AUTO_OPEN_CARDS.has(cardId));
-  });
-}
-
-// ============================================================
-//  Populate form from parsed data object
+//  Populate form from parsed data
 // ============================================================
 function populateForm(data) {
   clearAllInputs();
   dirtyInputIds.clear();
   originalValues = {};
 
-  // Extract and store the row map
   rowMap = data._rowMap || {};
 
   const blockKeys = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
@@ -433,13 +363,59 @@ function populateForm(data) {
     });
   });
 
-  // Snapshot clean baseline
   commitCurrentValues();
-
-  // Enable Save As now that a file is loaded
   btnSaveAs.disabled = false;
+  switchTab('owner1');
+}
 
-  applyVisibility();
+// ============================================================
+//  Clear form
+// ============================================================
+function handleClearForm() {
+  clearAllInputs();
+  rowMap = {};
+  originalValues = {};
+  dirtyInputIds.clear();
+  currentFilePath = null;
+  filePathDisplay.value = '';
+  fileSuccess.hidden = true;
+  btnSave.disabled = true;
+  btnSaveAs.disabled = true;
+  setStatus('Готов к работе');
+  switchTab('owner1');
+}
+
+// ============================================================
+//  Check data (basic validation)
+// ============================================================
+function handleCheckData() {
+  const missing = [];
+  const required = [
+    ['deal-Дата договора',      'Дата договора'],
+    ['deal-Тип договора',       'Тип договора'],
+    ['property-Адрес',          'Адрес объекта'],
+    ['seller-Фамилия',          'Фамилия продавца'],
+    ['buyer-Фамилия',           'Фамилия покупателя'],
+  ];
+  required.forEach(([id, label]) => {
+    const el = document.getElementById(id);
+    if (el && isFieldEmpty(el.value)) missing.push(label);
+  });
+  if (missing.length === 0) {
+    showToast('✔ Основные поля заполнены');
+  } else {
+    showToast('✖ Не заполнены: ' + missing.join(', '), 'error');
+  }
+}
+
+// ============================================================
+//  Template checkboxes
+// ============================================================
+function handleSelectAll() {
+  document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
+}
+function handleDeselectAll() {
+  document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
 }
 
 // ============================================================
@@ -455,10 +431,11 @@ async function handleChooseFile() {
     showError('Не удалось открыть диалог выбора файла: ' + err.message);
     return;
   }
+  if (!filePath) return;
 
-  if (!filePath) return; // user cancelled
-
-  filePathDisplay.textContent = filePath;
+  filePathDisplay.value = filePath;
+  fileSuccess.hidden = true;
+  setStatus('Чтение файла…');
   showLoader();
 
   let data;
@@ -467,6 +444,7 @@ async function handleChooseFile() {
   } catch (err) {
     hideLoader();
     showError('Ошибка при чтении файла: ' + err.message);
+    setStatus('Ошибка чтения файла');
     return;
   }
 
@@ -474,14 +452,17 @@ async function handleChooseFile() {
 
   if (!data || typeof data !== 'object') {
     showError('Файл прочитан, но данные не получены. Проверьте формат файла.');
+    setStatus('Ошибка формата файла');
     return;
   }
 
   currentFilePath = filePath;
-  populateForm(data);
+  const baseName = filePath.split(/[\\/]/).pop();
+  fileName.textContent = baseName;
+  fileSuccess.hidden = false;
 
-  emptyState.hidden = true;
-  cardsGrid.hidden  = false;
+  populateForm(data);
+  setStatus('Файл загружен: ' + baseName);
 }
 
 // ============================================================
@@ -490,4 +471,15 @@ async function handleChooseFile() {
 btnChooseFile.addEventListener('click', handleChooseFile);
 btnSave.addEventListener('click', handleSave);
 btnSaveAs.addEventListener('click', handleSaveAs);
+btnClear.addEventListener('click', handleClearForm);
+btnCheck.addEventListener('click', handleCheckData);
 errorClose.addEventListener('click', hideError);
+btnSelectAll.addEventListener('click', handleSelectAll);
+btnDeselectAll.addEventListener('click', handleDeselectAll);
+
+btnGenerate.addEventListener('click', () => {
+  showToast('Функция генерации договоров будет доступна в следующей версии');
+});
+btnPreview.addEventListener('click', () => {
+  showToast('Предварительный просмотр будет доступен в следующей версии');
+});

@@ -10,260 +10,524 @@
 </head>
 <body>
 
-  <!-- ===== TOOLBAR (sticky) ===== -->
-  <header class="app-toolbar">
-    <div class="toolbar-brand">
-      <span class="toolbar-logo">ГГ</span>
-      <span class="toolbar-title">Генератор договоров&nbsp;<strong>ГермесГарант</strong></span>
-    </div>
-    <div class="toolbar-file">
-      <button class="btn-primary" id="btn-choose-file">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        Выбрать Excel
-      </button>
-      <span class="file-path" id="file-path-display">Файл не выбран</span>
-    </div>
-    <div class="toolbar-actions">
-      <button class="btn-save" id="btn-save" disabled>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Toasts -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="error-banner" hidden>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="error-text"></span>
+    <button class="error-close" id="error-close">✕</button>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader-overlay" id="loader" hidden>
+    <div class="loader-spinner"></div>
+    <span>Чтение файла…</span>
+  </div>
+
+  <div class="app-wrapper">
+
+    <!-- ===== THIN SAVE TOOLBAR ===== -->
+    <div class="save-bar">
+      <button class="save-bar-btn save-primary" id="btn-save" disabled>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17 21 17 13 7 13 7 21"/>
           <polyline points="7 3 7 8 15 8"/>
         </svg>
         Сохранить
       </button>
-      <button class="btn-save-as" id="btn-save-as" disabled>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="save-bar-btn" id="btn-save-as" disabled>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17 21 17 13 7 13 7 21"/>
           <polyline points="7 3 7 8 15 8"/>
-          <line x1="12" y1="3" x2="12" y2="7"/>
         </svg>
         Сохранить как…
       </button>
     </div>
-  </header>
 
-  <!-- ===== TOAST NOTIFICATIONS ===== -->
-  <div id="toast-container" class="toast-container"></div>
+    <!-- ===== MAIN BODY ===== -->
+    <div class="win-body">
 
-  <!-- ===== ERROR BANNER ===== -->
-  <div class="error-banner" id="error-banner" hidden>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span id="error-text"></span>
-    <button class="error-close" id="error-close">✕</button>
-  </div>
+      <!-- ══════════════════════════════════════
+           LEFT PANEL
+      ══════════════════════════════════════ -->
+      <div class="win-left">
 
-  <!-- ===== LOADER ===== -->
-  <div class="loader-overlay" id="loader" hidden>
-    <div class="loader-spinner"></div>
-    <span>Чтение файла…</span>
-  </div>
+        <!-- ── SECTION 1: Excel ── -->
+        <div class="win-section">
+          <div class="section-hdr">1. Загрузка данных из Excel</div>
+          <div class="section-body">
+            <div class="file-row">
+              <label>Файл Excel:</label>
+              <input type="text" id="file-path-display" readonly placeholder="Путь к файлу не выбран" />
+              <button class="btn-choose" id="btn-choose-file">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                Выбрать файл
+              </button>
+            </div>
+            <div class="file-success" id="file-success" hidden>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a7f1a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Файл успешно загружен: <span class="file-name" id="file-name"></span>
+            </div>
+          </div>
+        </div>
 
-  <!-- ===== MAIN CONTENT ===== -->
-  <main class="main-content" id="main-content">
+        <!-- ── SECTION 2: Deal data ── -->
+        <div class="win-section">
+          <div class="section-hdr">2. Данные сделки</div>
+          <div class="section-body" id="deal-body">
 
-    <div class="empty-state" id="empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <p>Выберите файл Excel для загрузки данных</p>
+            <!-- Объект + Покупатель (two columns) -->
+            <div class="data-two-col">
+
+              <!-- LEFT: Объект недвижимости -->
+              <div class="data-col">
+                <div class="sub-hdr">Объект недвижимости</div>
+
+                <div class="fr fr-sm"><label>Тип объекта:</label>
+                  <div class="input-wrap"><input type="text" id="property-Тип объекта" /></div></div>
+
+                <div class="fr fr-sm"><label>Адрес:</label>
+                  <div class="input-wrap"><input type="text" id="property-Адрес" /></div></div>
+
+                <div class="fr fr-sm"><label>Город:</label>
+                  <div class="input-wrap"><input type="text" id="property-Город" /></div></div>
+
+                <div class="fr fr-sm"><label>Район:</label>
+                  <div class="input-wrap"><input type="text" id="property-Район" /></div></div>
+
+                <div class="fr fr-sm"><label>Улица:</label>
+                  <div class="input-wrap"><input type="text" id="property-Улица" /></div></div>
+
+                <div class="fr fr-sm"><label>Дом:</label>
+                  <div class="input-wrap"><input type="text" id="property-Дом" /></div></div>
+
+                <div class="fr fr-sm"><label>Корпус / Кв.:</label>
+                  <div class="input-wrap" style="gap:4px">
+                    <input type="text" id="property-Корпус" style="width:52px;flex:none" />
+                    <span style="font-size:11px;color:#888">/</span>
+                    <input type="text" id="property-Квартира" style="width:52px;flex:none" />
+                  </div></div>
+
+                <div class="fr fr-sm"><label>Кадастровый №:</label>
+                  <div class="input-wrap"><input type="text" id="property-Кадастровый номер" /></div></div>
+
+                <div class="fr fr-sm"><label>Инвентарный №:</label>
+                  <div class="input-wrap"><input type="text" id="property-Инвентарный номер" /></div></div>
+
+                <div class="fr fr-sm"><label>Этаж:</label>
+                  <div class="input-wrap">
+                    <div class="floor-row">
+                      <input type="text" id="property-Этаж" style="width:42px" />
+                      <span>из</span>
+                      <input type="text" id="property-Этажность" style="width:42px" />
+                    </div>
+                  </div></div>
+
+                <div class="fr fr-sm"><label>Кол-во комнат:</label>
+                  <div class="input-wrap"><input type="text" id="property-Количество комнат" /></div></div>
+
+                <div class="fr fr-sm"><label>Общая площадь, м²:</label>
+                  <div class="input-wrap"><input type="text" id="property-Общая площадь" /></div></div>
+
+                <div class="fr fr-sm"><label>Жилая площадь, м²:</label>
+                  <div class="input-wrap"><input type="text" id="property-Жилая площадь" /></div></div>
+
+                <div class="fr fr-sm"><label>Площадь кухни, м²:</label>
+                  <div class="input-wrap"><input type="text" id="property-Площадь кухни" /></div></div>
+
+                <div class="fr fr-sm"><label>Цена, USD:</label>
+                  <div class="input-wrap"><input type="text" id="deal-Стоимость USD" /></div></div>
+
+                <div class="fr fr-sm"><label>Цена, BYN:</label>
+                  <div class="input-wrap"><input type="text" id="deal-Стоимость BYN" /></div></div>
+
+                <div class="fr fr-sm"><label>Цена прописью:</label>
+                  <div class="input-wrap"><input type="text" id="deal-Стоимость прописью" /></div></div>
+              </div>
+
+              <!-- RIGHT: Покупатель -->
+              <div class="data-col">
+                <div class="sub-hdr">Покупатель</div>
+
+                <div class="fr fr-sm"><label>Фамилия:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Фамилия" /></div></div>
+
+                <div class="fr fr-sm"><label>Имя:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Имя" /></div></div>
+
+                <div class="fr fr-sm"><label>Отчество:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Отчество" /></div></div>
+
+                <div class="fr fr-sm"><label>Дата рождения:</label>
+                  <div class="input-wrap">
+                    <input type="text" id="buyer-Дата рождения" class="has-cal" />
+                    <button class="cal-btn" tabindex="-1">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </button>
+                  </div></div>
+
+                <div class="fr fr-sm"><label>Паспорт серия:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Паспорт серия" /></div></div>
+
+                <div class="fr fr-sm"><label>Паспорт номер:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Паспорт номер" /></div></div>
+
+                <div class="fr fr-sm"><label>Идент. номер:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Идентификационный номер" /></div></div>
+
+                <div class="fr fr-sm"><label>Кем выдан:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Кем выдан" /></div></div>
+
+                <div class="fr fr-sm"><label>Дата выдачи:</label>
+                  <div class="input-wrap">
+                    <input type="text" id="buyer-Дата выдачи" class="has-cal" />
+                    <button class="cal-btn" tabindex="-1">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </button>
+                  </div></div>
+
+                <div class="fr fr-sm"><label>Адрес регистрации:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Адрес регистрации" /></div></div>
+
+                <div class="fr fr-sm"><label>Телефон:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Телефон" /></div></div>
+
+                <div class="fr fr-sm"><label>Email:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Email" /></div></div>
+
+                <div class="fr fr-sm"><label>Семейное положение:</label>
+                  <div class="input-wrap"><input type="text" id="buyer-Семейное положение" /></div></div>
+              </div>
+
+            </div><!-- /data-two-col -->
+
+            <!-- ── Продавец ── -->
+            <div class="sub-hdr mt">Продавец</div>
+            <div class="seller-grid">
+
+              <div class="fr fr-sm"><label>Фамилия:</label>
+                <div class="input-wrap"><input type="text" id="seller-Фамилия" /></div></div>
+
+              <div class="fr fr-sm"><label>Дата выдачи:</label>
+                <div class="input-wrap">
+                  <input type="text" id="seller-Дата выдачи" class="has-cal" />
+                  <button class="cal-btn" tabindex="-1">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </button>
+                </div></div>
+
+              <div class="fr fr-sm"><label>Имя:</label>
+                <div class="input-wrap"><input type="text" id="seller-Имя" /></div></div>
+
+              <div class="fr fr-sm"><label>Адрес регистрации:</label>
+                <div class="input-wrap"><input type="text" id="seller-Адрес регистрации" /></div></div>
+
+              <div class="fr fr-sm"><label>Отчество:</label>
+                <div class="input-wrap"><input type="text" id="seller-Отчество" /></div></div>
+
+              <div class="fr fr-sm"><label>Телефон:</label>
+                <div class="input-wrap"><input type="text" id="seller-Телефон" /></div></div>
+
+              <div class="fr fr-sm"><label>Дата рождения:</label>
+                <div class="input-wrap">
+                  <input type="text" id="seller-Дата рождения" class="has-cal" />
+                  <button class="cal-btn" tabindex="-1">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </button>
+                </div></div>
+
+              <div class="fr fr-sm"><label>Email:</label>
+                <div class="input-wrap"><input type="text" id="seller-Email" /></div></div>
+
+              <div class="fr fr-sm"><label>Паспорт серия:</label>
+                <div class="input-wrap"><input type="text" id="seller-Паспорт серия" /></div></div>
+
+              <div class="fr fr-sm"><label>Является собственником:</label>
+                <div class="input-wrap"><input type="text" id="seller-Является собственником" /></div></div>
+
+              <div class="fr fr-sm"><label>Паспорт номер:</label>
+                <div class="input-wrap"><input type="text" id="seller-Паспорт номер" /></div></div>
+
+              <div class="fr fr-sm"><label>Номер доверенности:</label>
+                <div class="input-wrap"><input type="text" id="seller-Номер доверенности" /></div></div>
+
+              <div class="fr fr-sm"><label>Идент. номер:</label>
+                <div class="input-wrap"><input type="text" id="seller-Идентификационный номер" /></div></div>
+
+              <div class="fr fr-sm"><label>Дата доверенности:</label>
+                <div class="input-wrap"><input type="text" id="seller-Дата доверенности" /></div></div>
+
+              <div class="fr fr-sm"><label>Кем выдан:</label>
+                <div class="input-wrap"><input type="text" id="seller-Кем выдан" /></div></div>
+
+            </div><!-- /seller-grid -->
+
+            <!-- ── Собственники ── -->
+            <div class="sub-hdr mt">Продавцы / Собственники (до 3 человек)</div>
+            <div class="tabs-wrapper">
+              <div class="tab-bar">
+                <button class="tab-btn active" data-tab="owner1">Собственник 1</button>
+                <button class="tab-btn" data-tab="owner2">Собственник 2</button>
+                <button class="tab-btn" data-tab="owner3">Собственник 3</button>
+              </div>
+
+              <!-- Tab: owner1 -->
+              <div id="tab-pane-owner1" class="tab-pane active">
+                <div class="tab-inner-grid">
+                  <div>
+                    <div class="fr fr-sm"><label>Фамилия:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Фамилия" /></div></div>
+                    <div class="fr fr-sm"><label>Имя:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Имя" /></div></div>
+                    <div class="fr fr-sm"><label>Отчество:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Отчество" /></div></div>
+                    <div class="fr fr-sm"><label>Дата рождения:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner1-Дата рождения" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Паспорт серия:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Паспорт серия" /></div></div>
+                    <div class="fr fr-sm"><label>Паспорт номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Паспорт номер" /></div></div>
+                    <div class="fr fr-sm"><label>Идент. номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Идентификационный номер" /></div></div>
+                    <div class="fr fr-sm"><label>Кем выдан:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Кем выдан" /></div></div>
+                  </div>
+                  <div>
+                    <div class="fr fr-sm"><label>Дата выдачи:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner1-Дата выдачи" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Адрес регистрации" /></div></div>
+                    <div class="fr fr-sm"><label>Телефон:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Телефон" /></div></div>
+                    <div class="fr fr-sm"><label>Доля собственности:</label>
+                      <div class="input-wrap"><input type="text" id="owner1-Доля собственности" /></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab: owner2 -->
+              <div id="tab-pane-owner2" class="tab-pane">
+                <div class="tab-inner-grid">
+                  <div>
+                    <div class="fr fr-sm"><label>Фамилия:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Фамилия" /></div></div>
+                    <div class="fr fr-sm"><label>Имя:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Имя" /></div></div>
+                    <div class="fr fr-sm"><label>Отчество:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Отчество" /></div></div>
+                    <div class="fr fr-sm"><label>Дата рождения:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner2-Дата рождения" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Паспорт серия:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Паспорт серия" /></div></div>
+                    <div class="fr fr-sm"><label>Паспорт номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Паспорт номер" /></div></div>
+                    <div class="fr fr-sm"><label>Идент. номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Идентификационный номер" /></div></div>
+                    <div class="fr fr-sm"><label>Кем выдан:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Кем выдан" /></div></div>
+                  </div>
+                  <div>
+                    <div class="fr fr-sm"><label>Дата выдачи:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner2-Дата выдачи" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Адрес регистрации" /></div></div>
+                    <div class="fr fr-sm"><label>Телефон:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Телефон" /></div></div>
+                    <div class="fr fr-sm"><label>Доля собственности:</label>
+                      <div class="input-wrap"><input type="text" id="owner2-Доля собственности" /></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab: owner3 -->
+              <div id="tab-pane-owner3" class="tab-pane">
+                <div class="tab-inner-grid">
+                  <div>
+                    <div class="fr fr-sm"><label>Фамилия:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Фамилия" /></div></div>
+                    <div class="fr fr-sm"><label>Имя:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Имя" /></div></div>
+                    <div class="fr fr-sm"><label>Отчество:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Отчество" /></div></div>
+                    <div class="fr fr-sm"><label>Дата рождения:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner3-Дата рождения" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Паспорт серия:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Паспорт серия" /></div></div>
+                    <div class="fr fr-sm"><label>Паспорт номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Паспорт номер" /></div></div>
+                    <div class="fr fr-sm"><label>Идент. номер:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Идентификационный номер" /></div></div>
+                    <div class="fr fr-sm"><label>Кем выдан:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Кем выдан" /></div></div>
+                  </div>
+                  <div>
+                    <div class="fr fr-sm"><label>Дата выдачи:</label>
+                      <div class="input-wrap">
+                        <input type="text" id="owner3-Дата выдачи" class="has-cal" />
+                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div></div>
+                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Адрес регистрации" /></div></div>
+                    <div class="fr fr-sm"><label>Телефон:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Телефон" /></div></div>
+                    <div class="fr fr-sm"><label>Доля собственности:</label>
+                      <div class="input-wrap"><input type="text" id="owner3-Доля собственности" /></div></div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /tabs-wrapper -->
+
+            <!-- ── Дополнительные данные ── -->
+            <div class="sub-hdr mt">Дополнительные данные</div>
+            <div class="add-data-grid">
+
+              <div class="fr fr-sm"><label>Номер сделки:</label>
+                <div class="input-wrap"><input type="text" id="deal-Номер сделки" /></div></div>
+
+              <div class="fr fr-sm"><label>Риэлтер:</label>
+                <div class="input-wrap"><input type="text" id="deal-agent" /></div></div>
+
+              <div class="fr fr-sm"><label>Дата договора:</label>
+                <div class="input-wrap">
+                  <input type="text" id="deal-Дата договора" class="has-cal" />
+                  <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                </div></div>
+
+              <div class="fr fr-sm"><label>Комиссия агентства:</label>
+                <div class="input-wrap"><input type="text" id="deal-Комиссия агентства" /></div></div>
+
+              <div class="fr fr-sm"><label>Тип договора:</label>
+                <div class="input-wrap"><input type="text" id="deal-Тип договора" /></div></div>
+
+              <div class="fr fr-sm"><label>Эксклюзив:</label>
+                <div class="input-wrap"><input type="text" id="deal-Эксклюзив" /></div></div>
+
+              <div class="fr fr-sm"><label>Кол-во собственников:</label>
+                <div class="input-wrap"><input type="text" id="deal-Количество собственников" /></div></div>
+
+            </div><!-- /add-data-grid -->
+
+          </div><!-- /section-body -->
+        </div><!-- /win-section -->
+
+        <!-- ── Bottom action buttons ── -->
+        <div class="bottom-actions">
+          <button class="btn-bottom" id="btn-clear">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Очистить форму
+          </button>
+          <button class="btn-bottom" id="btn-check">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Проверить данные
+          </button>
+        </div>
+
+      </div><!-- /win-left -->
+
+      <!-- ══════════════════════════════════════
+           RIGHT PANEL
+      ══════════════════════════════════════ -->
+      <div class="win-right">
+
+        <!-- Section 3: Templates -->
+        <div class="win-section">
+          <div class="section-hdr">3. Выбор шаблонов договоров</div>
+          <div class="section-body">
+
+            <div class="tpl-group-hdr">Основные договоры купли-продажи</div>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (3 собственника, общий)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (3 собственника, эксклюзив)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (2 собственника, общий)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (2 собственника, эксклюзив)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (по шаблону Мокиенко)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (1 собственник, общий)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (1 собственник, эксклюзив)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор купли-продажи (физическое лицо — коммерческая структура)</label>
+
+            <div class="tpl-divider"></div>
+            <div class="tpl-group-hdr">Договоры и соглашения</div>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор задатка (стандартный)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon green">W</span>Договор задатка (табличная форма)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор о конвертации валюты</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор хранения имущества</label>
+
+            <div class="tpl-divider"></div>
+            <div class="tpl-group-hdr">Дополнительные документы</div>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Доверенность на представительство (ПНД)</label>
+            <label class="tpl-item"><input type="checkbox"><span class="word-icon">W</span>Договор на оказание рекламных услуг</label>
+
+            <div class="tpl-actions">
+              <button class="btn-tpl-action" id="btn-select-all">Выбрать все</button>
+              <button class="btn-tpl-action" id="btn-deselect-all">Снять все</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Settings -->
+        <div class="win-section">
+          <div class="section-hdr">4. Настройки генерации</div>
+          <div class="section-body">
+            <div style="font-size:11.5px;color:#555;margin-bottom:4px">Папка для сохранения:</div>
+            <div class="settings-row">
+              <input type="text" id="save-folder" value="C:\Договоры\Новая сделка\" style="flex:1" />
+              <button class="btn-browse">Обзор</button>
+            </div>
+            <label class="check-row"><input type="checkbox" checked> Открыть файлы после создания</label>
+            <label class="check-row"><input type="checkbox"> Объединить в один архив (ZIP)</label>
+            <label class="check-row"><input type="checkbox"> Добавить дату к имени файла</label>
+          </div>
+        </div>
+
+        <!-- Section 5: Actions -->
+        <div class="win-section">
+          <div class="section-hdr">5. Действия</div>
+          <div class="section-body">
+            <button class="btn-generate" id="btn-generate">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Сформировать документы
+            </button>
+            <button class="btn-preview" id="btn-preview">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Предварительный просмотр
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /win-right -->
+
+    </div><!-- /win-body -->
+
+    <!-- ===== STATUS BAR ===== -->
+    <div class="win-status">
+      <span id="status-text">Готов к работе</span>
+      <span>Версия 1.0.0</span>
     </div>
 
-    <div class="cards-grid" id="cards-grid" hidden>
-
-      <!-- СДЕЛКА -->
-      <section class="card" id="card-deal" data-card-id="deal">
-        <button class="card-title" data-toggle="deal" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Сделка
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Номер сделки</label><input type="text" id="deal-Номер сделки" /></div>
-              <div class="field-row" data-field-row><label>Дата договора</label><input type="text" id="deal-Дата договора" /></div>
-              <div class="field-row" data-field-row><label>Тип договора</label><input type="text" id="deal-Тип договора" /></div>
-              <div class="field-row" data-field-row><label>Эксклюзив</label><input type="text" id="deal-Эксклюзив" /></div>
-              <div class="field-row" data-field-row><label>Кол-во собственников</label><input type="text" id="deal-Количество собственников" /></div>
-              <div class="field-row" data-field-row><label>Стоимость USD</label><input type="text" id="deal-Стоимость USD" /></div>
-              <div class="field-row" data-field-row><label>Стоимость BYN</label><input type="text" id="deal-Стоимость BYN" /></div>
-              <div class="field-row" data-field-row><label>Стоимость прописью</label><input type="text" id="deal-Стоимость прописью" /></div>
-              <div class="field-row" data-field-row><label>Комиссия агентства</label><input type="text" id="deal-Комиссия агентства" /></div>
-              <div class="field-row" data-field-row><label>Риэлтер</label><input type="text" id="deal-agent" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ОБЪЕКТ -->
-      <section class="card" id="card-property" data-card-id="property">
-        <button class="card-title" data-toggle="property" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Объект
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Тип объекта</label><input type="text" id="property-Тип объекта" /></div>
-              <div class="field-row" data-field-row><label>Адрес</label><input type="text" id="property-Адрес" /></div>
-              <div class="field-row" data-field-row><label>Город</label><input type="text" id="property-Город" /></div>
-              <div class="field-row" data-field-row><label>Район</label><input type="text" id="property-Район" /></div>
-              <div class="field-row" data-field-row><label>Улица</label><input type="text" id="property-Улица" /></div>
-              <div class="field-row" data-field-row><label>Дом</label><input type="text" id="property-Дом" /></div>
-              <div class="field-row" data-field-row><label>Корпус</label><input type="text" id="property-Корпус" /></div>
-              <div class="field-row" data-field-row><label>Квартира</label><input type="text" id="property-Квартира" /></div>
-              <div class="field-row" data-field-row><label>Этаж</label><input type="text" id="property-Этаж" /></div>
-              <div class="field-row" data-field-row><label>Этажность</label><input type="text" id="property-Этажность" /></div>
-              <div class="field-row" data-field-row><label>Количество комнат</label><input type="text" id="property-Количество комнат" /></div>
-              <div class="field-row" data-field-row><label>Общая площадь</label><input type="text" id="property-Общая площадь" /></div>
-              <div class="field-row" data-field-row><label>Жилая площадь</label><input type="text" id="property-Жилая площадь" /></div>
-              <div class="field-row" data-field-row><label>Площадь кухни</label><input type="text" id="property-Площадь кухни" /></div>
-              <div class="field-row" data-field-row><label>Кадастровый номер</label><input type="text" id="property-Кадастровый номер" /></div>
-              <div class="field-row" data-field-row><label>Инвентарный номер</label><input type="text" id="property-Инвентарный номер" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ПРОДАВЕЦ -->
-      <section class="card" id="card-seller" data-card-id="seller">
-        <button class="card-title" data-toggle="seller" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Продавец
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="seller-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="seller-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="seller-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="seller-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="seller-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="seller-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="seller-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="seller-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="seller-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="seller-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="seller-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Email</label><input type="text" id="seller-Email" /></div>
-              <div class="field-row" data-field-row><label>Является собственником</label><input type="text" id="seller-Является собственником" /></div>
-              <div class="field-row" data-field-row><label>Номер доверенности</label><input type="text" id="seller-Номер доверенности" /></div>
-              <div class="field-row" data-field-row><label>Дата доверенности</label><input type="text" id="seller-Дата доверенности" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- СОБСТВЕННИК №1 -->
-      <section class="card" id="card-owner1" data-card-id="owner1">
-        <button class="card-title" data-toggle="owner1" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Собственник №1
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner1-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner1-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner1-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner1-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner1-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner1-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner1-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner1-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner1-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner1-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner1-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner1-Доля собственности" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- СОБСТВЕННИК №2 -->
-      <section class="card" id="card-owner2" data-card-id="owner2">
-        <button class="card-title" data-toggle="owner2" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Собственник №2
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner2-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner2-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner2-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner2-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner2-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner2-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner2-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner2-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner2-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner2-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner2-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner2-Доля собственности" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- СОБСТВЕННИК №3 -->
-      <section class="card" id="card-owner3" data-card-id="owner3">
-        <button class="card-title" data-toggle="owner3" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Собственник №3
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner3-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner3-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner3-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner3-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner3-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner3-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner3-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner3-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner3-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner3-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner3-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner3-Доля собственности" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ПОКУПАТЕЛЬ -->
-      <section class="card" id="card-buyer" data-card-id="buyer">
-        <button class="card-title" data-toggle="buyer" aria-expanded="false">
-          <span class="card-arrow">▶</span>
-          Покупатель
-        </button>
-        <div class="card-body">
-          <div class="card-body-inner">
-            <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="buyer-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="buyer-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="buyer-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="buyer-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="buyer-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="buyer-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="buyer-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="buyer-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="buyer-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="buyer-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="buyer-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Email</label><input type="text" id="buyer-Email" /></div>
-              <div class="field-row" data-field-row><label>Семейное положение</label><input type="text" id="buyer-Семейное положение" /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </div><!-- /cards-grid -->
-  </main>
+  </div><!-- /app-wrapper -->
 
   <script src="js/app.js"></script>
 </body>
