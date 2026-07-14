@@ -125,7 +125,39 @@ const FIELD_MAP = {
 };
 
 // ============================================================
-//  Helpers
+//  Cards auto-expanded after Excel load
+// ============================================================
+const AUTO_OPEN_CARDS = new Set(['deal', 'property', 'buyer']);
+
+// In-session collapse state: cardId → boolean (true = open)
+const cardOpenState = {};
+
+// ============================================================
+//  Universal helpers
+// ============================================================
+
+/** Returns true when a value should be treated as empty. */
+function isFieldEmpty(value) {
+  if (value === null || value === undefined) return true;
+  return String(value).trim() === '';
+}
+
+/**
+ * Returns true when every input inside a card section is empty.
+ * @param {string} cardId – e.g. 'deal', 'owner2'
+ */
+function isSectionEmpty(cardId) {
+  const card = document.getElementById('card-' + cardId);
+  if (!card) return true;
+  const inputs = card.querySelectorAll('input[type="text"]');
+  for (const input of inputs) {
+    if (!isFieldEmpty(input.value)) return false;
+  }
+  return true;
+}
+
+// ============================================================
+//  Error / loader helpers
 // ============================================================
 function showError(message) {
   errorText.textContent = message;
@@ -140,17 +172,96 @@ function hideError() {
 function showLoader() { loader.hidden = false; }
 function hideLoader() { loader.hidden = true; }
 
+// ============================================================
+//  Input population
+// ============================================================
 function setInputValue(inputId, value) {
   const el = document.getElementById(inputId);
   if (!el) return;
-  const v = (value !== null && value !== undefined) ? String(value).trim() : '';
+  const v = isFieldEmpty(value) ? '' : String(value).trim();
   el.value = v;
-  el.setAttribute('data-empty', v === '' ? 'true' : 'false');
   el.placeholder = v === '' ? '—' : '';
 }
 
 function clearAllInputs() {
   Object.values(FIELD_MAP).forEach((id) => setInputValue(id, ''));
+}
+
+// ============================================================
+//  Collapsible card logic
+// ============================================================
+
+/**
+ * Open or close a card with a smooth CSS transition.
+ * @param {string} cardId
+ * @param {boolean} open
+ */
+function setCardOpen(cardId, open) {
+  const card = document.getElementById('card-' + cardId);
+  if (!card) return;
+
+  const btn = card.querySelector('.card-title[data-toggle]');
+
+  if (open) {
+    card.classList.add('is-open');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  } else {
+    card.classList.remove('is-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  cardOpenState[cardId] = open;
+}
+
+/** Toggle open/closed state for a card. */
+function toggleCard(cardId) {
+  const isCurrentlyOpen = cardOpenState[cardId] === true;
+  setCardOpen(cardId, !isCurrentlyOpen);
+}
+
+// Bind click handlers for all toggle buttons
+document.querySelectorAll('.card-title[data-toggle]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const cardId = btn.getAttribute('data-toggle');
+    toggleCard(cardId);
+  });
+});
+
+// ============================================================
+//  Visibility pass — hide empty rows and empty cards
+// ============================================================
+
+/**
+ * After populating inputs, hide rows with empty values and
+ * hide entire cards whose every field is empty.
+ * Auto-opens deal / property / buyer; collapses the rest.
+ */
+function applyVisibility() {
+  const allCardIds = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
+
+  allCardIds.forEach((cardId) => {
+    const card = document.getElementById('card-' + cardId);
+    if (!card) return;
+
+    // --- hide / show individual field rows ---
+    card.querySelectorAll('.field-row[data-field-row]').forEach((row) => {
+      const input = row.querySelector('input[type="text"]');
+      if (!input) return;
+      row.hidden = isFieldEmpty(input.value);
+    });
+
+    // --- hide entire card if section is empty ---
+    if (isSectionEmpty(cardId)) {
+      card.hidden = true;
+      return;
+    }
+
+    card.hidden = false;
+
+    // --- set open/collapsed state ---
+    const shouldOpen = AUTO_OPEN_CARDS.has(cardId);
+    setCardOpen(cardId, shouldOpen);
+  });
 }
 
 // ============================================================
@@ -172,6 +283,8 @@ function populateForm(data) {
       }
     });
   });
+
+  applyVisibility();
 }
 
 // ============================================================
