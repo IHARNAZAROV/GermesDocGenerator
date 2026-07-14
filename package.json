@@ -12,6 +12,8 @@
     "electron": "^38.0.0"
   },
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "docxtemplater": "^3.69.0",
+    "exceljs": "^4.4.0",
+    "pizzip": "^3.2.0"
   }
 }
