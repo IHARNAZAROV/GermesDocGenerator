@@ -595,41 +595,99 @@ btnBrowse.addEventListener('click', async () => {
 });
 
 // ============================================================
+//  Template data helpers
+// ============================================================
+function getField(id) {
+  return (document.getElementById(id)?.value || '').trim();
+}
+
+// ============================================================
+//  Template registry
+//  key matches data-template attribute on .tpl-item labels.
+//  Each entry: { label, generate(outputDir) → Promise<{success, path?, error?}> }
+//
+//  To add a new template:
+//    1. Add data-template="your-key" to the label in index.html
+//    2. Add an entry here with the matching key
+// ============================================================
+const TEMPLATE_REGISTRY = {
+
+  'doverennost-pnd': {
+    label: 'Доверенность ПНД',
+    async generate(outputDir) {
+      const sellerFullName  = [getField('seller-Фамилия'), getField('seller-Имя'), getField('seller-Отчество')]
+                                .filter(Boolean).join(' ');
+      const data = {
+        sellerFullName,
+        sellerBirthDate: getField('seller-Дата рождения'),
+        sellerAddress:   getField('seller-Адрес регистрации'),
+        sellerId:        getField('seller-Идентификационный номер'),
+        currentDate:     getField('deal-Дата договора'),
+      };
+      return window.electronAPI.generateDoverennost(data, outputDir);
+    },
+  },
+
+  // ── Будущие шаблоны добавляются сюда ──────────────────────
+  // 'dkp-1-obshiy': {
+  //   label: 'ДКП (1 собственник, общий)',
+  //   async generate(outputDir) { ... }
+  // },
+
+};
+
+// ============================================================
 //  Generate documents
 // ============================================================
 btnGenerate.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
-  // Read values directly from current form state — never re-read Excel
-  const lastName  = (document.getElementById('seller-Фамилия')?.value  || '').trim();
-  const firstName = (document.getElementById('seller-Имя')?.value       || '').trim();
-  const midName   = (document.getElementById('seller-Отчество')?.value  || '').trim();
+  const outputDir = saveFolderInput.value.trim() || null;
 
-  const sellerFullName  = [lastName, firstName, midName].filter(Boolean).join(' ');
-  const sellerBirthDate = (document.getElementById('seller-Дата рождения')?.value           || '').trim();
-  const sellerAddress   = (document.getElementById('seller-Адрес регистрации')?.value       || '').trim();
-  const sellerId        = (document.getElementById('seller-Идентификационный номер')?.value || '').trim();
-  const currentDate     = (document.getElementById('deal-Дата договора')?.value             || '').trim();
+  // Collect checked, enabled checkboxes that have a data-template
+  const checked = [...document.querySelectorAll(
+    '.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]:checked'
+  )];
 
-  const data      = { sellerFullName, sellerBirthDate, sellerAddress, sellerId, currentDate };
-  const outputDir = saveFolderInput.value.trim() || null; // null → main process uses default output/
-
-  let result;
-  try {
-    result = await window.electronAPI.generateDoverennost(data, outputDir);
-  } catch (err) {
-    showToast('✖ Ошибка формирования доверенности: ' + err.message, 'error');
+  if (checked.length === 0) {
+    showToast('✖ Выберите хотя бы один шаблон', 'error');
     return;
   }
 
-  if (result && result.success) {
-    showToast('✔ Доверенность успешно сформирована');
-    if (chkOpenAfter && chkOpenAfter.checked) {
-      window.electronAPI.openFile(result.path);
-    }
-  } else {
-    showToast('✖ Ошибка формирования доверенности: ' + (result?.error || 'неизвестная ошибка'), 'error');
+  // Filter to only templates that are implemented in the registry
+  const toGenerate = checked
+    .map(cb => cb.closest('.tpl-item')?.dataset.template)
+    .filter(key => key && TEMPLATE_REGISTRY[key]);
+
+  if (toGenerate.length === 0) {
+    showToast('Выбранные шаблоны ещё не реализованы');
+    return;
   }
+
+  let successCount = 0;
+  const errors = [];
+
+  for (const key of toGenerate) {
+    const entry = TEMPLATE_REGISTRY[key];
+    try {
+      const result = await entry.generate(outputDir);
+      if (result && result.success) {
+        successCount++;
+        if (chkOpenAfter && chkOpenAfter.checked) {
+          window.electronAPI.openFile(result.path);
+        }
+      } else {
+        errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
+      }
+    } catch (err) {
+      errors.push(`${entry.label}: ${err.message}`);
+    }
+  }
+
+  if (successCount > 0) {
+    showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
+  }
+  errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
 }
 btnPreview.addEventListener('click', () => {
   showToast('Предварительный просмотр будет доступен в следующей версии');
