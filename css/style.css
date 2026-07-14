@@ -1,0 +1,362 @@
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:        #1a7f4b;
+  --accent-dark:   #155f38;
+  --accent-light:  #e8f5ee;
+  --bg:            #f0f0f0;
+  --surface:       #ffffff;
+  --border:        #e0e0e0;
+  --border-focus:  #1a7f4b;
+  --text:          #1a1a1a;
+  --text-secondary:#666666;
+  --error-bg:      #fff0f0;
+  --error-border:  #f28b82;
+  --error-text:    #b3261e;
+  --radius:        10px;
+  --shadow:        0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --font:          'Segoe UI', system-ui, -apple-system, sans-serif;
+  --header-h:      64px;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.app-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,.06);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.header-title strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 1px 4px rgba(26,127,75,.3);
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  opacity: .9;
+  box-shadow: 0 2px 8px rgba(26,127,75,.4);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.btn-primary svg {
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   FILE PATH
+   ============================================================ */
+.file-path {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--bg);
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* ============================================================
+   ERROR BANNER
+   ============================================================ */
+.error-banner {
+  position: fixed;
+  top: calc(var(--header-h) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 8px;
+  color: var(--error-text);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 600px;
+  width: calc(100% - 56px);
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  animation: slideDown .2s ease-out;
+}
+
+.error-banner[hidden] { display: none; }
+
+.error-banner svg { flex-shrink: 0; }
+
+.error-banner span { flex: 1; }
+
+.error-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--error-text);
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: .7;
+  transition: opacity .15s;
+}
+.error-close:hover { opacity: 1; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(240,240,240,.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.loader-overlay[hidden] { display: none; }
+
+.loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-top: var(--header-h);
+  min-height: calc(100vh - var(--header-h));
+  padding: 28px;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  height: calc(100vh - var(--header-h) - 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #b0b0b0;
+  font-size: 15px;
+  user-select: none;
+}
+
+.empty-state[hidden] { display: none; }
+
+/* ============================================================
+   CARDS GRID
+   ============================================================ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(560px, 1fr));
+  gap: 20px;
+}
+
+.cards-grid[hidden] { display: none; }
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--accent);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-light);
+}
+
+/* ============================================================
+   FIELDS GRID  (two-column: label | input)
+   ============================================================ */
+.fields-grid {
+  padding: 12px 0;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 20px;
+  transition: background .12s;
+}
+
+.field-row:hover {
+  background: #fafafa;
+}
+
+.field-row label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.field-row input[type="text"] {
+  width: 100%;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13.5px;
+  color: var(--text);
+  cursor: default;
+  transition: border-color .15s, background .15s;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.field-row input[type="text"]:not(:placeholder-shown) {
+  background: #f7f9f8;
+  border-color: var(--border);
+}
+
+.field-row input[type="text"]:focus {
+  border-color: var(--border-focus);
+  background: #f0faf5;
+  cursor: text;
+}
+
+.field-row input[type="text"]::placeholder {
+  color: #c4c4c4;
+}
+
+/* empty value style */
+.field-row input[type="text"][data-empty="true"] {
+  color: #c0c0c0;
+}
+
+/* ============================================================
+   SCROLLBAR  (Chromium/Electron)
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b8b8b8; }
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+::selection { background: var(--accent-light); color: var(--text); }

@@ -1,0 +1,17 @@
+{
+  "name": "contract-generator",
+  "version": "1.0.0",
+  "description": "Генератор договоров ГермесГарант",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Игорь",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^38.0.0"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

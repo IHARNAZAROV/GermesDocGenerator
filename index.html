@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Генератор договоров ГермесГарант</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="header-brand">
+      <span class="header-logo">ГГ</span>
+      <span class="header-title">Генератор договоров&nbsp;<strong>ГермесГарант</strong></span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" id="btn-choose-file">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Выбрать Excel
+      </button>
+      <span class="file-path" id="file-path-display">Файл не выбран</span>
+    </div>
+  </header>
+
+  <!-- ===== ERROR BANNER ===== -->
+  <div class="error-banner" id="error-banner" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="error-text"></span>
+    <button class="error-close" id="error-close">✕</button>
+  </div>
+
+  <!-- ===== LOADER ===== -->
+  <div class="loader-overlay" id="loader" hidden>
+    <div class="loader-spinner"></div>
+    <span>Чтение файла…</span>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content" id="main-content">
+
+    <div class="empty-state" id="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <p>Выберите файл Excel для загрузки данных</p>
+    </div>
+
+    <div class="cards-grid" id="cards-grid" hidden>
+
+      <!-- СДЕЛКА -->
+      <section class="card" id="card-deal">
+        <h2 class="card-title">Сделка</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Номер сделки</label><input type="text" readonly id="deal-Номер сделки" /></div>
+          <div class="field-row"><label>Дата договора</label><input type="text" readonly id="deal-Дата договора" /></div>
+          <div class="field-row"><label>Тип договора</label><input type="text" readonly id="deal-Тип договора" /></div>
+          <div class="field-row"><label>Эксклюзив</label><input type="text" readonly id="deal-Эксклюзив" /></div>
+          <div class="field-row"><label>Количество собственников</label><input type="text" readonly id="deal-Количество собственников" /></div>
+          <div class="field-row"><label>Стоимость USD</label><input type="text" readonly id="deal-Стоимость USD" /></div>
+          <div class="field-row"><label>Стоимость BYN</label><input type="text" readonly id="deal-Стоимость BYN" /></div>
+          <div class="field-row"><label>Стоимость прописью</label><input type="text" readonly id="deal-Стоимость прописью" /></div>
+          <div class="field-row"><label>Комиссия агентства</label><input type="text" readonly id="deal-Комиссия агентства" /></div>
+          <div class="field-row"><label>Риэлтер</label><input type="text" readonly id="deal-agent" /></div>
+        </div>
+      </section>
+
+      <!-- ОБЪЕКТ -->
+      <section class="card" id="card-property">
+        <h2 class="card-title">Объект</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Тип объекта</label><input type="text" readonly id="property-Тип объекта" /></div>
+          <div class="field-row"><label>Адрес</label><input type="text" readonly id="property-Адрес" /></div>
+          <div class="field-row"><label>Город</label><input type="text" readonly id="property-Город" /></div>
+          <div class="field-row"><label>Район</label><input type="text" readonly id="property-Район" /></div>
+          <div class="field-row"><label>Улица</label><input type="text" readonly id="property-Улица" /></div>
+          <div class="field-row"><label>Дом</label><input type="text" readonly id="property-Дом" /></div>
+          <div class="field-row"><label>Корпус</label><input type="text" readonly id="property-Корпус" /></div>
+          <div class="field-row"><label>Квартира</label><input type="text" readonly id="property-Квартира" /></div>
+          <div class="field-row"><label>Этаж</label><input type="text" readonly id="property-Этаж" /></div>
+          <div class="field-row"><label>Этажность</label><input type="text" readonly id="property-Этажность" /></div>
+          <div class="field-row"><label>Количество комнат</label><input type="text" readonly id="property-Количество комнат" /></div>
+          <div class="field-row"><label>Общая площадь</label><input type="text" readonly id="property-Общая площадь" /></div>
+          <div class="field-row"><label>Жилая площадь</label><input type="text" readonly id="property-Жилая площадь" /></div>
+          <div class="field-row"><label>Площадь кухни</label><input type="text" readonly id="property-Площадь кухни" /></div>
+          <div class="field-row"><label>Кадастровый номер</label><input type="text" readonly id="property-Кадастровый номер" /></div>
+          <div class="field-row"><label>Инвентарный номер</label><input type="text" readonly id="property-Инвентарный номер" /></div>
+        </div>
+      </section>
+
+      <!-- ПРОДАВЕЦ -->
+      <section class="card" id="card-seller">
+        <h2 class="card-title">Продавец</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Фамилия</label><input type="text" readonly id="seller-Фамилия" /></div>
+          <div class="field-row"><label>Имя</label><input type="text" readonly id="seller-Имя" /></div>
+          <div class="field-row"><label>Отчество</label><input type="text" readonly id="seller-Отчество" /></div>
+          <div class="field-row"><label>Дата рождения</label><input type="text" readonly id="seller-Дата рождения" /></div>
+          <div class="field-row"><label>Паспорт серия</label><input type="text" readonly id="seller-Паспорт серия" /></div>
+          <div class="field-row"><label>Паспорт номер</label><input type="text" readonly id="seller-Паспорт номер" /></div>
+          <div class="field-row"><label>Идентификационный номер</label><input type="text" readonly id="seller-Идентификационный номер" /></div>
+          <div class="field-row"><label>Кем выдан</label><input type="text" readonly id="seller-Кем выдан" /></div>
+          <div class="field-row"><label>Дата выдачи</label><input type="text" readonly id="seller-Дата выдачи" /></div>
+          <div class="field-row"><label>Адрес регистрации</label><input type="text" readonly id="seller-Адрес регистрации" /></div>
+          <div class="field-row"><label>Телефон</label><input type="text" readonly id="seller-Телефон" /></div>
+          <div class="field-row"><label>Email</label><input type="text" readonly id="seller-Email" /></div>
+          <div class="field-row"><label>Является собственником</label><input type="text" readonly id="seller-Является собственником" /></div>
+          <div class="field-row"><label>Номер доверенности</label><input type="text" readonly id="seller-Номер доверенности" /></div>
+          <div class="field-row"><label>Дата доверенности</label><input type="text" readonly id="seller-Дата доверенности" /></div>
+        </div>
+      </section>
+
+      <!-- СОБСТВЕННИК №1 -->
+      <section class="card" id="card-owner1">
+        <h2 class="card-title">Собственник №1</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Фамилия</label><input type="text" readonly id="owner1-Фамилия" /></div>
+          <div class="field-row"><label>Имя</label><input type="text" readonly id="owner1-Имя" /></div>
+          <div class="field-row"><label>Отчество</label><input type="text" readonly id="owner1-Отчество" /></div>
+          <div class="field-row"><label>Дата рождения</label><input type="text" readonly id="owner1-Дата рождения" /></div>
+          <div class="field-row"><label>Паспорт серия</label><input type="text" readonly id="owner1-Паспорт серия" /></div>
+          <div class="field-row"><label>Паспорт номер</label><input type="text" readonly id="owner1-Паспорт номер" /></div>
+          <div class="field-row"><label>Идентификационный номер</label><input type="text" readonly id="owner1-Идентификационный номер" /></div>
+          <div class="field-row"><label>Кем выдан</label><input type="text" readonly id="owner1-Кем выдан" /></div>
+          <div class="field-row"><label>Дата выдачи</label><input type="text" readonly id="owner1-Дата выдачи" /></div>
+          <div class="field-row"><label>Адрес регистрации</label><input type="text" readonly id="owner1-Адрес регистрации" /></div>
+          <div class="field-row"><label>Телефон</label><input type="text" readonly id="owner1-Телефон" /></div>
+          <div class="field-row"><label>Доля собственности</label><input type="text" readonly id="owner1-Доля собственности" /></div>
+        </div>
+      </section>
+
+      <!-- СОБСТВЕННИК №2 -->
+      <section class="card" id="card-owner2">
+        <h2 class="card-title">Собственник №2</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Фамилия</label><input type="text" readonly id="owner2-Фамилия" /></div>
+          <div class="field-row"><label>Имя</label><input type="text" readonly id="owner2-Имя" /></div>
+          <div class="field-row"><label>Отчество</label><input type="text" readonly id="owner2-Отчество" /></div>
+          <div class="field-row"><label>Дата рождения</label><input type="text" readonly id="owner2-Дата рождения" /></div>
+          <div class="field-row"><label>Паспорт серия</label><input type="text" readonly id="owner2-Паспорт серия" /></div>
+          <div class="field-row"><label>Паспорт номер</label><input type="text" readonly id="owner2-Паспорт номер" /></div>
+          <div class="field-row"><label>Идентификационный номер</label><input type="text" readonly id="owner2-Идентификационный номер" /></div>
+          <div class="field-row"><label>Кем выдан</label><input type="text" readonly id="owner2-Кем выдан" /></div>
+          <div class="field-row"><label>Дата выдачи</label><input type="text" readonly id="owner2-Дата выдачи" /></div>
+          <div class="field-row"><label>Адрес регистрации</label><input type="text" readonly id="owner2-Адрес регистрации" /></div>
+          <div class="field-row"><label>Телефон</label><input type="text" readonly id="owner2-Телефон" /></div>
+          <div class="field-row"><label>Доля собственности</label><input type="text" readonly id="owner2-Доля собственности" /></div>
+        </div>
+      </section>
+
+      <!-- СОБСТВЕННИК №3 -->
+      <section class="card" id="card-owner3">
+        <h2 class="card-title">Собственник №3</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Фамилия</label><input type="text" readonly id="owner3-Фамилия" /></div>
+          <div class="field-row"><label>Имя</label><input type="text" readonly id="owner3-Имя" /></div>
+          <div class="field-row"><label>Отчество</label><input type="text" readonly id="owner3-Отчество" /></div>
+          <div class="field-row"><label>Дата рождения</label><input type="text" readonly id="owner3-Дата рождения" /></div>
+          <div class="field-row"><label>Паспорт серия</label><input type="text" readonly id="owner3-Паспорт серия" /></div>
+          <div class="field-row"><label>Паспорт номер</label><input type="text" readonly id="owner3-Паспорт номер" /></div>
+          <div class="field-row"><label>Идентификационный номер</label><input type="text" readonly id="owner3-Идентификационный номер" /></div>
+          <div class="field-row"><label>Кем выдан</label><input type="text" readonly id="owner3-Кем выдан" /></div>
+          <div class="field-row"><label>Дата выдачи</label><input type="text" readonly id="owner3-Дата выдачи" /></div>
+          <div class="field-row"><label>Адрес регистрации</label><input type="text" readonly id="owner3-Адрес регистрации" /></div>
+          <div class="field-row"><label>Телефон</label><input type="text" readonly id="owner3-Телефон" /></div>
+          <div class="field-row"><label>Доля собственности</label><input type="text" readonly id="owner3-Доля собственности" /></div>
+        </div>
+      </section>
+
+      <!-- ПОКУПАТЕЛЬ -->
+      <section class="card" id="card-buyer">
+        <h2 class="card-title">Покупатель</h2>
+        <div class="fields-grid">
+          <div class="field-row"><label>Фамилия</label><input type="text" readonly id="buyer-Фамилия" /></div>
+          <div class="field-row"><label>Имя</label><input type="text" readonly id="buyer-Имя" /></div>
+          <div class="field-row"><label>Отчество</label><input type="text" readonly id="buyer-Отчество" /></div>
+          <div class="field-row"><label>Дата рождения</label><input type="text" readonly id="buyer-Дата рождения" /></div>
+          <div class="field-row"><label>Паспорт серия</label><input type="text" readonly id="buyer-Паспорт серия" /></div>
+          <div class="field-row"><label>Паспорт номер</label><input type="text" readonly id="buyer-Паспорт номер" /></div>
+          <div class="field-row"><label>Идентификационный номер</label><input type="text" readonly id="buyer-Идентификационный номер" /></div>
+          <div class="field-row"><label>Кем выдан</label><input type="text" readonly id="buyer-Кем выдан" /></div>
+          <div class="field-row"><label>Дата выдачи</label><input type="text" readonly id="buyer-Дата выдачи" /></div>
+          <div class="field-row"><label>Адрес регистрации</label><input type="text" readonly id="buyer-Адрес регистрации" /></div>
+          <div class="field-row"><label>Телефон</label><input type="text" readonly id="buyer-Телефон" /></div>
+          <div class="field-row"><label>Email</label><input type="text" readonly id="buyer-Email" /></div>
+          <div class="field-row"><label>Семейное положение</label><input type="text" readonly id="buyer-Семейное положение" /></div>
+        </div>
+      </section>
+
+    </div><!-- /cards-grid -->
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
