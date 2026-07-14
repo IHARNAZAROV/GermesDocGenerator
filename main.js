@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const ExcelJS = require('exceljs');
+const { generateWord } = require("./generator/word-generator");
 
 let mainWindow;
 let isDirty = false; // renderer notifies us when dirty state changes
@@ -142,4 +143,42 @@ ipcMain.on('app:dirty-changed', (_event, dirty) => {
 ipcMain.on('app:close-confirmed', () => {
   isDirty = false;
   if (mainWindow) mainWindow.destroy();
+});
+
+ipcMain.handle("generate-test-word", async () => {
+
+    const path = require("path");
+
+    const templatePath = path.join(
+        __dirname,
+        "templates",
+        "Доверенность ПНД.docx"
+    );
+
+    const outputPath = path.join(
+        __dirname,
+        "output",
+        "Доверенность.docx"
+    );
+
+    const data = {
+
+        sellerFullName: "Петров Сергей Викторович",
+
+        sellerBirthDate: "12.05.1981",
+
+        sellerAddress: "г. Лида, ул. Советская, 12",
+
+        sellerId: "3120581A012PB4",
+
+        currentDate: "15.07.2026"
+
+    };
+
+    return generateWord(
+        templatePath,
+        outputPath,
+        data
+    );
+
 });

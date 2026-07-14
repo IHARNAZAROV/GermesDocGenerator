@@ -9,7 +9,7 @@
   "author": "Игорь",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^38.0.0"
+    "electron": "^38.8.6"
   },
   "dependencies": {
     "docxtemplater": "^3.69.0",
