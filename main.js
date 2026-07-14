@@ -166,6 +166,18 @@ ipcMain.handle('shell:openFile', async (_event, filePath) => {
 });
 
 // ============================================================
+//  IPC — generate "Договор реклама" from current form data
+// ============================================================
+ipcMain.handle('word:generateReklama', async (_event, data, outputDir) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_реклама.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = path.join(resolvedDir, 'Договор_реклама.docx');
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
+
+// ============================================================
 //  IPC — generate "Доверенность ПНД" from current form data
 // ============================================================
 ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir) => {

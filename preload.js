@@ -27,4 +27,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Document generation
   generateDoverennost: (data, outputDir)       => ipcRenderer.invoke('word:generateDoverennost', data, outputDir),
+  generateReklama:     (data, outputDir)       => ipcRenderer.invoke('word:generateReklama',     data, outputDir),
 });

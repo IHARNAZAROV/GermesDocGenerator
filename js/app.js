@@ -628,6 +628,30 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'reklama': {
+    label: 'Договор на оказание рекламных услуг',
+    async generate(outputDir) {
+      const sellerFullName = [getField('seller-Фамилия'), getField('seller-Имя'), getField('seller-Отчество')]
+                               .filter(Boolean).join(' ');
+      const passport = [getField('seller-Паспорт серия'), getField('seller-Паспорт номер')]
+                         .filter(Boolean).join(' ');
+      const data = {
+        dealNumber:               getField('deal-Номер сделки'),
+        sellerFullName,
+        realEstateContractNumber: getField('deal-Номер сделки'),
+        realEstateContractDate:   getField('deal-Дата договора'),
+        propertyType:             getField('property-Тип объекта'),
+        propertyAddress:          getField('property-Адрес'),
+        sellerPassport:           passport,
+        sellerPassportIssuedBy:   getField('seller-Кем выдан'),
+        sellerId:                 getField('seller-Идентификационный номер'),
+        sellerPhone:              getField('seller-Телефон'),
+        contractDateText:         getField('deal-Дата договора'),
+      };
+      return window.electronAPI.generateReklama(data, outputDir);
+    },
+  },
+
   // ── Будущие шаблоны добавляются сюда ──────────────────────
   // 'dkp-1-obshiy': {
   //   label: 'ДКП (1 собственник, общий)',
