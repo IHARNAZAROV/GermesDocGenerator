@@ -33,8 +33,13 @@ Requires Node.js with Electron installed (`npm install` handles it via devDepend
 - **Hide empty sections** — if an entire card (e.g. Собственник №3) has no filled fields, the card is not shown.
 - **Sticky toolbar** — the top bar with the "Выбрать Excel" button stays fixed at the top during scroll.
 
+## Replit setup notes
+
+- **No run workflow configured** — the user's goal is to edit the renderer code (HTML/CSS/JS), not to run the Electron app on Replit. Electron requires a local desktop environment and cannot run in Replit's browser preview.
+- To preview changes live in the browser, see the proposed follow-up task for converting the renderer to a web-served app.
+
 ## User preferences
 
 - Do not change `main.js`, `preload.js`, or `excel/excel-reader.js` — these are stable backend/IPC files.
 - Only modify the renderer layer: `index.html`, `js/app.js`, `css/style.css`.
-- Keep the project's existing Electron architecture — do not migrate to a web server.
+- Keep the project's existing Electron architecture — do not migrate to a web server unless the user explicitly requests it.
