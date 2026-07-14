@@ -27,7 +27,29 @@
       </button>
       <span class="file-path" id="file-path-display">Файл не выбран</span>
     </div>
+    <div class="toolbar-actions">
+      <button class="btn-save" id="btn-save" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Сохранить
+      </button>
+      <button class="btn-save-as" id="btn-save-as" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+          <line x1="12" y1="3" x2="12" y2="7"/>
+        </svg>
+        Сохранить как…
+      </button>
+    </div>
   </header>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div id="toast-container" class="toast-container"></div>
 
   <!-- ===== ERROR BANNER ===== -->
   <div class="error-banner" id="error-banner" hidden>
@@ -61,16 +83,16 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Номер сделки</label><input type="text" readonly id="deal-Номер сделки" /></div>
-              <div class="field-row" data-field-row><label>Дата договора</label><input type="text" readonly id="deal-Дата договора" /></div>
-              <div class="field-row" data-field-row><label>Тип договора</label><input type="text" readonly id="deal-Тип договора" /></div>
-              <div class="field-row" data-field-row><label>Эксклюзив</label><input type="text" readonly id="deal-Эксклюзив" /></div>
-              <div class="field-row" data-field-row><label>Кол-во собственников</label><input type="text" readonly id="deal-Количество собственников" /></div>
-              <div class="field-row" data-field-row><label>Стоимость USD</label><input type="text" readonly id="deal-Стоимость USD" /></div>
-              <div class="field-row" data-field-row><label>Стоимость BYN</label><input type="text" readonly id="deal-Стоимость BYN" /></div>
-              <div class="field-row" data-field-row><label>Стоимость прописью</label><input type="text" readonly id="deal-Стоимость прописью" /></div>
-              <div class="field-row" data-field-row><label>Комиссия агентства</label><input type="text" readonly id="deal-Комиссия агентства" /></div>
-              <div class="field-row" data-field-row><label>Риэлтер</label><input type="text" readonly id="deal-agent" /></div>
+              <div class="field-row" data-field-row><label>Номер сделки</label><input type="text" id="deal-Номер сделки" /></div>
+              <div class="field-row" data-field-row><label>Дата договора</label><input type="text" id="deal-Дата договора" /></div>
+              <div class="field-row" data-field-row><label>Тип договора</label><input type="text" id="deal-Тип договора" /></div>
+              <div class="field-row" data-field-row><label>Эксклюзив</label><input type="text" id="deal-Эксклюзив" /></div>
+              <div class="field-row" data-field-row><label>Кол-во собственников</label><input type="text" id="deal-Количество собственников" /></div>
+              <div class="field-row" data-field-row><label>Стоимость USD</label><input type="text" id="deal-Стоимость USD" /></div>
+              <div class="field-row" data-field-row><label>Стоимость BYN</label><input type="text" id="deal-Стоимость BYN" /></div>
+              <div class="field-row" data-field-row><label>Стоимость прописью</label><input type="text" id="deal-Стоимость прописью" /></div>
+              <div class="field-row" data-field-row><label>Комиссия агентства</label><input type="text" id="deal-Комиссия агентства" /></div>
+              <div class="field-row" data-field-row><label>Риэлтер</label><input type="text" id="deal-agent" /></div>
             </div>
           </div>
         </div>
@@ -85,22 +107,22 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Тип объекта</label><input type="text" readonly id="property-Тип объекта" /></div>
-              <div class="field-row" data-field-row><label>Адрес</label><input type="text" readonly id="property-Адрес" /></div>
-              <div class="field-row" data-field-row><label>Город</label><input type="text" readonly id="property-Город" /></div>
-              <div class="field-row" data-field-row><label>Район</label><input type="text" readonly id="property-Район" /></div>
-              <div class="field-row" data-field-row><label>Улица</label><input type="text" readonly id="property-Улица" /></div>
-              <div class="field-row" data-field-row><label>Дом</label><input type="text" readonly id="property-Дом" /></div>
-              <div class="field-row" data-field-row><label>Корпус</label><input type="text" readonly id="property-Корпус" /></div>
-              <div class="field-row" data-field-row><label>Квартира</label><input type="text" readonly id="property-Квартира" /></div>
-              <div class="field-row" data-field-row><label>Этаж</label><input type="text" readonly id="property-Этаж" /></div>
-              <div class="field-row" data-field-row><label>Этажность</label><input type="text" readonly id="property-Этажность" /></div>
-              <div class="field-row" data-field-row><label>Количество комнат</label><input type="text" readonly id="property-Количество комнат" /></div>
-              <div class="field-row" data-field-row><label>Общая площадь</label><input type="text" readonly id="property-Общая площадь" /></div>
-              <div class="field-row" data-field-row><label>Жилая площадь</label><input type="text" readonly id="property-Жилая площадь" /></div>
-              <div class="field-row" data-field-row><label>Площадь кухни</label><input type="text" readonly id="property-Площадь кухни" /></div>
-              <div class="field-row" data-field-row><label>Кадастровый номер</label><input type="text" readonly id="property-Кадастровый номер" /></div>
-              <div class="field-row" data-field-row><label>Инвентарный номер</label><input type="text" readonly id="property-Инвентарный номер" /></div>
+              <div class="field-row" data-field-row><label>Тип объекта</label><input type="text" id="property-Тип объекта" /></div>
+              <div class="field-row" data-field-row><label>Адрес</label><input type="text" id="property-Адрес" /></div>
+              <div class="field-row" data-field-row><label>Город</label><input type="text" id="property-Город" /></div>
+              <div class="field-row" data-field-row><label>Район</label><input type="text" id="property-Район" /></div>
+              <div class="field-row" data-field-row><label>Улица</label><input type="text" id="property-Улица" /></div>
+              <div class="field-row" data-field-row><label>Дом</label><input type="text" id="property-Дом" /></div>
+              <div class="field-row" data-field-row><label>Корпус</label><input type="text" id="property-Корпус" /></div>
+              <div class="field-row" data-field-row><label>Квартира</label><input type="text" id="property-Квартира" /></div>
+              <div class="field-row" data-field-row><label>Этаж</label><input type="text" id="property-Этаж" /></div>
+              <div class="field-row" data-field-row><label>Этажность</label><input type="text" id="property-Этажность" /></div>
+              <div class="field-row" data-field-row><label>Количество комнат</label><input type="text" id="property-Количество комнат" /></div>
+              <div class="field-row" data-field-row><label>Общая площадь</label><input type="text" id="property-Общая площадь" /></div>
+              <div class="field-row" data-field-row><label>Жилая площадь</label><input type="text" id="property-Жилая площадь" /></div>
+              <div class="field-row" data-field-row><label>Площадь кухни</label><input type="text" id="property-Площадь кухни" /></div>
+              <div class="field-row" data-field-row><label>Кадастровый номер</label><input type="text" id="property-Кадастровый номер" /></div>
+              <div class="field-row" data-field-row><label>Инвентарный номер</label><input type="text" id="property-Инвентарный номер" /></div>
             </div>
           </div>
         </div>
@@ -115,21 +137,21 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" readonly id="seller-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" readonly id="seller-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" readonly id="seller-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" readonly id="seller-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" readonly id="seller-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" readonly id="seller-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" readonly id="seller-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" readonly id="seller-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" readonly id="seller-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" readonly id="seller-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" readonly id="seller-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Email</label><input type="text" readonly id="seller-Email" /></div>
-              <div class="field-row" data-field-row><label>Является собственником</label><input type="text" readonly id="seller-Является собственником" /></div>
-              <div class="field-row" data-field-row><label>Номер доверенности</label><input type="text" readonly id="seller-Номер доверенности" /></div>
-              <div class="field-row" data-field-row><label>Дата доверенности</label><input type="text" readonly id="seller-Дата доверенности" /></div>
+              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="seller-Фамилия" /></div>
+              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="seller-Имя" /></div>
+              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="seller-Отчество" /></div>
+              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="seller-Дата рождения" /></div>
+              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="seller-Паспорт серия" /></div>
+              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="seller-Паспорт номер" /></div>
+              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="seller-Идентификационный номер" /></div>
+              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="seller-Кем выдан" /></div>
+              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="seller-Дата выдачи" /></div>
+              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="seller-Адрес регистрации" /></div>
+              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="seller-Телефон" /></div>
+              <div class="field-row" data-field-row><label>Email</label><input type="text" id="seller-Email" /></div>
+              <div class="field-row" data-field-row><label>Является собственником</label><input type="text" id="seller-Является собственником" /></div>
+              <div class="field-row" data-field-row><label>Номер доверенности</label><input type="text" id="seller-Номер доверенности" /></div>
+              <div class="field-row" data-field-row><label>Дата доверенности</label><input type="text" id="seller-Дата доверенности" /></div>
             </div>
           </div>
         </div>
@@ -144,18 +166,18 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" readonly id="owner1-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" readonly id="owner1-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" readonly id="owner1-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" readonly id="owner1-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" readonly id="owner1-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" readonly id="owner1-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" readonly id="owner1-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" readonly id="owner1-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" readonly id="owner1-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" readonly id="owner1-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" readonly id="owner1-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" readonly id="owner1-Доля собственности" /></div>
+              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner1-Фамилия" /></div>
+              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner1-Имя" /></div>
+              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner1-Отчество" /></div>
+              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner1-Дата рождения" /></div>
+              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner1-Паспорт серия" /></div>
+              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner1-Паспорт номер" /></div>
+              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner1-Идентификационный номер" /></div>
+              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner1-Кем выдан" /></div>
+              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner1-Дата выдачи" /></div>
+              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner1-Адрес регистрации" /></div>
+              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner1-Телефон" /></div>
+              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner1-Доля собственности" /></div>
             </div>
           </div>
         </div>
@@ -170,18 +192,18 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" readonly id="owner2-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" readonly id="owner2-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" readonly id="owner2-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" readonly id="owner2-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" readonly id="owner2-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" readonly id="owner2-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" readonly id="owner2-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" readonly id="owner2-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" readonly id="owner2-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" readonly id="owner2-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" readonly id="owner2-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" readonly id="owner2-Доля собственности" /></div>
+              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner2-Фамилия" /></div>
+              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner2-Имя" /></div>
+              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner2-Отчество" /></div>
+              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner2-Дата рождения" /></div>
+              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner2-Паспорт серия" /></div>
+              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner2-Паспорт номер" /></div>
+              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner2-Идентификационный номер" /></div>
+              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner2-Кем выдан" /></div>
+              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner2-Дата выдачи" /></div>
+              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner2-Адрес регистрации" /></div>
+              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner2-Телефон" /></div>
+              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner2-Доля собственности" /></div>
             </div>
           </div>
         </div>
@@ -196,18 +218,18 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" readonly id="owner3-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" readonly id="owner3-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" readonly id="owner3-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" readonly id="owner3-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" readonly id="owner3-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" readonly id="owner3-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" readonly id="owner3-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" readonly id="owner3-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" readonly id="owner3-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" readonly id="owner3-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" readonly id="owner3-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" readonly id="owner3-Доля собственности" /></div>
+              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="owner3-Фамилия" /></div>
+              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="owner3-Имя" /></div>
+              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="owner3-Отчество" /></div>
+              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="owner3-Дата рождения" /></div>
+              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="owner3-Паспорт серия" /></div>
+              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="owner3-Паспорт номер" /></div>
+              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="owner3-Идентификационный номер" /></div>
+              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="owner3-Кем выдан" /></div>
+              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="owner3-Дата выдачи" /></div>
+              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="owner3-Адрес регистрации" /></div>
+              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="owner3-Телефон" /></div>
+              <div class="field-row" data-field-row><label>Доля собственности</label><input type="text" id="owner3-Доля собственности" /></div>
             </div>
           </div>
         </div>
@@ -222,19 +244,19 @@
         <div class="card-body">
           <div class="card-body-inner">
             <div class="fields-grid">
-              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" readonly id="buyer-Фамилия" /></div>
-              <div class="field-row" data-field-row><label>Имя</label><input type="text" readonly id="buyer-Имя" /></div>
-              <div class="field-row" data-field-row><label>Отчество</label><input type="text" readonly id="buyer-Отчество" /></div>
-              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" readonly id="buyer-Дата рождения" /></div>
-              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" readonly id="buyer-Паспорт серия" /></div>
-              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" readonly id="buyer-Паспорт номер" /></div>
-              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" readonly id="buyer-Идентификационный номер" /></div>
-              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" readonly id="buyer-Кем выдан" /></div>
-              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" readonly id="buyer-Дата выдачи" /></div>
-              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" readonly id="buyer-Адрес регистрации" /></div>
-              <div class="field-row" data-field-row><label>Телефон</label><input type="text" readonly id="buyer-Телефон" /></div>
-              <div class="field-row" data-field-row><label>Email</label><input type="text" readonly id="buyer-Email" /></div>
-              <div class="field-row" data-field-row><label>Семейное положение</label><input type="text" readonly id="buyer-Семейное положение" /></div>
+              <div class="field-row" data-field-row><label>Фамилия</label><input type="text" id="buyer-Фамилия" /></div>
+              <div class="field-row" data-field-row><label>Имя</label><input type="text" id="buyer-Имя" /></div>
+              <div class="field-row" data-field-row><label>Отчество</label><input type="text" id="buyer-Отчество" /></div>
+              <div class="field-row" data-field-row><label>Дата рождения</label><input type="text" id="buyer-Дата рождения" /></div>
+              <div class="field-row" data-field-row><label>Паспорт серия</label><input type="text" id="buyer-Паспорт серия" /></div>
+              <div class="field-row" data-field-row><label>Паспорт номер</label><input type="text" id="buyer-Паспорт номер" /></div>
+              <div class="field-row" data-field-row><label>Идентификационный номер</label><input type="text" id="buyer-Идентификационный номер" /></div>
+              <div class="field-row" data-field-row><label>Кем выдан</label><input type="text" id="buyer-Кем выдан" /></div>
+              <div class="field-row" data-field-row><label>Дата выдачи</label><input type="text" id="buyer-Дата выдачи" /></div>
+              <div class="field-row" data-field-row><label>Адрес регистрации</label><input type="text" id="buyer-Адрес регистрации" /></div>
+              <div class="field-row" data-field-row><label>Телефон</label><input type="text" id="buyer-Телефон" /></div>
+              <div class="field-row" data-field-row><label>Email</label><input type="text" id="buyer-Email" /></div>
+              <div class="field-row" data-field-row><label>Семейное положение</label><input type="text" id="buyer-Семейное положение" /></div>
             </div>
           </div>
         </div>

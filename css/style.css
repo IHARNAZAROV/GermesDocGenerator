@@ -16,6 +16,9 @@
   --error-bg:      #fff0f0;
   --error-border:  #f28b82;
   --error-text:    #b3261e;
+  --dirty:         #e07d00;
+  --dirty-bg:      #fff8ee;
+  --dirty-border:  #f0a940;
   --radius:        7px;
   --shadow:        0 1px 3px rgba(0,0,0,.07), 0 2px 8px rgba(0,0,0,.05);
   --font:          'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -44,8 +47,8 @@ html, body {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
+  gap: 12px;
+  padding: 0 14px;
   z-index: 200;
   box-shadow: 0 1px 4px rgba(0,0,0,.08);
   flex-shrink: 0;
@@ -56,6 +59,7 @@ html, body {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  margin-right: 4px;
 }
 
 .toolbar-logo {
@@ -88,35 +92,83 @@ html, body {
 .toolbar-file {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex: 1;
   min-width: 0;
 }
 
-/* ============================================================
-   PRIMARY BUTTON
-   ============================================================ */
-.btn-primary {
-  display: inline-flex;
+.toolbar-actions {
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-  color: #fff;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+/* Base shared button style */
+.btn-primary,
+.btn-save,
+.btn-save-as {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
   border: none;
   border-radius: 5px;
   font-family: var(--font);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity .15s, box-shadow .15s;
-  box-shadow: 0 1px 3px rgba(26,127,75,.3);
+  transition: opacity .15s, box-shadow .15s, background .15s;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
+/* Open file — green */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(26,127,75,.3);
+}
 .btn-primary:hover  { opacity: .9; box-shadow: 0 2px 6px rgba(26,127,75,.4); }
 .btn-primary:active { transform: translateY(1px); box-shadow: none; }
-.btn-primary svg    { flex-shrink: 0; }
+
+/* Save — blue-grey */
+.btn-save {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(37,99,235,.3);
+}
+.btn-save:not(:disabled):hover  { opacity: .9; box-shadow: 0 2px 6px rgba(37,99,235,.4); }
+.btn-save:not(:disabled):active { transform: translateY(1px); box-shadow: none; }
+
+/* Save As — outlined */
+.btn-save-as {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.btn-save-as:not(:disabled):hover  { background: #f4f4f4; color: var(--text); }
+.btn-save-as:not(:disabled):active { transform: translateY(1px); }
+
+/* Disabled state for all buttons */
+.btn-primary:disabled,
+.btn-save:disabled,
+.btn-save-as:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary svg,
+.btn-save svg,
+.btn-save-as svg { flex-shrink: 0; }
 
 /* ============================================================
    FILE PATH
@@ -124,7 +176,7 @@ html, body {
 .file-path {
   font-size: 11px;
   color: var(--text-secondary);
-  max-width: 500px;
+  max-width: 480px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -181,6 +233,46 @@ html, body {
 @keyframes slideDown {
   from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-container {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #1f2937;
+  color: #f9fafb;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .25s ease, transform .25s ease;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.toast-error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
 }
 
 /* ============================================================
@@ -263,7 +355,6 @@ html, body {
   overflow: hidden;
 }
 
-/* card hidden entirely when section is empty */
 .card[hidden] { display: none; }
 
 /* ============================================================
@@ -276,7 +367,7 @@ html, body {
   width: 100%;
   background: var(--accent-light);
   border: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
   padding: 7px 12px;
   cursor: pointer;
   font-family: var(--font);
@@ -292,15 +383,8 @@ html, body {
 
 .card-title:hover { background: #dff0e9; }
 
-/* when card is expanded, hide the bottom border on the title */
-.card.is-open > .card-title {
-  border-bottom-color: var(--border);
-}
-
-/* collapsed: no bottom border (body is hidden) */
-.card:not(.is-open) > .card-title {
-  border-bottom-color: transparent;
-}
+.card.is-open > .card-title  { border-bottom-color: var(--border); }
+.card:not(.is-open) > .card-title { border-bottom-color: transparent; }
 
 .card-arrow {
   font-size: 9px;
@@ -311,9 +395,7 @@ html, body {
   line-height: 1;
 }
 
-.card.is-open .card-arrow {
-  transform: rotate(90deg);
-}
+.card.is-open .card-arrow { transform: rotate(90deg); }
 
 /* ============================================================
    CARD BODY  (smooth collapse via CSS grid trick)
@@ -324,20 +406,14 @@ html, body {
   transition: grid-template-rows .22s ease;
 }
 
-.card.is-open > .card-body {
-  grid-template-rows: 1fr;
-}
+.card.is-open > .card-body { grid-template-rows: 1fr; }
 
-.card-body-inner {
-  overflow: hidden;
-}
+.card-body-inner { overflow: hidden; }
 
 /* ============================================================
-   FIELDS GRID  (two-column: label | value)
+   FIELDS GRID  (label | input, two-column)
    ============================================================ */
-.fields-grid {
-  padding: 4px 0;
-}
+.fields-grid { padding: 4px 0; }
 
 .field-row {
   display: grid;
@@ -348,7 +424,6 @@ html, body {
   transition: background .1s;
 }
 
-/* hide the entire row when its field is empty */
 .field-row[hidden] { display: none; }
 
 .field-row:hover { background: #f7f7f7; }
@@ -372,41 +447,45 @@ html, body {
   font-family: var(--font);
   font-size: 12px;
   color: var(--text);
-  cursor: default;
+  cursor: text;
   transition: border-color .12s, background .12s;
   outline: none;
   -webkit-user-select: text;
   user-select: text;
 }
 
-.field-row input[type="text"]:not(:placeholder-shown) {
-  background: #f5f8f6;
+.field-row input[type="text"]:hover {
   border-color: var(--border);
+  background: #f7f7f7;
 }
 
 .field-row input[type="text"]:focus {
   border-color: var(--border-focus);
-  background: #edf7f2;
-  cursor: text;
+  background: var(--accent-light);
 }
 
-.field-row input[type="text"]::placeholder {
-  color: #cccccc;
+/* ============================================================
+   DIRTY (modified) INPUT STATE
+   ============================================================ */
+.field-row input[type="text"].input-dirty {
+  border-color: var(--dirty-border);
+  background: var(--dirty-bg);
+  color: var(--text);
+}
+
+.field-row input[type="text"].input-dirty:focus {
+  border-color: var(--dirty);
+  background: var(--dirty-bg);
 }
 
 /* ============================================================
    RESPONSIVE  — single column on narrow windows
    ============================================================ */
 @media (max-width: 540px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .field-row {
-    grid-template-columns: 140px 1fr;
-  }
-  .file-path {
-    max-width: 160px;
-  }
+  .cards-grid       { grid-template-columns: 1fr; }
+  .field-row        { grid-template-columns: 140px 1fr; }
+  .file-path        { max-width: 120px; }
+  .toolbar-title    { display: none; }
 }
 
 /* ============================================================

@@ -4,6 +4,8 @@
 //  DOM references
 // ============================================================
 const btnChooseFile   = document.getElementById('btn-choose-file');
+const btnSave         = document.getElementById('btn-save');
+const btnSaveAs       = document.getElementById('btn-save-as');
 const filePathDisplay = document.getElementById('file-path-display');
 const errorBanner     = document.getElementById('error-banner');
 const errorText       = document.getElementById('error-text');
@@ -11,6 +13,7 @@ const errorClose      = document.getElementById('error-close');
 const loader          = document.getElementById('loader');
 const emptyState      = document.getElementById('empty-state');
 const cardsGrid       = document.getElementById('cards-grid');
+const toastContainer  = document.getElementById('toast-container');
 
 // ============================================================
 //  Field-to-input ID map
@@ -28,7 +31,6 @@ const FIELD_MAP = {
   'deal-Стоимость BYN':             'deal-Стоимость BYN',
   'deal-Стоимость прописью':        'deal-Стоимость прописью',
   'deal-Комиссия агентства':        'deal-Комиссия агентства',
-  // Excel field is "Ответственный риэлтер" — mapped to "Агент" display field
   'deal-Ответственный риэлтер':     'deal-agent',
 
   // ОБЪЕКТ
@@ -124,13 +126,26 @@ const FIELD_MAP = {
   'buyer-Семейное положение':       'buyer-Семейное положение',
 };
 
+// Reverse map: inputId → mapKey (for looking up rowMap entries when saving)
+const SAVE_MAP = Object.fromEntries(
+  Object.entries(FIELD_MAP).map(([mapKey, inputId]) => [inputId, mapKey])
+);
+
 // ============================================================
 //  Cards auto-expanded after Excel load
 // ============================================================
 const AUTO_OPEN_CARDS = new Set(['deal', 'property', 'buyer']);
 
-// In-session collapse state: cardId → boolean (true = open)
+// In-session collapse state
 const cardOpenState = {};
+
+// ============================================================
+//  Application state
+// ============================================================
+let currentFilePath = null; // path of the currently open file
+let rowMap          = {};   // mapKey → Excel row number  (from _rowMap)
+let originalValues  = {};   // inputId → value at load / last save
+let dirtyInputIds   = new Set(); // set of inputIds that have been changed
 
 // ============================================================
 //  Universal helpers
@@ -149,15 +164,39 @@ function isFieldEmpty(value) {
 function isSectionEmpty(cardId) {
   const card = document.getElementById('card-' + cardId);
   if (!card) return true;
-  const inputs = card.querySelectorAll('input[type="text"]');
-  for (const input of inputs) {
+  for (const input of card.querySelectorAll('input[type="text"]')) {
     if (!isFieldEmpty(input.value)) return false;
   }
   return true;
 }
 
 // ============================================================
-//  Error / loader helpers
+//  Toast notifications
+// ============================================================
+
+/**
+ * Show a self-dismissing in-app notification.
+ * @param {string} message
+ * @param {'success'|'error'} type
+ */
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('toast-visible'));
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    setTimeout(() => toast.remove(), 320);
+  }, 3200);
+}
+
+// ============================================================
+//  Error banner helpers
 // ============================================================
 function showError(message) {
   errorText.textContent = message;
@@ -178,9 +217,7 @@ function hideLoader() { loader.hidden = true; }
 function setInputValue(inputId, value) {
   const el = document.getElementById(inputId);
   if (!el) return;
-  const v = isFieldEmpty(value) ? '' : String(value).trim();
-  el.value = v;
-  el.placeholder = v === '' ? '—' : '';
+  el.value = isFieldEmpty(value) ? '' : String(value).trim();
 }
 
 function clearAllInputs() {
@@ -188,54 +225,169 @@ function clearAllInputs() {
 }
 
 // ============================================================
-//  Collapsible card logic
+//  Dirty-state tracking
 // ============================================================
 
+function updateDirtyState() {
+  const hasDirty = dirtyInputIds.size > 0;
+  btnSave.disabled = !hasDirty;
+  window.electronAPI.notifyDirtyChange(hasDirty);
+}
+
 /**
- * Open or close a card with a smooth CSS transition.
- * @param {string} cardId
- * @param {boolean} open
+ * Called on every input `input` event.
+ * Compares current value against the saved baseline.
  */
+function onInputChange(inputId, currentValue) {
+  const original = originalValues[inputId] ?? '';
+  const current  = currentValue.trim();
+
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  if (current !== original) {
+    dirtyInputIds.add(inputId);
+    input.classList.add('input-dirty');
+  } else {
+    dirtyInputIds.delete(inputId);
+    input.classList.remove('input-dirty');
+  }
+
+  updateDirtyState();
+}
+
+/** Snapshot current values as the new baseline and clear all dirty markers. */
+function commitCurrentValues() {
+  for (const inputId of Object.values(FIELD_MAP)) {
+    const el = document.getElementById(inputId);
+    if (!el) continue;
+    originalValues[inputId] = el.value.trim();
+    el.classList.remove('input-dirty');
+  }
+  dirtyInputIds.clear();
+  updateDirtyState();
+}
+
+// Attach change listeners to every input once at startup
+for (const inputId of Object.values(FIELD_MAP)) {
+  const el = document.getElementById(inputId);
+  if (!el) continue;
+  el.addEventListener('input', () => onInputChange(inputId, el.value));
+}
+
+// ============================================================
+//  Build updates map for writing to Excel
+//  Returns: { [rowNumber]: value }
+// ============================================================
+function buildUpdates() {
+  const updates = {};
+  for (const [inputId, mapKey] of Object.entries(SAVE_MAP)) {
+    const rowNum = rowMap[mapKey];
+    if (rowNum === undefined) continue;
+    const el = document.getElementById(inputId);
+    if (el) updates[rowNum] = el.value.trim();
+  }
+  return updates;
+}
+
+// ============================================================
+//  Build default "Save As" filename
+//  Format: Сделка_<ФамилияПродавца>_<ДатаДоговора>.xlsx
+// ============================================================
+function buildDefaultSaveAsName() {
+  const lastName = (document.getElementById('seller-Фамилия')?.value || '').trim();
+  const dealDate = (document.getElementById('deal-Дата договора')?.value || '').trim();
+
+  // Convert DD.MM.YYYY → YYYY-MM-DD for a clean filename
+  let dateStr = dealDate;
+  const dateParts = dealDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (dateParts) dateStr = `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}`;
+
+  const parts = ['Сделка'];
+  if (lastName) parts.push(lastName);
+  if (dateStr)  parts.push(dateStr);
+  return parts.join('_') + '.xlsx';
+}
+
+// ============================================================
+//  Save — overwrite the currently open file
+// ============================================================
+async function handleSave() {
+  if (!currentFilePath || dirtyInputIds.size === 0) return;
+
+  const updates = buildUpdates();
+  try {
+    await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
+    commitCurrentValues();
+    showToast('✔ Изменения сохранены');
+  } catch (err) {
+    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
+  }
+}
+
+// ============================================================
+//  Save As — write to a new file; new file becomes current
+// ============================================================
+async function handleSaveAs() {
+  if (!currentFilePath) return;
+
+  const defaultName = buildDefaultSaveAsName();
+  const defaultPath = currentFilePath.replace(/[^/\\]+$/, defaultName);
+
+  let targetPath;
+  try {
+    targetPath = await window.electronAPI.saveFileDialog(defaultPath);
+  } catch (err) {
+    showToast('✖ Ошибка при открытии диалога: ' + err.message, 'error');
+    return;
+  }
+
+  if (!targetPath) return; // user cancelled
+
+  const updates = buildUpdates();
+  try {
+    await window.electronAPI.writeExcel(currentFilePath, targetPath, updates);
+    // New file becomes the current working file
+    currentFilePath = targetPath;
+    filePathDisplay.textContent = targetPath;
+    commitCurrentValues();
+    showToast('✔ Файл успешно сохранен');
+  } catch (err) {
+    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
+  }
+}
+
+// ============================================================
+//  Close-app flow: main process asks us to save then close
+// ============================================================
+window.electronAPI.onRequestSaveBeforeClose(async () => {
+  await handleSave();
+  window.electronAPI.closeApp();
+});
+
+// ============================================================
+//  Collapsible card logic
+// ============================================================
 function setCardOpen(cardId, open) {
   const card = document.getElementById('card-' + cardId);
   if (!card) return;
-
   const btn = card.querySelector('.card-title[data-toggle]');
-
-  if (open) {
-    card.classList.add('is-open');
-    if (btn) btn.setAttribute('aria-expanded', 'true');
-  } else {
-    card.classList.remove('is-open');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-  }
-
+  card.classList.toggle('is-open', open);
+  if (btn) btn.setAttribute('aria-expanded', String(open));
   cardOpenState[cardId] = open;
 }
 
-/** Toggle open/closed state for a card. */
 function toggleCard(cardId) {
-  const isCurrentlyOpen = cardOpenState[cardId] === true;
-  setCardOpen(cardId, !isCurrentlyOpen);
+  setCardOpen(cardId, !cardOpenState[cardId]);
 }
 
-// Bind click handlers for all toggle buttons
 document.querySelectorAll('.card-title[data-toggle]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const cardId = btn.getAttribute('data-toggle');
-    toggleCard(cardId);
-  });
+  btn.addEventListener('click', () => toggleCard(btn.getAttribute('data-toggle')));
 });
 
 // ============================================================
 //  Visibility pass — hide empty rows and empty cards
 // ============================================================
-
-/**
- * After populating inputs, hide rows with empty values and
- * hide entire cards whose every field is empty.
- * Auto-opens deal / property / buyer; collapses the rest.
- */
 function applyVisibility() {
   const allCardIds = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
 
@@ -243,24 +395,19 @@ function applyVisibility() {
     const card = document.getElementById('card-' + cardId);
     if (!card) return;
 
-    // --- hide / show individual field rows ---
+    // Show all rows initially, then hide empty ones
     card.querySelectorAll('.field-row[data-field-row]').forEach((row) => {
       const input = row.querySelector('input[type="text"]');
-      if (!input) return;
-      row.hidden = isFieldEmpty(input.value);
+      row.hidden = input ? isFieldEmpty(input.value) : true;
     });
 
-    // --- hide entire card if section is empty ---
     if (isSectionEmpty(cardId)) {
       card.hidden = true;
       return;
     }
 
     card.hidden = false;
-
-    // --- set open/collapsed state ---
-    const shouldOpen = AUTO_OPEN_CARDS.has(cardId);
-    setCardOpen(cardId, shouldOpen);
+    setCardOpen(cardId, AUTO_OPEN_CARDS.has(cardId));
   });
 }
 
@@ -269,26 +416,34 @@ function applyVisibility() {
 // ============================================================
 function populateForm(data) {
   clearAllInputs();
+  dirtyInputIds.clear();
+  originalValues = {};
+
+  // Extract and store the row map
+  rowMap = data._rowMap || {};
 
   const blockKeys = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
-
   blockKeys.forEach((block) => {
     const blockData = data[block];
     if (!blockData) return;
     Object.entries(blockData).forEach(([fieldName, value]) => {
-      const mapKey = `${block}-${fieldName}`;
+      const mapKey  = `${block}-${fieldName}`;
       const inputId = FIELD_MAP[mapKey];
-      if (inputId) {
-        setInputValue(inputId, value);
-      }
+      if (inputId) setInputValue(inputId, value);
     });
   });
+
+  // Snapshot clean baseline
+  commitCurrentValues();
+
+  // Enable Save As now that a file is loaded
+  btnSaveAs.disabled = false;
 
   applyVisibility();
 }
 
 // ============================================================
-//  Main flow
+//  Main flow — choose and load Excel file
 // ============================================================
 async function handleChooseFile() {
   hideError();
@@ -322,14 +477,17 @@ async function handleChooseFile() {
     return;
   }
 
+  currentFilePath = filePath;
   populateForm(data);
 
   emptyState.hidden = true;
-  cardsGrid.hidden = false;
+  cardsGrid.hidden  = false;
 }
 
 // ============================================================
 //  Event listeners
 // ============================================================
 btnChooseFile.addEventListener('click', handleChooseFile);
+btnSave.addEventListener('click', handleSave);
+btnSaveAs.addEventListener('click', handleSaveAs);
 errorClose.addEventListener('click', hideError);

@@ -50,6 +50,10 @@ async function readFile(filePath) {
     buyer: {},
   };
 
+  // rowMap: "block-fieldName" → Excel row number
+  // Used by the writer to update only the correct cells in column B.
+  const rowMap = {};
+
   let currentBlock = null;
 
   worksheet.eachRow((row) => {
@@ -68,10 +72,11 @@ async function readFile(filePath) {
 
     if (currentBlock && result[currentBlock] !== undefined) {
       result[currentBlock][a] = b;
+      rowMap[`${currentBlock}-${a}`] = row.number;
     }
   });
 
-  return result;
+  return { ...result, _rowMap: rowMap };
 }
 
 module.exports = { readFile };
