@@ -4,6 +4,23 @@ const path = require("path");
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 
+/**
+ * Remove <w:proofErr> elements that Word inserts as spell/grammar markers.
+ * These elements can fragment placeholder tags (e.g. {{currentDate}}) across
+ * multiple XML runs, causing Docxtemplater to throw "Multi error".
+ */
+function cleanProofErrors(zip) {
+    const candidates = Object.keys(zip.files).filter((f) =>
+        f.startsWith("word/") && f.endsWith(".xml")
+    );
+    candidates.forEach((file) => {
+        let xml = zip.files[file].asText();
+        if (!xml.includes("w:proofErr")) return;
+        xml = xml.replace(/<w:proofErr[^/]*\/>/g, "");
+        zip.file(file, xml);
+    });
+}
+
 async function generateWord(templatePath, outputPath, data) {
 
     try {
@@ -12,9 +29,12 @@ async function generateWord(templatePath, outputPath, data) {
 
         const zip = new PizZip(content);
 
+        cleanProofErrors(zip);
+
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
-            linebreaks: true
+            linebreaks: true,
+            delimiters: { start: '{{', end: '}}' }
         });
 
         doc.render(data);
@@ -33,9 +53,17 @@ async function generateWord(templatePath, outputPath, data) {
 
     } catch (error) {
 
+        // Docxtemplater wraps multiple issues in a "Multi error" — extract them
+        let message = error.message;
+        if (error.properties && error.properties.errors) {
+            message = error.properties.errors
+                .map((e) => e.message || String(e))
+                .join("; ");
+        }
+
         return {
             success: false,
-            error: error.message
+            error: message
         };
 
     }
