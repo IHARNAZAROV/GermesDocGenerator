@@ -28,10 +28,22 @@
 
   <div class="app-wrapper">
 
-    <!-- ===== THIN SAVE TOOLBAR ===== -->
+    <!-- ===== TOOLBAR ===== -->
     <div class="save-bar">
+      <span class="toolbar-brand">ГермесГарант</span>
+      <div class="toolbar-sep"></div>
+
+      <button class="save-bar-btn toolbar-choose" id="btn-choose-file">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        Выбрать Excel
+      </button>
+
+      <div class="toolbar-sep"></div>
+
       <button class="save-bar-btn save-primary" id="btn-save" disabled>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17 21 17 13 7 13 7 21"/>
           <polyline points="7 3 7 8 15 8"/>
@@ -39,7 +51,7 @@
         Сохранить
       </button>
       <button class="save-bar-btn" id="btn-save-as" disabled>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17 21 17 13 7 13 7 21"/>
           <polyline points="7 3 7 8 15 8"/>
@@ -62,16 +74,10 @@
           <div class="section-body">
             <div class="file-row">
               <label>Файл Excel:</label>
-              <input type="text" id="file-path-display" readonly placeholder="Путь к файлу не выбран" />
-              <button class="btn-choose" id="btn-choose-file">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                </svg>
-                Выбрать файл
-              </button>
+              <input type="text" id="file-path-display" readonly placeholder="Файл не выбран — нажмите «Выбрать Excel» на панели инструментов" />
             </div>
             <div class="file-success" id="file-success" hidden>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a7f1a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               Файл успешно загружен: <span class="file-name" id="file-name"></span>
             </div>
           </div>
