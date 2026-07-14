@@ -225,6 +225,10 @@ function onInputChange(inputId, currentValue) {
     el.classList.remove('input-dirty');
   }
   updateDirtyState();
+  // Re-evaluate contract availability whenever any owner field changes
+  if (inputId.startsWith('owner1-') || inputId.startsWith('owner2-') || inputId.startsWith('owner3-')) {
+    updateContractAvailability();
+  }
 }
 
 function commitCurrentValues() {
@@ -366,6 +370,7 @@ function populateForm(data) {
   commitCurrentValues();
   btnSaveAs.disabled = false;
   switchTab('owner1');
+  updateContractAvailability();
 }
 
 // ============================================================
@@ -383,6 +388,7 @@ function handleClearForm() {
   btnSaveAs.disabled = true;
   setStatus('Готов к работе');
   switchTab('owner1');
+  resetContractAvailability();
 }
 
 // ============================================================
@@ -409,10 +415,67 @@ function handleCheckData() {
 }
 
 // ============================================================
+//  Owners count detection
+// ============================================================
+const OWNER_SIGNIFICANT_FIELDS = [
+  'Фамилия', 'Имя', 'Паспорт серия', 'Паспорт номер', 'Идентификационный номер',
+];
+
+function isOwnerPresent(ownerPrefix) {
+  return OWNER_SIGNIFICANT_FIELDS.some((field) => {
+    const el = document.getElementById(`${ownerPrefix}-${field}`);
+    return el && !isFieldEmpty(el.value);
+  });
+}
+
+function getOwnersCount() {
+  if (isOwnerPresent('owner3')) return 3;
+  if (isOwnerPresent('owner2')) return 2;
+  return 1;
+}
+
+// ============================================================
+//  Contract availability
+// ============================================================
+const OWNERS_TOOLTIP = {
+  1: 'Недоступно. В сделке участвует только один собственник.',
+  2: 'Недоступно. В сделке участвуют два собственника.',
+  3: 'Недоступно. В сделке участвуют три собственника.',
+};
+
+function updateContractAvailability() {
+  const count    = getOwnersCount();
+  const tooltip  = OWNERS_TOOLTIP[count] || '';
+  document.querySelectorAll('.tpl-item[data-owners-required]').forEach((label) => {
+    const required   = label.dataset.ownersRequired;
+    const cb         = label.querySelector('input[type="checkbox"]');
+    const isDisabled = required !== 'any' && Number(required) !== count;
+    if (isDisabled) {
+      label.classList.add('tpl-item-disabled');
+      label.dataset.tooltip = tooltip;
+      if (cb) { cb.disabled = true; cb.checked = false; }
+    } else {
+      label.classList.remove('tpl-item-disabled');
+      delete label.dataset.tooltip;
+      if (cb) cb.disabled = false;
+    }
+  });
+}
+
+function resetContractAvailability() {
+  document.querySelectorAll('.tpl-item[data-owners-required]').forEach((label) => {
+    label.classList.remove('tpl-item-disabled');
+    delete label.dataset.tooltip;
+    const cb = label.querySelector('input[type="checkbox"]');
+    if (cb) cb.disabled = false;
+  });
+}
+
+// ============================================================
 //  Template checkboxes
 // ============================================================
 function handleSelectAll() {
-  document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
+  document.querySelectorAll('.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
 }
 function handleDeselectAll() {
   document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
