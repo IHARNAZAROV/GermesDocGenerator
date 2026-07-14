@@ -716,6 +716,28 @@ html, body {
 .word-icon.green { background: var(--brand); }
 
 /* ============================================================
+   BYN FIELD — VALIDATION ERROR
+   ============================================================ */
+.byn-field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.byn-field-wrap .input-wrap { flex: none; }
+.byn-error {
+  font-size: 10px;
+  color: var(--error-text);
+  padding-left: 3px;
+  line-height: 1.2;
+}
+.byn-input-error {
+  border-color: var(--error-bdr) !important;
+  background: var(--error-bg) !important;
+}
+
+/* ============================================================
    TEMPLATE — DISABLED STATE & TOOLTIP
    ============================================================ */
 .tpl-item-disabled {

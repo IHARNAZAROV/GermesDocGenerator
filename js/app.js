@@ -367,6 +367,9 @@ function populateForm(data) {
     });
   });
 
+  // Always recompute "Цена прописью" from "Цена BYN" — ignore any value from Excel
+  autoUpdatePropis();
+
   commitCurrentValues();
   btnSaveAs.disabled = false;
   switchTab('owner1');
@@ -412,6 +415,45 @@ function handleCheckData() {
   } else {
     showToast('✖ Не заполнены: ' + missing.join(', '), 'error');
   }
+}
+
+// ============================================================
+//  Auto-compute "Цена прописью" from "Цена BYN"
+// ============================================================
+const bynInput    = document.getElementById('deal-Стоимость BYN');
+const propisInput = document.getElementById('deal-Стоимость прописью');
+const bynErrorEl  = document.getElementById('byn-error');
+
+function autoUpdatePropis() {
+  if (!bynInput || !propisInput) return;
+
+  // Normalise: treat comma as decimal separator
+  const raw = bynInput.value.replace(',', '.').trim();
+
+  if (raw === '') {
+    propisInput.value = '';
+    if (bynErrorEl) bynErrorEl.hidden = true;
+    bynInput.classList.remove('byn-input-error');
+    return;
+  }
+
+  // Validate: digits only, optional single dot, max 2 decimal places, no negatives
+  const valid = /^\d+(\.\d{1,2})?$/.test(raw) && parseFloat(raw) >= 0;
+
+  if (!valid) {
+    if (bynErrorEl) bynErrorEl.hidden = false;
+    bynInput.classList.add('byn-input-error');
+    propisInput.value = '';
+    return;
+  }
+
+  if (bynErrorEl) bynErrorEl.hidden = true;
+  bynInput.classList.remove('byn-input-error');
+  propisInput.value = window.moneyToText(raw);
+}
+
+if (bynInput) {
+  bynInput.addEventListener('input', autoUpdatePropis);
 }
 
 // ============================================================

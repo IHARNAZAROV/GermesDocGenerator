@@ -151,10 +151,13 @@
                   <div class="input-wrap"><input type="text" id="deal-Стоимость USD" /></div></div>
 
                 <div class="fr fr-sm"><label>Цена, BYN:</label>
-                  <div class="input-wrap"><input type="text" id="deal-Стоимость BYN" /></div></div>
+                  <div class="byn-field-wrap">
+                    <div class="input-wrap"><input type="text" id="deal-Стоимость BYN" placeholder="например: 105000.50" /></div>
+                    <span class="byn-error" id="byn-error" hidden>Введите корректную сумму</span>
+                  </div></div>
 
                 <div class="fr fr-sm"><label>Цена прописью:</label>
-                  <div class="input-wrap"><input type="text" id="deal-Стоимость прописью" /></div></div>
+                  <div class="input-wrap"><input type="text" id="deal-Стоимость прописью" readonly title="Вычисляется автоматически из поля «Цена BYN»" /></div></div>
               </div>
 
               <!-- RIGHT: Продавец -->
@@ -535,6 +538,7 @@
 
   </div><!-- /app-wrapper -->
 
+  <script src="js/money-to-text.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
