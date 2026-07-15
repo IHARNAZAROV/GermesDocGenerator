@@ -29,6 +29,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateDoverennost: (data, outputDir)       => ipcRenderer.invoke('word:generateDoverennost', data, outputDir),
   generateReklama:     (data, outputDir)       => ipcRenderer.invoke('word:generateReklama',     data, outputDir),
 
+  // Document generation — Расписка в получении ключей
+  generateRaspiska: (data, outputDir)          => ipcRenderer.invoke('word:generateRaspiska', data, outputDir),
+
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
 });

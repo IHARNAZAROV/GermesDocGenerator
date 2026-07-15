@@ -202,6 +202,18 @@ ipcMain.handle('word:generateReklama', async (_event, data, outputDir) => {
 });
 
 // ============================================================
+//  IPC — generate "Расписка в получении ключей"
+// ============================================================
+ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'РАСПИСКА_в_получении_ключей.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = path.join(resolvedDir, 'Расписка в получении ключей.docx');
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
+
+// ============================================================
 //  IPC — generate "Доверенность ПНД" from current form data
 // ============================================================
 ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir) => {

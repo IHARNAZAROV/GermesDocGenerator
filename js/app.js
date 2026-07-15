@@ -562,6 +562,36 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'raspiska-klyuchi': {
+    label: 'Расписка в получении ключей',
+    async generate(outputDir) {
+      // Тип объекта → родительный падеж (квартира → квартиры и т.д.)
+      const GENITIVE_MAP = {
+        'квартира':           'квартиры',
+        'дом':                'дома',
+        'жилой дом':          'жилого дома',
+        'комната':            'комнаты',
+        'апартаменты':        'апартаментов',
+        'гараж':              'гаража',
+        'земельный участок':  'земельного участка',
+        'офис':               'офиса',
+        'нежилое помещение':  'нежилого помещения',
+        'помещение':          'помещения',
+      };
+      const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
+      const propertyTypeGenitive = GENITIVE_MAP[propertyTypeRaw] || getField('property-Тип объекта') || '';
+
+      const data = {
+        agentFullName:            getField('deal-Ответственный риэлтер'),
+        realEstateContractNumber: getField('deal-Номер сделки'),
+        realEstateContractDate:   getField('deal-Дата договора'),
+        propertyTypeGenitive,
+        propertyAddress:          getField('property-Адрес'),
+      };
+      return window.electronAPI.generateRaspiska(data, outputDir);
+    },
+  },
+
   'reklama': {
     label: 'Договор на оказание рекламных услуг',
     async generate(outputDir) {
