@@ -127,8 +127,13 @@ function onInputChange(inputId, currentValue) {
     el.classList.remove('input-dirty');
   }
   updateDirtyState();
-  // Re-evaluate contract availability whenever any owner field changes
-  if (inputId.startsWith('owner1-') || inputId.startsWith('owner2-') || inputId.startsWith('owner3-')) {
+  // Re-evaluate contract availability whenever owner fields or seller-ownership flag changes
+  if (
+    inputId.startsWith('owner1-') ||
+    inputId.startsWith('owner2-') ||
+    inputId.startsWith('owner3-') ||
+    inputId === 'seller-Является собственником'
+  ) {
     updateContractAvailability();
   }
 }
@@ -372,10 +377,26 @@ function isOwnerPresent(ownerPrefix) {
   });
 }
 
+function getSellerIsOwner() {
+  const el = document.getElementById('seller-Является собственником');
+  if (!el) return false;
+  const raw = el.value.trim().toLowerCase();
+  return raw === 'да' || raw === 'yes';
+}
+
 function getOwnersCount() {
-  if (isOwnerPresent('owner3')) return 3;
-  if (isOwnerPresent('owner2')) return 2;
-  return 1;
+  if (getSellerIsOwner()) {
+    // Продавец — собственник №1; дополнительные совладельцы — во вкладках собственников
+    const coOwners = (isOwnerPresent('owner1') ? 1 : 0)
+                   + (isOwnerPresent('owner2') ? 1 : 0)
+                   + (isOwnerPresent('owner3') ? 1 : 0);
+    return 1 + coOwners;
+  } else {
+    // Продавец действует по доверенности; собственники — только из вкладок
+    if (isOwnerPresent('owner3')) return 3;
+    if (isOwnerPresent('owner2')) return 2;
+    return 1;
+  }
 }
 
 // ============================================================
@@ -635,15 +656,15 @@ function buildPlaceholderData() {
   const buyer  = buildPersonBlock('buyer-');
 
   // ── Логика продавца ────────────────────────────────────────
-  // Если «Является собственником» = «Да» — продавец совпадает с owner1.
-  // Данные в блоке ПРОДАВЕЦ пользователь не дублирует → берём из owner1.
-  // Если «Нет» — у продавца собственные данные + доверенность.
-  const isOwnerRaw   = (getField('seller-Является собственником') || '').trim().toLowerCase();
+  // Продавец всегда заполняется из блока ПРОДАВЕЦ в Excel.
+  // Если «Является собственником» = «Да» — продавец является собственником №1,
+  // дополнительные совладельцы — во вкладках Собственник 1/2/3.
+  // Если «Нет» — продавец действует по доверенности; все собственники — из вкладок.
+  const isOwnerRaw    = (getField('seller-Является собственником') || '').trim().toLowerCase();
   const sellerIsOwner = isOwnerRaw === 'да' || isOwnerRaw === 'yes';
 
-  const sellerPersonData = sellerIsOwner ? { ...owner1 } : buildPersonBlock('seller-');
   const seller = {
-    ...sellerPersonData,
+    ...buildPersonBlock('seller-'),
     isOwner:   sellerIsOwner,
     poaNumber: sellerIsOwner ? '' : (getField('seller-Номер доверенности') || ''),
     poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
