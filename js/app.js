@@ -942,6 +942,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'rastorzhenie': {
+    label: 'Соглашение о расторжении',
+    async generate(outputDir) {
+      return window.electronAPI.generateRastorzhenie(buildPlaceholderData(), outputDir);
+    },
+  },
+
   'zapros-pnd': {
     label: 'Запрос на ПНД',
     async generate(outputDir) {
