@@ -792,6 +792,30 @@ html, body {
 }
 .tpl-item-disabled[data-tooltip]:hover::after { opacity: 1; }
 
+/* «Скоро» — шаблон ещё не готов */
+.tpl-item--soon {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+.tpl-item--soon input[type="checkbox"] {
+  border-color: #c0c8d0 !important;
+  background: #f0f0f0 !important;
+}
+.tpl-soon-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: #7a8fb0;
+  background: #eef2fa;
+  border: 1px solid #c8d4ee;
+  border-radius: 4px;
+  padding: 1px 6px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
 .tpl-divider {
   height: 1px;
   background: var(--border);
