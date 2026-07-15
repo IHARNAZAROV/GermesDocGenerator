@@ -485,6 +485,40 @@ btnSelectAll.addEventListener('click', handleSelectAll);
 btnDeselectAll.addEventListener('click', handleDeselectAll);
 
 // ============================================================
+//  Scan template — кнопка «Обновить шаблон»
+// ============================================================
+const btnScanTemplate = document.getElementById('btn-scan-template');
+if (btnScanTemplate) {
+  btnScanTemplate.addEventListener('click', async () => {
+    btnScanTemplate.disabled = true;
+    setStatus('Сканирование шаблона…');
+    try {
+      const result = await window.electronAPI.scanTemplate();
+      if (result.canceled) {
+        setStatus(currentFilePath ? 'Файл загружен' : 'Готов к работе');
+        return;
+      }
+      if (!result.ok) {
+        showToast('✖ Ошибка сканирования: ' + result.error, 'error');
+        setStatus('Ошибка сканирования');
+        return;
+      }
+      // main.js перезагружает окно — toast не успеет показаться,
+      // но если reload по какой-то причине не случился — покажем сообщение.
+      const info = [];
+      if (result.added?.length)   info.push(`+${result.added.length} новых`);
+      if (result.removed?.length) info.push(`−${result.removed.length} удалено`);
+      showToast('✔ Шаблон обновлён' + (info.length ? ': ' + info.join(', ') : ''));
+    } catch (err) {
+      showToast('✖ ' + err.message, 'error');
+      setStatus('Ошибка');
+    } finally {
+      btnScanTemplate.disabled = false;
+    }
+  });
+}
+
+// ============================================================
 //  Browse output folder
 // ============================================================
 btnBrowse.addEventListener('click', async () => {

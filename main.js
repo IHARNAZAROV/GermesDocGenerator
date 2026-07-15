@@ -166,6 +166,30 @@ ipcMain.handle('shell:openFile', async (_event, filePath) => {
 });
 
 // ============================================================
+//  IPC — scan Excel template and update fields-config
+// ============================================================
+ipcMain.handle('template:scan', async () => {
+  // 1. Диалог выбора Excel-шаблона
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Выбрать Excel-шаблон для обновления формы',
+    filters: [{ name: 'Excel файлы', extensions: ['xlsx'] }],
+    properties: ['openFile'],
+  });
+  if (result.canceled || result.filePaths.length === 0) return { canceled: true };
+
+  const excelPath = result.filePaths[0];
+  try {
+    const { scanAndUpdate } = require('./excel/excel-scanner');
+    const info = await scanAndUpdate(excelPath);
+    // Перезагружаем рендерер чтобы подхватить новый js/fields-config.js
+    mainWindow.reload();
+    return { ok: true, ...info };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// ============================================================
 //  IPC — generate "Договор реклама" from current form data
 // ============================================================
 ipcMain.handle('word:generateReklama', async (_event, data, outputDir) => {

@@ -251,6 +251,22 @@ html, body {
   border-color: var(--brand-mid);
 }
 
+/* «Обновить шаблон» */
+.toolbar-scan {
+  background: #f0f4ff;
+  border-color: #b3c4f0;
+  color: #2a4faa;
+  font-weight: 600;
+}
+.toolbar-scan:hover:not(:disabled) {
+  background: #dce6ff;
+  border-color: #5577dd;
+}
+.toolbar-scan:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .save-bar-sep {
   width: 1px; height: 22px;
   background: var(--border);
