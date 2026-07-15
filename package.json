@@ -4,7 +4,8 @@
   "description": "Генератор договоров ГермесГарант",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "scan": "node scripts/scan-excel.js"
   },
   "author": "Игорь",
   "license": "MIT",

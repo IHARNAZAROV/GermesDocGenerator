@@ -88,194 +88,31 @@
           <div class="section-hdr">2. Данные сделки</div>
           <div class="section-body" id="deal-body">
 
-            <!-- Объект + Покупатель (two columns) -->
+            <!-- Объект + Продавец (two columns) -->
             <div class="data-two-col">
 
-              <!-- LEFT: Объект недвижимости -->
+              <!-- LEFT: Объект недвижимости + цены -->
               <div class="data-col">
                 <div class="sub-hdr">Объект недвижимости</div>
-
-                <div class="fr fr-sm"><label>Тип объекта:</label>
-                  <div class="input-wrap"><input type="text" id="property-Тип объекта" /></div></div>
-
-                <div class="fr fr-sm"><label>Адрес:</label>
-                  <div class="input-wrap"><input type="text" id="property-Адрес" /></div></div>
-
-                <div class="fr fr-sm"><label>Город:</label>
-                  <div class="input-wrap"><input type="text" id="property-Город" /></div></div>
-
-                <div class="fr fr-sm"><label>Район:</label>
-                  <div class="input-wrap"><input type="text" id="property-Район" /></div></div>
-
-                <div class="fr fr-sm"><label>Улица:</label>
-                  <div class="input-wrap"><input type="text" id="property-Улица" /></div></div>
-
-                <div class="fr fr-sm"><label>Дом:</label>
-                  <div class="input-wrap"><input type="text" id="property-Дом" /></div></div>
-
-                <div class="fr fr-sm"><label>Корпус / Кв.:</label>
-                  <div class="input-wrap" style="gap:4px">
-                    <input type="text" id="property-Корпус" style="width:52px;flex:none" />
-                    <span style="font-size:11px;color:#888">/</span>
-                    <input type="text" id="property-Квартира" style="width:52px;flex:none" />
-                  </div></div>
-
-                <div class="fr fr-sm"><label>Кадастровый №:</label>
-                  <div class="input-wrap"><input type="text" id="property-Кадастровый номер" /></div></div>
-
-                <div class="fr fr-sm"><label>Инвентарный №:</label>
-                  <div class="input-wrap"><input type="text" id="property-Инвентарный номер" /></div></div>
-
-                <div class="fr fr-sm"><label>Этаж:</label>
-                  <div class="input-wrap">
-                    <div class="floor-row">
-                      <input type="text" id="property-Этаж" style="width:42px" />
-                      <span>из</span>
-                      <input type="text" id="property-Этажность" style="width:42px" />
-                    </div>
-                  </div></div>
-
-                <div class="fr fr-sm"><label>Кол-во комнат:</label>
-                  <div class="input-wrap"><input type="text" id="property-Количество комнат" /></div></div>
-
-                <div class="fr fr-sm"><label>Общая площадь, м²:</label>
-                  <div class="input-wrap"><input type="text" id="property-Общая площадь" /></div></div>
-
-                <div class="fr fr-sm"><label>Жилая площадь, м²:</label>
-                  <div class="input-wrap"><input type="text" id="property-Жилая площадь" /></div></div>
-
-                <div class="fr fr-sm"><label>Площадь кухни, м²:</label>
-                  <div class="input-wrap"><input type="text" id="property-Площадь кухни" /></div></div>
-
-                <div class="fr fr-sm"><label>Цена, USD:</label>
-                  <div class="input-wrap"><input type="text" id="deal-Стоимость USD" /></div></div>
-
-                <div class="fr fr-sm"><label>Цена, BYN:</label>
-                  <div class="byn-field-wrap">
-                    <div class="input-wrap"><input type="text" id="deal-Стоимость BYN" placeholder="например: 105000.50" /></div>
-                    <span class="byn-error" id="byn-error" hidden>Введите корректную сумму</span>
-                  </div></div>
-
-                <div class="fr fr-sm"><label>Цена прописью:</label>
-                  <div class="input-wrap"><input type="text" id="deal-Стоимость прописью" readonly title="Вычисляется автоматически из поля «Цена BYN»" /></div></div>
+                <!-- Поля объекта — вставляет form-builder.js -->
+                <div id="form-section-property"></div>
+                <!-- Поля стоимости из блока СДЕЛКА — вставляет form-builder.js -->
+                <div id="form-section-deal-prices"></div>
               </div>
 
               <!-- RIGHT: Продавец -->
               <div class="data-col">
                 <div class="sub-hdr">Продавец</div>
-
-                <div class="fr fr-sm"><label>Фамилия:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Фамилия" /></div></div>
-
-                <div class="fr fr-sm"><label>Имя:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Имя" /></div></div>
-
-                <div class="fr fr-sm"><label>Отчество:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Отчество" /></div></div>
-
-                <div class="fr fr-sm"><label>Дата рождения:</label>
-                  <div class="input-wrap">
-                    <input type="text" id="seller-Дата рождения" class="has-cal" />
-                    <button class="cal-btn" tabindex="-1">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </button>
-                  </div></div>
-
-                <div class="fr fr-sm"><label>Паспорт серия:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Паспорт серия" /></div></div>
-
-                <div class="fr fr-sm"><label>Паспорт номер:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Паспорт номер" /></div></div>
-
-                <div class="fr fr-sm"><label>Идент. номер:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Идентификационный номер" /></div></div>
-
-                <div class="fr fr-sm"><label>Кем выдан:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Кем выдан" /></div></div>
-
-                <div class="fr fr-sm"><label>Дата выдачи:</label>
-                  <div class="input-wrap">
-                    <input type="text" id="seller-Дата выдачи" class="has-cal" />
-                    <button class="cal-btn" tabindex="-1">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </button>
-                  </div></div>
-
-                <div class="fr fr-sm"><label>Адрес регистрации:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Адрес регистрации" /></div></div>
-
-                <div class="fr fr-sm"><label>Телефон:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Телефон" /></div></div>
-
-                <div class="fr fr-sm"><label>Email:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Email" /></div></div>
-
-                <div class="fr fr-sm"><label>Является собственником:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Является собственником" /></div></div>
-
-                <div class="fr fr-sm"><label>Номер доверенности:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Номер доверенности" /></div></div>
-
-                <div class="fr fr-sm"><label>Дата доверенности:</label>
-                  <div class="input-wrap"><input type="text" id="seller-Дата доверенности" /></div></div>
+                <!-- Поля продавца — вставляет form-builder.js -->
+                <div id="form-section-seller"></div>
               </div>
 
             </div><!-- /data-two-col -->
 
             <!-- ── Покупатель ── -->
             <div class="sub-hdr mt">Покупатель</div>
-            <div class="seller-grid">
-
-              <div class="fr fr-sm"><label>Фамилия:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Фамилия" /></div></div>
-
-              <div class="fr fr-sm"><label>Дата выдачи:</label>
-                <div class="input-wrap">
-                  <input type="text" id="buyer-Дата выдачи" class="has-cal" />
-                  <button class="cal-btn" tabindex="-1">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  </button>
-                </div></div>
-
-              <div class="fr fr-sm"><label>Имя:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Имя" /></div></div>
-
-              <div class="fr fr-sm"><label>Адрес регистрации:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Адрес регистрации" /></div></div>
-
-              <div class="fr fr-sm"><label>Отчество:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Отчество" /></div></div>
-
-              <div class="fr fr-sm"><label>Телефон:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Телефон" /></div></div>
-
-              <div class="fr fr-sm"><label>Дата рождения:</label>
-                <div class="input-wrap">
-                  <input type="text" id="buyer-Дата рождения" class="has-cal" />
-                  <button class="cal-btn" tabindex="-1">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  </button>
-                </div></div>
-
-              <div class="fr fr-sm"><label>Email:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Email" /></div></div>
-
-              <div class="fr fr-sm"><label>Паспорт серия:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Паспорт серия" /></div></div>
-
-              <div class="fr fr-sm"><label>Семейное положение:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Семейное положение" /></div></div>
-
-              <div class="fr fr-sm"><label>Паспорт номер:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Паспорт номер" /></div></div>
-
-              <div class="fr fr-sm"><label>Идент. номер:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Идентификационный номер" /></div></div>
-
-              <div class="fr fr-sm"><label>Кем выдан:</label>
-                <div class="input-wrap"><input type="text" id="buyer-Кем выдан" /></div></div>
-
-            </div><!-- /buyer-grid -->
+            <!-- Поля покупателя — вставляет form-builder.js -->
+            <div class="seller-grid" id="form-section-buyer"></div>
 
             <!-- ── Собственники ── -->
             <div class="sub-hdr mt">Продавцы / Собственники (до 3 человек)</div>
@@ -286,156 +123,33 @@
                 <button class="tab-btn" data-tab="owner3">Собственник 3</button>
               </div>
 
-              <!-- Tab: owner1 -->
               <div id="tab-pane-owner1" class="tab-pane active">
                 <div class="tab-inner-grid">
-                  <div>
-                    <div class="fr fr-sm"><label>Фамилия:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Фамилия" /></div></div>
-                    <div class="fr fr-sm"><label>Имя:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Имя" /></div></div>
-                    <div class="fr fr-sm"><label>Отчество:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Отчество" /></div></div>
-                    <div class="fr fr-sm"><label>Дата рождения:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner1-Дата рождения" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Паспорт серия:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Паспорт серия" /></div></div>
-                    <div class="fr fr-sm"><label>Паспорт номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Паспорт номер" /></div></div>
-                    <div class="fr fr-sm"><label>Идент. номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Идентификационный номер" /></div></div>
-                    <div class="fr fr-sm"><label>Кем выдан:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Кем выдан" /></div></div>
-                  </div>
-                  <div>
-                    <div class="fr fr-sm"><label>Дата выдачи:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner1-Дата выдачи" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Адрес регистрации" /></div></div>
-                    <div class="fr fr-sm"><label>Телефон:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Телефон" /></div></div>
-                    <div class="fr fr-sm"><label>Доля собственности:</label>
-                      <div class="input-wrap"><input type="text" id="owner1-Доля собственности" /></div></div>
-                  </div>
+                  <!-- Поля делятся на 2 колонки — вставляет form-builder.js -->
+                  <div></div>
+                  <div></div>
                 </div>
               </div>
 
-              <!-- Tab: owner2 -->
               <div id="tab-pane-owner2" class="tab-pane">
                 <div class="tab-inner-grid">
-                  <div>
-                    <div class="fr fr-sm"><label>Фамилия:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Фамилия" /></div></div>
-                    <div class="fr fr-sm"><label>Имя:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Имя" /></div></div>
-                    <div class="fr fr-sm"><label>Отчество:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Отчество" /></div></div>
-                    <div class="fr fr-sm"><label>Дата рождения:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner2-Дата рождения" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Паспорт серия:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Паспорт серия" /></div></div>
-                    <div class="fr fr-sm"><label>Паспорт номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Паспорт номер" /></div></div>
-                    <div class="fr fr-sm"><label>Идент. номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Идентификационный номер" /></div></div>
-                    <div class="fr fr-sm"><label>Кем выдан:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Кем выдан" /></div></div>
-                  </div>
-                  <div>
-                    <div class="fr fr-sm"><label>Дата выдачи:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner2-Дата выдачи" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Адрес регистрации" /></div></div>
-                    <div class="fr fr-sm"><label>Телефон:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Телефон" /></div></div>
-                    <div class="fr fr-sm"><label>Доля собственности:</label>
-                      <div class="input-wrap"><input type="text" id="owner2-Доля собственности" /></div></div>
-                  </div>
+                  <div></div>
+                  <div></div>
                 </div>
               </div>
 
-              <!-- Tab: owner3 -->
               <div id="tab-pane-owner3" class="tab-pane">
                 <div class="tab-inner-grid">
-                  <div>
-                    <div class="fr fr-sm"><label>Фамилия:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Фамилия" /></div></div>
-                    <div class="fr fr-sm"><label>Имя:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Имя" /></div></div>
-                    <div class="fr fr-sm"><label>Отчество:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Отчество" /></div></div>
-                    <div class="fr fr-sm"><label>Дата рождения:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner3-Дата рождения" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Паспорт серия:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Паспорт серия" /></div></div>
-                    <div class="fr fr-sm"><label>Паспорт номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Паспорт номер" /></div></div>
-                    <div class="fr fr-sm"><label>Идент. номер:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Идентификационный номер" /></div></div>
-                    <div class="fr fr-sm"><label>Кем выдан:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Кем выдан" /></div></div>
-                  </div>
-                  <div>
-                    <div class="fr fr-sm"><label>Дата выдачи:</label>
-                      <div class="input-wrap">
-                        <input type="text" id="owner3-Дата выдачи" class="has-cal" />
-                        <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                      </div></div>
-                    <div class="fr fr-sm"><label>Адрес регистрации:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Адрес регистрации" /></div></div>
-                    <div class="fr fr-sm"><label>Телефон:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Телефон" /></div></div>
-                    <div class="fr fr-sm"><label>Доля собственности:</label>
-                      <div class="input-wrap"><input type="text" id="owner3-Доля собственности" /></div></div>
-                  </div>
+                  <div></div>
+                  <div></div>
                 </div>
               </div>
             </div><!-- /tabs-wrapper -->
 
             <!-- ── Дополнительные данные ── -->
             <div class="sub-hdr mt">Дополнительные данные</div>
-            <div class="add-data-grid">
-
-              <div class="fr fr-sm"><label>Номер сделки:</label>
-                <div class="input-wrap"><input type="text" id="deal-Номер сделки" /></div></div>
-
-              <div class="fr fr-sm"><label>Риэлтер:</label>
-                <div class="input-wrap"><input type="text" id="deal-agent" /></div></div>
-
-              <div class="fr fr-sm"><label>Дата договора:</label>
-                <div class="input-wrap">
-                  <input type="text" id="deal-Дата договора" class="has-cal" />
-                  <button class="cal-btn" tabindex="-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-                </div></div>
-
-              <div class="fr fr-sm"><label>Комиссия агентства:</label>
-                <div class="input-wrap"><input type="text" id="deal-Комиссия агентства" /></div></div>
-
-              <div class="fr fr-sm"><label>Тип договора:</label>
-                <div class="input-wrap"><input type="text" id="deal-Тип договора" /></div></div>
-
-              <div class="fr fr-sm"><label>Эксклюзив:</label>
-                <div class="input-wrap"><input type="text" id="deal-Эксклюзив" /></div></div>
-
-              <div class="fr fr-sm"><label>Кол-во собственников:</label>
-                <div class="input-wrap"><input type="text" id="deal-Количество собственников" /></div></div>
-
-            </div><!-- /add-data-grid -->
+            <!-- Остальные поля сделки — вставляет form-builder.js -->
+            <div class="add-data-grid" id="form-section-extras"></div>
 
           </div><!-- /section-body -->
         </div><!-- /win-section -->
@@ -538,6 +252,15 @@
 
   </div><!-- /app-wrapper -->
 
+  <!--
+    Порядок загрузки скриптов важен:
+    1. fields-config.js  — задаёт window.FIELDS_CONFIG (генерируется scan-excel.js)
+    2. form-builder.js   — задаёт window.FormBuilder
+    3. money-to-text.js  — задаёт window.moneyToText
+    4. app.js            — вызывает FormBuilder.buildForm() и запускает логику
+  -->
+  <script src="js/fields-config.js"></script>
+  <script src="js/form-builder.js"></script>
   <script src="js/money-to-text.js"></script>
   <script src="js/app.js"></script>
 </body>
