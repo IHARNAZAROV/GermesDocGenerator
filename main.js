@@ -214,6 +214,18 @@ ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir) => {
 });
 
 // ============================================================
+//  IPC — generate "Запрос в РСЦ"
+// ============================================================
+ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_в_РСЦ.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = path.join(resolvedDir, 'Запрос в РСЦ.docx');
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
+
+// ============================================================
 //  IPC — generate "Доверенность ПНД" from current form data
 // ============================================================
 ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir) => {

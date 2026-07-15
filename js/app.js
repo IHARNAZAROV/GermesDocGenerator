@@ -839,6 +839,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'zapros-rsc': {
+    label: 'Запрос в РСЦ',
+    async generate(outputDir) {
+      return window.electronAPI.generateZaprosRsc(buildPlaceholderData(), outputDir);
+    },
+  },
+
 };
 
 // ============================================================

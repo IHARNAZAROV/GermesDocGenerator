@@ -30,7 +30,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateReklama:     (data, outputDir)       => ipcRenderer.invoke('word:generateReklama',     data, outputDir),
 
   // Document generation — Расписка в получении ключей
-  generateRaspiska: (data, outputDir)          => ipcRenderer.invoke('word:generateRaspiska', data, outputDir),
+  generateRaspiska:  (data, outputDir)         => ipcRenderer.invoke('word:generateRaspiska',  data, outputDir),
+
+  // Document generation — Запрос в РСЦ
+  generateZaprosRsc: (data, outputDir)         => ipcRenderer.invoke('word:generateZaprosRsc', data, outputDir),
 
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
