@@ -629,11 +629,25 @@ function buildPlaceholderData() {
     priceWords:   getField('deal-Стоимость прописью')   || '',
   };
 
-  const seller = buildPersonBlock('seller-');
   const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
   const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '' };
   const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '' };
   const buyer  = buildPersonBlock('buyer-');
+
+  // ── Логика продавца ────────────────────────────────────────
+  // Если «Является собственником» = «Да» — продавец совпадает с owner1.
+  // Данные в блоке ПРОДАВЕЦ пользователь не дублирует → берём из owner1.
+  // Если «Нет» — у продавца собственные данные + доверенность.
+  const isOwnerRaw   = (getField('seller-Является собственником') || '').trim().toLowerCase();
+  const sellerIsOwner = isOwnerRaw === 'да' || isOwnerRaw === 'yes';
+
+  const sellerPersonData = sellerIsOwner ? { ...owner1 } : buildPersonBlock('seller-');
+  const seller = {
+    ...sellerPersonData,
+    isOwner:   sellerIsOwner,
+    poaNumber: sellerIsOwner ? '' : (getField('seller-Номер доверенности') || ''),
+    poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
+  };
 
   const agentFullName = getField('deal-Ответственный риэлтер') || '';
   const agent = {
