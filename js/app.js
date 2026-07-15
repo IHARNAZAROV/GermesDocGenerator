@@ -578,6 +578,7 @@ const TEMPLATE_REGISTRY = {
         propertyAddress:          getField('property-Адрес'),
         sellerPassport:           passport,
         sellerPassportIssuedBy:   getField('seller-Кем выдан'),
+        sellerAddress:            getField('seller-Адрес регистрации'),
         sellerId:                 getField('seller-Идентификационный номер'),
         sellerPhone:              getField('seller-Телефон'),
         contractDateText:         getField('deal-Дата договора'),
