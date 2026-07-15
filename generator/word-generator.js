@@ -31,10 +31,23 @@ async function generateWord(templatePath, outputPath, data) {
 
         cleanProofErrors(zip);
 
+        // Парсер с поддержкой точечной нотации: {{seller.fullName}}, {{deal.number}} и т.д.
+        function dotParser(tag) {
+            return {
+                get(scope) {
+                    return tag.split('.').reduce((obj, key) => {
+                        if (obj == null) return '';
+                        return obj[key] !== undefined ? obj[key] : '';
+                    }, scope);
+                }
+            };
+        }
+
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            delimiters: { start: '{{', end: '}}' }
+            delimiters: { start: '{{', end: '}}' },
+            parser: dotParser,
         });
 
         doc.render(data);
