@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document generation — Расписка в получении ключей
   generateRaspiska:  (data, outputDir)         => ipcRenderer.invoke('word:generateRaspiska',  data, outputDir),
 
+  // Document generation — Запрос на ПНД
+  generateZaprosPnd: (data, outputDir)         => ipcRenderer.invoke('word:generateZaprosPnd', data, outputDir),
+
   // Document generation — Запрос в РСЦ
   generateZaprosRsc: (data, outputDir)         => ipcRenderer.invoke('word:generateZaprosRsc', data, outputDir),
 

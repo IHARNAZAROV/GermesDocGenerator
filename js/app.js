@@ -839,6 +839,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'zapros-pnd': {
+    label: 'Запрос на ПНД',
+    async generate(outputDir) {
+      return window.electronAPI.generateZaprosPnd(buildPlaceholderData(), outputDir);
+    },
+  },
+
   'zapros-rsc': {
     label: 'Запрос в РСЦ',
     async generate(outputDir) {
