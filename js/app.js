@@ -684,6 +684,107 @@ function _declineLastNameDative(last, gender) {
   return t;
 }
 
+// ============================================================
+//  Genitive case (родительный падеж) for Russian/Belarusian names
+//  «справка о здоровье КОГО?» — Малейкович Юзефы Казимировны
+//  Gender is auto-detected from the patronymic ending.
+// ============================================================
+function _declinePatronymicGenitive(middle) {
+  if (!middle) return middle;
+  const t = middle.trim();
+  const low = t.toLowerCase();
+  if (low.endsWith('иична'))  return t.slice(0, -1) + 'ы'; // Ильиична → Ильиичны
+  if (low.endsWith('овна'))   return t.slice(0, -1) + 'ы'; // Казимировна → Казимировны
+  if (low.endsWith('евна'))   return t.slice(0, -1) + 'ы'; // Андреевна → Андреевны
+  if (low.endsWith('ична'))   return t.slice(0, -1) + 'ы'; // Ильична → Ильичны
+  if (low.endsWith('ович'))   return t + 'а';              // Иванович → Ивановича
+  if (low.endsWith('евич'))   return t + 'а';              // Андреевич → Андреевича
+  if (low.endsWith('ич'))     return t + 'а';              // Ильич → Ильича
+  return t;
+}
+
+function _declineFirstNameGenitive(first, gender) {
+  if (!first) return first;
+  const t = first.trim();
+  const low = t.toLowerCase();
+  const velars = ['г','к','х','ж','ш','щ','ч'];
+  if (gender === 'f' || gender === null) {
+    if (low.endsWith('ия'))  return t.slice(0, -1) + 'и'; // Мария → Марии
+    if (low.endsWith('ья'))  return t.slice(0, -2) + 'ьи'; // Дарья → Дарьи
+    if (low.endsWith('я'))   return t.slice(0, -1) + 'и'; // Таня → Тани
+    if (low.endsWith('а'))   return velars.includes(low[low.length - 2])
+      ? t.slice(0, -1) + 'и'   // Ольга → Ольги
+      : t.slice(0, -1) + 'ы';  // Юзефа → Юзефы, Анна → Анны
+    if (low.endsWith('ь'))   return t.slice(0, -1) + 'и'; // Любовь → Любови
+  }
+  if (gender === 'm') {
+    if (low.endsWith('ий'))  return t.slice(0, -2) + 'ия'; // Василий → Василия
+    if (low.endsWith('й'))   return t.slice(0, -1) + 'я';  // Сергей → Сергея
+    if (low.endsWith('я'))   return t.slice(0, -1) + 'и';  // Илья → Ильи
+    if (low.endsWith('а'))   return velars.includes(low[low.length - 2])
+      ? t.slice(0, -1) + 'и'   // (редко, но по правилу)
+      : t.slice(0, -1) + 'ы';  // Никита → Никиты
+    if (low.endsWith('ь'))   return t.slice(0, -1) + 'я';  // Игорь → Игоря
+    return t + 'а'; // Иван → Ивана, Александр → Александра
+  }
+  return t;
+}
+
+function _declineLastNameGenitive(last, gender) {
+  if (!last) return last;
+  const t = last.trim();
+  const low = t.toLowerCase();
+  if (gender === 'f') {
+    if (low.endsWith('ская') || low.endsWith('цкая') || low.endsWith('зская')) {
+      return t.slice(0, -2) + 'ой';  // Островская → Островской (= dative)
+    }
+    if (low.endsWith('ова') || low.endsWith('ева') || low.endsWith('ёва') ||
+        low.endsWith('ина') || low.endsWith('ына')) {
+      return t.slice(0, -1) + 'ой';  // Иванова → Ивановой (= dative)
+    }
+    // Фамилия на согласный — не склоняется (Малейкович → Малейкович)
+    return t;
+  }
+  if (gender === 'm') {
+    if (low.endsWith('ский') || low.endsWith('цкий') || low.endsWith('зский')) {
+      return t.slice(0, -2) + 'ого'; // Троцкий → Троцкого
+    }
+    if (low.endsWith('ой') || low.endsWith('ый') || low.endsWith('ий')) {
+      return t.slice(0, -2) + 'ого'; // Толстой → Толстого
+    }
+    if (low.endsWith('ов') || low.endsWith('ев') || low.endsWith('ёв')) {
+      return t + 'а'; // Иванов → Иванова
+    }
+    if (low.endsWith('ин') || low.endsWith('ын')) {
+      return t + 'а'; // Пушкин → Пушкина
+    }
+    if (low.endsWith('ь')) {
+      return t.slice(0, -1) + 'я'; // Медведь → Медведя
+    }
+    return t + 'а'; // прочие мужские на согласный: Горбач → Горбача
+  }
+  return t;
+}
+
+function buildNameGenitive(lastName, firstName, middleName) {
+  const p = (middleName || '').trim().toLowerCase();
+  let gender = null;
+  if (p.endsWith('иична') || p.endsWith('овна') || p.endsWith('евна') || p.endsWith('ична')) {
+    gender = 'f';
+  } else if (p.endsWith('ович') || p.endsWith('евич') || p.endsWith('ич')) {
+    gender = 'm';
+  }
+  const lg = _declineLastNameGenitive(lastName || '', gender);
+  const fg = _declineFirstNameGenitive(firstName || '', gender);
+  const mg = _declinePatronymicGenitive(middleName || '');
+  return {
+    lastNameGenitive:   lg,
+    firstNameGenitive:  fg,
+    middleNameGenitive: mg,
+    fullNameGenitive:   [lg, fg, mg].filter(Boolean).join(' '),
+  };
+}
+
 function buildNameDative(lastName, firstName, middleName) {
   const p = (middleName || '').trim().toLowerCase();
   let gender = null;
@@ -713,13 +814,15 @@ function buildPersonBlock(prefix) {
     : fullName;
   const series  = getField(prefix + 'Паспорт серия') || '';
   const number  = getField(prefix + 'Паспорт номер') || '';
-  const dative  = buildNameDative(lastName, firstName, middleName);
+  const genitive = buildNameGenitive(lastName, firstName, middleName);
+  const dative   = buildNameDative(lastName, firstName, middleName);
   return {
     lastName,
     firstName,
     middleName,
     fullName,
     initials,
+    ...genitive,
     ...dative,
     birthDate:                    getField(prefix + 'Дата рождения')          || '',
     passportSeries:               series,
