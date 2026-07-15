@@ -1,0 +1,556 @@
+{
+  "_comment": "Единый словарь плейсхолдеров проекта ГермесГарант. Все шаблоны Word должны использовать только переменные из этого файла. Добавление нового плейсхолдера — сначала здесь, затем в шаблоне.",
+
+  "_rules": {
+    "seller_vs_owner": "seller — сторона договора (лицо, продающее объект). owner1/owner2/owner3 — собственники объекта недвижимости. Если seller пустой, но owner1 существует — генератор автоматически использует данные owner1 для заполнения seller. Дублировать данные не нужно. Word-шаблоны всегда ссылаются на переменные seller; логика подстановки выполняется только генератором документов."
+  },
+
+  "deal": {
+    "number": {
+      "value": "",
+      "description": "Номер сделки"
+    },
+    "date": {
+      "value": "",
+      "description": "Дата договора (в формате ДД.ММ.ГГГГ)"
+    },
+    "dateText": {
+      "value": "",
+      "description": "Дата договора прописью (например: пятнадцатое июля две тысячи двадцать шестого года)"
+    },
+    "exclusive": {
+      "value": "",
+      "description": "Признак эксклюзивного договора (да / нет)"
+    },
+    "contractNumber": {
+      "value": "",
+      "description": "Номер договора на оказание риэлтерских услуг"
+    },
+    "contractDate": {
+      "value": "",
+      "description": "Дата договора на оказание риэлтерских услуг"
+    },
+    "advertisingContractNumber": {
+      "value": "",
+      "description": "Номер договора на оказание рекламных услуг"
+    },
+    "advertisingContractDate": {
+      "value": "",
+      "description": "Дата договора на оказание рекламных услуг"
+    },
+    "depositContractNumber": {
+      "value": "",
+      "description": "Номер договора задатка"
+    },
+    "depositContractDate": {
+      "value": "",
+      "description": "Дата договора задатка"
+    },
+    "storageContractNumber": {
+      "value": "",
+      "description": "Номер договора хранения имущества"
+    },
+    "storageContractDate": {
+      "value": "",
+      "description": "Дата договора хранения имущества"
+    }
+  },
+
+  "property": {
+    "type": {
+      "value": "",
+      "description": "Тип объекта недвижимости в именительном падеже (квартира, дом, комната и т.д.)"
+    },
+    "typeGenitive": {
+      "value": "",
+      "description": "Тип объекта недвижимости в родительном падеже (квартиры, дома, комнаты и т.д.)"
+    },
+    "city": {
+      "value": "",
+      "description": "Город расположения объекта"
+    },
+    "street": {
+      "value": "",
+      "description": "Улица расположения объекта"
+    },
+    "house": {
+      "value": "",
+      "description": "Номер дома (включая корпус, если есть)"
+    },
+    "flat": {
+      "value": "",
+      "description": "Номер квартиры"
+    },
+    "address": {
+      "value": "",
+      "description": "Полный адрес объекта недвижимости"
+    },
+    "rooms": {
+      "value": "",
+      "description": "Количество комнат"
+    },
+    "floor": {
+      "value": "",
+      "description": "Этаж расположения объекта"
+    },
+    "floors": {
+      "value": "",
+      "description": "Общее количество этажей в доме"
+    },
+    "areaTotal": {
+      "value": "",
+      "description": "Общая площадь объекта (кв.м)"
+    },
+    "areaLiving": {
+      "value": "",
+      "description": "Жилая площадь объекта (кв.м)"
+    },
+    "areaKitchen": {
+      "value": "",
+      "description": "Площадь кухни (кв.м)"
+    },
+    "cadastre": {
+      "value": "",
+      "description": "Кадастровый номер объекта"
+    },
+    "priceUSD": {
+      "value": "",
+      "description": "Стоимость объекта в долларах США"
+    },
+    "priceBYN": {
+      "value": "",
+      "description": "Стоимость объекта в белорусских рублях"
+    },
+    "priceWords": {
+      "value": "",
+      "description": "Стоимость объекта прописью (в белорусских рублях)"
+    }
+  },
+
+  "seller": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия продавца"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя продавца"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество продавца"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО продавца (Фамилия Имя Отчество)"
+    },
+    "initials": {
+      "value": "",
+      "description": "Инициалы продавца (Фамилия И.О.)"
+    },
+    "birthDate": {
+      "value": "",
+      "description": "Дата рождения продавца"
+    },
+    "passportSeries": {
+      "value": "",
+      "description": "Серия паспорта продавца"
+    },
+    "passportNumber": {
+      "value": "",
+      "description": "Номер паспорта продавца"
+    },
+    "passport": {
+      "value": "",
+      "description": "Полные паспортные данные продавца (серия и номер)"
+    },
+    "id": {
+      "value": "",
+      "description": "Идентификационный номер (личный номер) продавца"
+    },
+    "passportIssuedBy": {
+      "value": "",
+      "description": "Орган, выдавший паспорт продавца"
+    },
+    "passportIssueDate": {
+      "value": "",
+      "description": "Дата выдачи паспорта продавца"
+    },
+    "address": {
+      "value": "",
+      "description": "Адрес регистрации продавца"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон продавца"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта продавца"
+    }
+  },
+
+  "owner1": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия собственника №1"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя собственника №1"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество собственника №1"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО собственника №1"
+    },
+    "initials": {
+      "value": "",
+      "description": "Инициалы собственника №1 (Фамилия И.О.)"
+    },
+    "birthDate": {
+      "value": "",
+      "description": "Дата рождения собственника №1"
+    },
+    "passportSeries": {
+      "value": "",
+      "description": "Серия паспорта собственника №1"
+    },
+    "passportNumber": {
+      "value": "",
+      "description": "Номер паспорта собственника №1"
+    },
+    "passport": {
+      "value": "",
+      "description": "Полные паспортные данные собственника №1"
+    },
+    "id": {
+      "value": "",
+      "description": "Идентификационный номер собственника №1"
+    },
+    "passportIssuedBy": {
+      "value": "",
+      "description": "Орган, выдавший паспорт собственника №1"
+    },
+    "passportIssueDate": {
+      "value": "",
+      "description": "Дата выдачи паспорта собственника №1"
+    },
+    "address": {
+      "value": "",
+      "description": "Адрес регистрации собственника №1"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон собственника №1"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта собственника №1"
+    },
+    "share": {
+      "value": "",
+      "description": "Доля собственника №1 в праве собственности (например: 1/2, 1/3)"
+    }
+  },
+
+  "owner2": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия собственника №2"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя собственника №2"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество собственника №2"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО собственника №2"
+    },
+    "initials": {
+      "value": "",
+      "description": "Инициалы собственника №2 (Фамилия И.О.)"
+    },
+    "birthDate": {
+      "value": "",
+      "description": "Дата рождения собственника №2"
+    },
+    "passportSeries": {
+      "value": "",
+      "description": "Серия паспорта собственника №2"
+    },
+    "passportNumber": {
+      "value": "",
+      "description": "Номер паспорта собственника №2"
+    },
+    "passport": {
+      "value": "",
+      "description": "Полные паспортные данные собственника №2"
+    },
+    "id": {
+      "value": "",
+      "description": "Идентификационный номер собственника №2"
+    },
+    "passportIssuedBy": {
+      "value": "",
+      "description": "Орган, выдавший паспорт собственника №2"
+    },
+    "passportIssueDate": {
+      "value": "",
+      "description": "Дата выдачи паспорта собственника №2"
+    },
+    "address": {
+      "value": "",
+      "description": "Адрес регистрации собственника №2"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон собственника №2"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта собственника №2"
+    },
+    "share": {
+      "value": "",
+      "description": "Доля собственника №2 в праве собственности (например: 1/2, 1/3)"
+    }
+  },
+
+  "owner3": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия собственника №3"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя собственника №3"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество собственника №3"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО собственника №3"
+    },
+    "initials": {
+      "value": "",
+      "description": "Инициалы собственника №3 (Фамилия И.О.)"
+    },
+    "birthDate": {
+      "value": "",
+      "description": "Дата рождения собственника №3"
+    },
+    "passportSeries": {
+      "value": "",
+      "description": "Серия паспорта собственника №3"
+    },
+    "passportNumber": {
+      "value": "",
+      "description": "Номер паспорта собственника №3"
+    },
+    "passport": {
+      "value": "",
+      "description": "Полные паспортные данные собственника №3"
+    },
+    "id": {
+      "value": "",
+      "description": "Идентификационный номер собственника №3"
+    },
+    "passportIssuedBy": {
+      "value": "",
+      "description": "Орган, выдавший паспорт собственника №3"
+    },
+    "passportIssueDate": {
+      "value": "",
+      "description": "Дата выдачи паспорта собственника №3"
+    },
+    "address": {
+      "value": "",
+      "description": "Адрес регистрации собственника №3"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон собственника №3"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта собственника №3"
+    },
+    "share": {
+      "value": "",
+      "description": "Доля собственника №3 в праве собственности (например: 1/2, 1/3)"
+    }
+  },
+
+  "buyer": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия покупателя"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя покупателя"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество покупателя"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО покупателя"
+    },
+    "initials": {
+      "value": "",
+      "description": "Инициалы покупателя (Фамилия И.О.)"
+    },
+    "birthDate": {
+      "value": "",
+      "description": "Дата рождения покупателя"
+    },
+    "passportSeries": {
+      "value": "",
+      "description": "Серия паспорта покупателя"
+    },
+    "passportNumber": {
+      "value": "",
+      "description": "Номер паспорта покупателя"
+    },
+    "passport": {
+      "value": "",
+      "description": "Полные паспортные данные покупателя"
+    },
+    "id": {
+      "value": "",
+      "description": "Идентификационный номер покупателя"
+    },
+    "passportIssuedBy": {
+      "value": "",
+      "description": "Орган, выдавший паспорт покупателя"
+    },
+    "passportIssueDate": {
+      "value": "",
+      "description": "Дата выдачи паспорта покупателя"
+    },
+    "address": {
+      "value": "",
+      "description": "Адрес регистрации покупателя"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон покупателя"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта покупателя"
+    }
+  },
+
+  "agent": {
+    "lastName": {
+      "value": "",
+      "description": "Фамилия риэлтера"
+    },
+    "firstName": {
+      "value": "",
+      "description": "Имя риэлтера"
+    },
+    "middleName": {
+      "value": "",
+      "description": "Отчество риэлтера"
+    },
+    "fullName": {
+      "value": "",
+      "description": "Полное ФИО риэлтера"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон риэлтера"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта риэлтера"
+    }
+  },
+
+  "agency": {
+    "name": {
+      "value": "",
+      "description": "Полное наименование агентства недвижимости"
+    },
+    "shortName": {
+      "value": "",
+      "description": "Краткое наименование агентства"
+    },
+    "director": {
+      "value": "",
+      "description": "ФИО директора агентства"
+    },
+    "address": {
+      "value": "",
+      "description": "Юридический адрес агентства"
+    },
+    "phone": {
+      "value": "",
+      "description": "Телефон агентства"
+    },
+    "email": {
+      "value": "",
+      "description": "Электронная почта агентства"
+    },
+    "website": {
+      "value": "",
+      "description": "Сайт агентства"
+    },
+    "bank": {
+      "value": "",
+      "description": "Наименование банка агентства"
+    },
+    "bankAccount": {
+      "value": "",
+      "description": "Расчётный счёт агентства"
+    },
+    "bik": {
+      "value": "",
+      "description": "БИК банка агентства"
+    },
+    "unp": {
+      "value": "",
+      "description": "УНП агентства (учётный номер плательщика)"
+    }
+  },
+
+  "keys": {
+    "count": {
+      "value": "",
+      "description": "Количество комплектов ключей (цифрой)"
+    },
+    "countWords": {
+      "value": "",
+      "description": "Количество комплектов ключей прописью"
+    }
+  },
+
+  "money": {
+    "amount": {
+      "value": "",
+      "description": "Денежная сумма (цифрой)"
+    },
+    "amountWords": {
+      "value": "",
+      "description": "Денежная сумма прописью"
+    },
+    "currency": {
+      "value": "",
+      "description": "Валюта (BYN, USD и т.д.)"
+    }
+  }
+}
