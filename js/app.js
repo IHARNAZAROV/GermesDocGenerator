@@ -364,6 +364,30 @@ if (bynInput) {
 }
 
 // ============================================================
+//  Instrumental case converter for passport-issuing organizations
+//  (творительный падеж: «выдан Лидским РОВД» вместо «выдан Лидский РОВД»)
+// ============================================================
+function toInstrumental(str) {
+  if (!str) return str;
+  // Replace adjective nominative endings with instrumental equivalents.
+  // Lookahead (?=\s|$) targets word-final positions in Cyrillic text.
+  // Order matters: longer/more specific endings first.
+  return str
+    .replace(/(ский)(?=\s|$)/g,  'ским')
+    .replace(/(цкий)(?=\s|$)/g,  'цким')
+    .replace(/(жний)(?=\s|$)/g,  'жним')
+    .replace(/(дний)(?=\s|$)/g,  'дним')
+    .replace(/(зний)(?=\s|$)/g,  'зним')
+    .replace(/(ний)(?=\s|$)/g,   'ним')
+    .replace(/(жный)(?=\s|$)/g,  'жным')
+    .replace(/(дный)(?=\s|$)/g,  'дным')
+    .replace(/(зный)(?=\s|$)/g,  'зным')
+    .replace(/(ный)(?=\s|$)/g,   'ным')
+    .replace(/(ий)(?=\s|$)/g,    'им')
+    .replace(/(ый)(?=\s|$)/g,    'ым');
+}
+
+// ============================================================
 //  Owners count detection
 // ============================================================
 const OWNER_SIGNIFICANT_FIELDS = [
@@ -604,8 +628,9 @@ function buildPersonBlock(prefix) {
     passportNumber:   number,
     passport:         [series, number].filter(Boolean).join(' '),
     id:               getField(prefix + 'Идентификационный номер') || '',
-    passportIssuedBy: getField(prefix + 'Кем выдан')              || '',
-    passportIssueDate:getField(prefix + 'Дата выдачи')            || '',
+    passportIssuedBy:             getField(prefix + 'Кем выдан')              || '',
+    passportIssuedByInstrumental: toInstrumental(getField(prefix + 'Кем выдан') || ''),
+    passportIssueDate:            getField(prefix + 'Дата выдачи')            || '',
     address:          getField(prefix + 'Адрес регистрации')       || '',
     phone:            getField(prefix + 'Телефон')                 || '',
     email:            '',
