@@ -544,76 +544,140 @@ function getField(id) {
 //    2. Добавьте data-template="your-key" в label в index.html
 //    3. Добавьте запись здесь с соответствующим ключом
 // ============================================================
+// ============================================================
+//  buildPlaceholderData() — единый источник данных для всех
+//  Word-шаблонов. Структура соответствует config/placeholders.json.
+//  Плейсхолдеры в .docx: {{deal.number}}, {{seller.fullName}} и т.д.
+// ============================================================
+const GENITIVE_MAP = {
+  'квартира':          'квартиры',
+  'дом':               'дома',
+  'жилой дом':         'жилого дома',
+  'комната':           'комнаты',
+  'апартаменты':       'апартаментов',
+  'гараж':             'гаража',
+  'земельный участок': 'земельного участка',
+  'офис':              'офиса',
+  'нежилое помещение': 'нежилого помещения',
+  'помещение':         'помещения',
+};
+
+function buildPersonBlock(prefix) {
+  const lastName   = getField(prefix + 'Фамилия')   || '';
+  const firstName  = getField(prefix + 'Имя')        || '';
+  const middleName = getField(prefix + 'Отчество')   || '';
+  const fullName   = [lastName, firstName, middleName].filter(Boolean).join(' ');
+  const initials   = lastName && firstName
+    ? lastName + ' ' + firstName[0] + '.' + (middleName ? middleName[0] + '.' : '')
+    : fullName;
+  const series  = getField(prefix + 'Паспорт серия') || '';
+  const number  = getField(prefix + 'Паспорт номер') || '';
+  return {
+    lastName,
+    firstName,
+    middleName,
+    fullName,
+    initials,
+    birthDate:        getField(prefix + 'Дата рождения')          || '',
+    passportSeries:   series,
+    passportNumber:   number,
+    passport:         [series, number].filter(Boolean).join(' '),
+    id:               getField(prefix + 'Идентификационный номер') || '',
+    passportIssuedBy: getField(prefix + 'Кем выдан')              || '',
+    passportIssueDate:getField(prefix + 'Дата выдачи')            || '',
+    address:          getField(prefix + 'Адрес регистрации')       || '',
+    phone:            getField(prefix + 'Телефон')                 || '',
+    email:            '',
+  };
+}
+
+function buildPlaceholderData() {
+  const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
+
+  const deal = {
+    number:                    getField('deal-Номер сделки')    || '',
+    date:                      getField('deal-Дата договора')   || '',
+    dateText:                  '',
+    exclusive:                 getField('deal-Эксклюзив')       || '',
+    contractNumber:            getField('deal-Номер сделки')    || '',
+    contractDate:              getField('deal-Дата договора')   || '',
+    advertisingContractNumber: '',
+    advertisingContractDate:   '',
+    depositContractNumber:     '',
+    depositContractDate:       '',
+    storageContractNumber:     '',
+    storageContractDate:       '',
+  };
+
+  const property = {
+    type:         getField('property-Тип объекта')      || '',
+    typeGenitive: GENITIVE_MAP[propertyTypeRaw] || getField('property-Тип объекта') || '',
+    city:         getField('property-Город')            || '',
+    street:       getField('property-Улица')            || '',
+    house:        [getField('property-Дом'), getField('property-Корпус')].filter(Boolean).join('/'),
+    flat:         getField('property-Квартира')         || '',
+    address:      getField('property-Адрес')            || '',
+    rooms:        getField('property-Количество комнат')|| '',
+    floor:        getField('property-Этаж')             || '',
+    floors:       getField('property-Этажность')        || '',
+    areaTotal:    getField('property-Общая площадь')    || '',
+    areaLiving:   getField('property-Жилая площадь')   || '',
+    areaKitchen:  getField('property-Площадь кухни')   || '',
+    cadastre:     getField('property-Кадастровый номер')|| '',
+    priceUSD:     getField('deal-Стоимость USD')        || '',
+    priceBYN:     getField('deal-Стоимость BYN')        || '',
+    priceWords:   getField('deal-Стоимость прописью')   || '',
+  };
+
+  const seller = buildPersonBlock('seller-');
+  const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
+  const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '' };
+  const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '' };
+  const buyer  = buildPersonBlock('buyer-');
+
+  const agentFullName = getField('deal-Ответственный риэлтер') || '';
+  const agent = {
+    lastName:   '',
+    firstName:  '',
+    middleName: '',
+    fullName:   agentFullName,
+    phone:      '',
+    email:      '',
+  };
+
+  const agency = {
+    name: '', shortName: '', director: '', address: '',
+    phone: '', email: '', website: '', bank: '',
+    bankAccount: '', bik: '', unp: '',
+  };
+
+  const keys  = { count: '', countWords: '' };
+  const money = { amount: '', amountWords: '', currency: '' };
+
+  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money };
+}
+
+// ============================================================
 const TEMPLATE_REGISTRY = {
 
   'doverennost-pnd': {
     label: 'Доверенность ПНД',
     async generate(outputDir) {
-      const sellerFullName  = [getField('seller-Фамилия'), getField('seller-Имя'), getField('seller-Отчество')]
-                                .filter(Boolean).join(' ');
-      const data = {
-        sellerFullName,
-        sellerBirthDate: getField('seller-Дата рождения'),
-        sellerAddress:   getField('seller-Адрес регистрации'),
-        sellerId:        getField('seller-Идентификационный номер'),
-        currentDate:     getField('deal-Дата договора'),
-      };
-      return window.electronAPI.generateDoverennost(data, outputDir);
+      return window.electronAPI.generateDoverennost(buildPlaceholderData(), outputDir);
     },
   },
 
   'raspiska-klyuchi': {
     label: 'Расписка в получении ключей',
     async generate(outputDir) {
-      // Тип объекта → родительный падеж (квартира → квартиры и т.д.)
-      const GENITIVE_MAP = {
-        'квартира':           'квартиры',
-        'дом':                'дома',
-        'жилой дом':          'жилого дома',
-        'комната':            'комнаты',
-        'апартаменты':        'апартаментов',
-        'гараж':              'гаража',
-        'земельный участок':  'земельного участка',
-        'офис':               'офиса',
-        'нежилое помещение':  'нежилого помещения',
-        'помещение':          'помещения',
-      };
-      const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
-      const propertyTypeGenitive = GENITIVE_MAP[propertyTypeRaw] || getField('property-Тип объекта') || '';
-
-      const data = {
-        agentFullName:            getField('deal-Ответственный риэлтер'),
-        realEstateContractNumber: getField('deal-Номер сделки'),
-        realEstateContractDate:   getField('deal-Дата договора'),
-        propertyTypeGenitive,
-        propertyAddress:          getField('property-Адрес'),
-      };
-      return window.electronAPI.generateRaspiska(data, outputDir);
+      return window.electronAPI.generateRaspiska(buildPlaceholderData(), outputDir);
     },
   },
 
   'reklama': {
     label: 'Договор на оказание рекламных услуг',
     async generate(outputDir) {
-      const sellerFullName = [getField('seller-Фамилия'), getField('seller-Имя'), getField('seller-Отчество')]
-                               .filter(Boolean).join(' ');
-      const passport = [getField('seller-Паспорт серия'), getField('seller-Паспорт номер')]
-                         .filter(Boolean).join(' ');
-      const data = {
-        dealNumber:               getField('deal-Номер сделки'),
-        sellerFullName,
-        realEstateContractNumber: getField('deal-Номер сделки'),
-        realEstateContractDate:   getField('deal-Дата договора'),
-        propertyType:             getField('property-Тип объекта'),
-        propertyAddress:          getField('property-Адрес'),
-        sellerPassport:           passport,
-        sellerPassportIssuedBy:   getField('seller-Кем выдан'),
-        sellerAddress:            getField('seller-Адрес регистрации'),
-        sellerId:                 getField('seller-Идентификационный номер'),
-        sellerPhone:              getField('seller-Телефон'),
-        contractDateText:         getField('deal-Дата договора'),
-      };
-      return window.electronAPI.generateReklama(data, outputDir);
+      return window.electronAPI.generateReklama(buildPlaceholderData(), outputDir);
     },
   },
 
