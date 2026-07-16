@@ -937,6 +937,8 @@ function buildPlaceholderData() {
       const raw = (getField('deal-Стоимость USD') || '').replace(',', '.').trim();
       return raw ? window.moneyToTextUSD(raw) : '';
     })(),
+    remainderUSD:      '',   // заполняется ниже, после вычисления задатка
+    remainderUSDWords: '',   // заполняется ниже
   };
 
   const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
@@ -1034,6 +1036,15 @@ function buildPlaceholderData() {
     amountUSDWords: depositUSDRaw ? window.moneyToTextUSD(depositUSDRaw) : '',
   };
 
+  // ── Остаточная стоимость после задатка (USD) ────────────────
+  // remainderUSD = Стоимость USD − Сумма задатка USD
+  // Вычисляется в памяти; в Excel не хранится.
+  const _priceUSDNum   = parseFloat((getField('deal-Стоимость USD') || '0').replace(',', '.')) || 0;
+  const _depositUSDNum = parseFloat(depositUSDRaw || '0') || 0;
+  const _remainderUSD  = Math.max(0, _priceUSDNum - _depositUSDNum);
+  property.remainderUSD      = _remainderUSD ? String(_remainderUSD) : '';
+  property.remainderUSDWords = _remainderUSD ? window.moneyToTextUSD(_remainderUSD) : '';
+
   return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit };
 }
 
@@ -1100,6 +1111,13 @@ const TEMPLATE_REGISTRY = {
     label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',
     async generate(outputDir, options) {
       return window.electronAPI.generateDkp1Obshiy(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
+  'konvertaciya': {
+    label: 'Договор о конвертации валюты',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateKonvertaciya(buildPlaceholderData(), outputDir, options);
     },
   },
 
