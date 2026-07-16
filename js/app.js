@@ -1024,7 +1024,17 @@ function buildPlaceholderData() {
                    : '',
   };
 
-  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission };
+  // ── Задаток ─────────────────────────────────────────────────
+  const depositBYNRaw = (getField('deal-Сумма задатка BYN') || '').replace(',', '.').trim();
+  const depositUSDRaw = (getField('deal-Сумма задатка USD') || '').replace(',', '.').trim();
+  const deposit = {
+    amountBYN:      depositBYNRaw,
+    amountBYNWords: depositBYNRaw ? window.moneyToText(depositBYNRaw)    : '',
+    amountUSD:      depositUSDRaw,
+    amountUSDWords: depositUSDRaw ? window.moneyToTextUSD(depositUSDRaw) : '',
+  };
+
+  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit };
 }
 
 // ============================================================
