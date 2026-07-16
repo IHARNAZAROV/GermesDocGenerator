@@ -917,6 +917,7 @@ function buildPlaceholderData() {
         attestationDate:   agentRecord.attestationDate,
         attestationExpiry: agentRecord.attestationExpiry,
         cardNumber:        agentRecord.cardNumber,
+        cardDate:          agentRecord.cardDate,
       }
     : {
         lastName:          '',
@@ -930,6 +931,7 @@ function buildPlaceholderData() {
         attestationDate:   '',
         attestationExpiry: '',
         cardNumber:        '',
+        cardDate:          '',
       };
 
   const agency = {

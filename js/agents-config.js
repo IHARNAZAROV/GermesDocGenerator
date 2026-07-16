@@ -12,10 +12,11 @@ window.AGENTS_CONFIG = {
       "initials": "Турко О.Р.",
       "phone": "",
       "email": "",
-      "attestationNumber": "347",
-      "attestationDate": "12.03.2021",
-      "attestationExpiry": "12.03.2026",
-      "cardNumber": "АТ-00347"
+      "attestationNumber": "1931",
+      "attestationDate": "29.02.2024",
+      "attestationExpiry": "",
+      "cardNumber": "АВ 0028488",
+      "cardDate": "26.06.2026"
     },
     {
       "matchKeys": ["юшкевич", "yushkevich"],
@@ -26,10 +27,26 @@ window.AGENTS_CONFIG = {
       "initials": "Юшкевич Н.В.",
       "phone": "",
       "email": "",
-      "attestationNumber": "512",
-      "attestationDate": "05.09.2022",
-      "attestationExpiry": "05.09.2027",
-      "cardNumber": "АТ-00512"
+      "attestationNumber": "1839",
+      "attestationDate": "17.11.2022",
+      "attestationExpiry": "",
+      "cardNumber": "АВ 0028486",
+      "cardDate": "26.06.2026"
+    },
+    {
+      "matchKeys": ["москаленко", "moskalenko"],
+      "lastName": "Москаленко",
+      "firstName": "Екатерина",
+      "middleName": "Викторовна",
+      "fullName": "Москаленко Екатерина Викторовна",
+      "initials": "Москаленко Е.В.",
+      "phone": "",
+      "email": "",
+      "attestationNumber": "2030",
+      "attestationDate": "23.01.2025",
+      "attestationExpiry": "",
+      "cardNumber": "АВ 0028487",
+      "cardDate": "26.06.2026"
     },
     {
       "matchKeys": ["эйсмонт", "eismont"],
@@ -40,24 +57,11 @@ window.AGENTS_CONFIG = {
       "initials": "Эйсмонт О.И.",
       "phone": "",
       "email": "",
-      "attestationNumber": "289",
-      "attestationDate": "18.06.2020",
-      "attestationExpiry": "18.06.2025",
-      "cardNumber": "АТ-00289"
-    },
-    {
-      "matchKeys": ["москоленко", "moskolenko"],
-      "lastName": "Москоленко",
-      "firstName": "Екатерина",
-      "middleName": "Викторовна",
-      "fullName": "Москоленко Екатерина Викторовна",
-      "initials": "Москоленко Е.В.",
-      "phone": "",
-      "email": "",
-      "attestationNumber": "631",
-      "attestationDate": "27.11.2023",
-      "attestationExpiry": "27.11.2028",
-      "cardNumber": "АТ-00631"
+      "attestationNumber": "2448",
+      "attestationDate": "17.02.2026",
+      "attestationExpiry": "",
+      "cardNumber": "АВ 0028485",
+      "cardDate": "26.06.2026"
     }
   ]
 };
