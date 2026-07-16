@@ -628,6 +628,25 @@ function getField(id) {
 //  Word-шаблонов. Структура соответствует config/placeholders.json.
 //  Плейсхолдеры в .docx: {{deal.number}}, {{seller.fullName}} и т.д.
 // ============================================================
+// ============================================================
+//  Date → "16 июля 2027" (long Russian format)
+// ============================================================
+const MONTHS_GEN_RU = [
+  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
+];
+
+function dateToLongRussian(ddmmyyyy) {
+  if (!ddmmyyyy) return '';
+  const m = String(ddmmyyyy).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!m) return ddmmyyyy;
+  const day   = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  const year  = m[3];
+  if (month < 1 || month > 12) return ddmmyyyy;
+  return `${day} ${MONTHS_GEN_RU[month - 1]} ${year}`;
+}
+
 const GENITIVE_MAP = {
   'квартира':          'квартиры',
   'дом':               'дома',
@@ -875,10 +894,13 @@ function buildPersonBlock(prefix) {
 function buildPlaceholderData() {
   const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
 
+  const _endDateRaw = getField('deal-Дата окончания договора') || '';
   const deal = {
     number:                    getField('deal-Номер сделки')    || '',
     date:                      getField('deal-Дата договора')   || '',
     dateText:                  '',
+    endDate:                   _endDateRaw,
+    endDateText:               dateToLongRussian(_endDateRaw),
     exclusive:                 getField('deal-Эксклюзив')       || '',
     contractNumber:            getField('deal-Номер сделки')    || '',
     contractDate:              getField('deal-Дата договора')   || '',
