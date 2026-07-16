@@ -277,6 +277,8 @@ function populateForm(data) {
 
   // Always recompute "Цена прописью" from "Цена BYN" — ignore any value from Excel
   autoUpdatePropis();
+  // Always recompute commission — ignore any value from Excel
+  autoUpdateCommission();
 
   commitCurrentValues();
   btnSaveAs.disabled = false;
@@ -297,6 +299,7 @@ function handleClearForm() {
   fileSuccess.hidden = true;
   btnSave.disabled = true;
   btnSaveAs.disabled = true;
+  if (commissionInput) commissionInput.value = '';
   setStatus('Готов к работе');
   switchTab('owner1');
   resetContractAvailability();
@@ -328,9 +331,19 @@ function handleCheckData() {
 // ============================================================
 //  Auto-compute "Цена прописью" from "Цена BYN"
 // ============================================================
-const bynInput    = document.getElementById('deal-Стоимость BYN');
-const propisInput = document.getElementById('deal-Стоимость прописью');
-const bynErrorEl  = document.getElementById('byn-error');
+const bynInput         = document.getElementById('deal-Стоимость BYN');
+const propisInput      = document.getElementById('deal-Стоимость прописью');
+const bynErrorEl       = document.getElementById('byn-error');
+const commissionInput  = document.getElementById('deal-Комиссия агентства');
+
+// Make commission field read-only — it is always computed, never entered manually
+if (commissionInput) {
+  commissionInput.readOnly = true;
+  commissionInput.title    = 'Вычисляется автоматически по тарифной таблице';
+  commissionInput.style.background = '#f4f6f8';
+  commissionInput.style.color      = '#555';
+  commissionInput.style.cursor     = 'default';
+}
 
 function autoUpdatePropis() {
   if (!bynInput || !propisInput) return;
@@ -362,6 +375,26 @@ function autoUpdatePropis() {
 
 if (bynInput) {
   bynInput.addEventListener('input', autoUpdatePropis);
+}
+
+// ============================================================
+//  Auto-compute commission from "Цена BYN"
+// ============================================================
+function autoUpdateCommission() {
+  if (!commissionInput) return;
+
+  const raw = (bynInput ? bynInput.value : '').replace(',', '.').trim();
+  if (raw === '' || !/^\d+(\.\d{1,2})?$/.test(raw)) {
+    commissionInput.value = '';
+    return;
+  }
+
+  const result = window.calculateCommission(parseFloat(raw), window.COMMISSION_CONFIG.baseValue);
+  commissionInput.value = result.amountBYN ? `${result.amountBYN} (${result.percent}%)` : '';
+}
+
+if (bynInput) {
+  bynInput.addEventListener('input', autoUpdateCommission);
 }
 
 // ============================================================

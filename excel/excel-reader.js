@@ -54,6 +54,9 @@ async function readFile(filePath) {
   // Used by the writer to update only the correct cells in column B.
   const rowMap = {};
 
+  // Fields computed by the app itself — skip when reading from Excel.
+  const COMPUTED_FIELDS = new Set(['Комиссия агентства']);
+
   let currentBlock = null;
 
   worksheet.eachRow((row) => {
@@ -69,6 +72,9 @@ async function readFile(filePath) {
       currentBlock = BLOCK_HEADERS[a];
       return;
     }
+
+    // Skip fields that are computed by the app (not read from Excel)
+    if (COMPUTED_FIELDS.has(a)) return;
 
     if (currentBlock && result[currentBlock] !== undefined) {
       result[currentBlock][a] = b;
