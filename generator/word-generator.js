@@ -84,26 +84,36 @@ async function generateWord(templatePath, outputPath, data) {
 }
 
 // ============================================================
-//  Extract readable paragraphs from a rendered DOCX buffer
+//  Extract readable paragraphs from rendered DOCX XML
+//  Uses a paragraph regex that matches <w:p> / <w:p attr...>
+//  but NOT <w:pPr>, <w:pStyle>, etc. (all start with <w:p too).
 // ============================================================
 function extractParagraphs(xml) {
     const paragraphs = [];
-    // Split by closing paragraph tag — each chunk contains one <w:p> block
-    const parts = xml.split('</w:p>');
-    for (const part of parts) {
-        // Only look at content from the last opening <w:p in this chunk
-        const idx = part.lastIndexOf('<w:p');
-        const pXml = idx >= 0 ? part.slice(idx) : part;
-        // Collect all <w:t> text runs inside this paragraph
+
+    // <w:p(?:\s[^>]*)?>  matches:  <w:p>  or  <w:p attr="...">
+    //   but NOT  <w:pPr>  (because 'P' after 'p' is neither '>' nor whitespace)
+    const paraRe = /<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g;
+    let m;
+    while ((m = paraRe.exec(xml)) !== null) {
+        const pXml = m[0];
         let text = '';
-        const tRegex = /<w:t(?:[^>]*)>([\s\S]*?)<\/w:t>/g;
-        let m;
-        while ((m = tRegex.exec(pXml)) !== null) {
-            text += m[1];
+        const textRe = /<w:t(?:[^>]*)>([\s\S]*?)<\/w:t>/g;
+        let t;
+        while ((t = textRe.exec(pXml)) !== null) {
+            text += t[1];
         }
+        // Decode basic XML entities that may appear in text content
+        text = text
+            .replace(/&amp;/g,  '&')
+            .replace(/&lt;/g,   '<')
+            .replace(/&gt;/g,   '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'");
         paragraphs.push(text);
     }
-    // Drop trailing empty lines
+
+    // Drop trailing blank lines
     while (paragraphs.length && paragraphs[paragraphs.length - 1].trim() === '') {
         paragraphs.pop();
     }
