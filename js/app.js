@@ -905,6 +905,8 @@ function buildPlaceholderData() {
     areaLiving:   getField('property-Жилая площадь')   || '',
     areaKitchen:  getField('property-Площадь кухни')   || '',
     cadastre:     getField('property-Кадастровый номер')|| '',
+    wallMaterial: getField('property-Материал стен')   || '',
+    yearBuilt:    getField('property-Год постройки')   || '',
     priceUSD:     getField('deal-Стоимость USD')        || '',
     priceBYN:     getField('deal-Стоимость BYN')        || '',
     priceWords:   getField('deal-Стоимость прописью')   || '',
