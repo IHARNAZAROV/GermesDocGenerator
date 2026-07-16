@@ -685,7 +685,7 @@
     },
     "attestationExpiry": {
       "value": "",
-      "description": "Дата окончания действия свидетельства об аттестации риэлтера (ДД.ММ.ГГГГ). Плейсхолдер в Word: {{agent.attestationExpiry}}"
+      "description": "Дата окончания действия свидетельства об аттестации риэлтера (ДД.ММ.ГГГГ). Вычисляется как attestationDate + 5 лет. Плейсхолдер в Word: {{agent.attestationExpiry}}"
     },
     "cardNumber": {
       "value": "",

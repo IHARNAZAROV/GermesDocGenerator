@@ -14,7 +14,7 @@ window.AGENTS_CONFIG = {
       "email": "",
       "attestationNumber": "1931",
       "attestationDate": "29.02.2024",
-      "attestationExpiry": "",
+      "attestationExpiry": "28.02.2029",
       "cardNumber": "АВ 0028488",
       "cardDate": "26.06.2026"
     },
@@ -29,7 +29,7 @@ window.AGENTS_CONFIG = {
       "email": "",
       "attestationNumber": "1839",
       "attestationDate": "17.11.2022",
-      "attestationExpiry": "",
+      "attestationExpiry": "17.11.2027",
       "cardNumber": "АВ 0028486",
       "cardDate": "26.06.2026"
     },
@@ -44,7 +44,7 @@ window.AGENTS_CONFIG = {
       "email": "",
       "attestationNumber": "2030",
       "attestationDate": "23.01.2025",
-      "attestationExpiry": "",
+      "attestationExpiry": "23.01.2030",
       "cardNumber": "АВ 0028487",
       "cardDate": "26.06.2026"
     },
@@ -59,7 +59,7 @@ window.AGENTS_CONFIG = {
       "email": "",
       "attestationNumber": "2448",
       "attestationDate": "17.02.2026",
-      "attestationExpiry": "",
+      "attestationExpiry": "17.02.2031",
       "cardNumber": "АВ 0028485",
       "cardDate": "26.06.2026"
     }
