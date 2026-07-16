@@ -47,6 +47,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document generation — Договор ЭКС 1 собственник
   generateDkp1Eksklyuziv: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp1Eksklyuziv', data, outputDir, options),
 
+  // Document generation — Договор 1 собственник (общий)
+  generateDkp1Obshiy: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp1Obshiy', data, outputDir, options),
+
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
 

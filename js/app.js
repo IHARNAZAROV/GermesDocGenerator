@@ -1082,6 +1082,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'dkp-1-obshiy': {
+    label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDkp1Obshiy(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
 };
 
 // ============================================================
