@@ -975,6 +975,15 @@ async function handleGenerate() {
   const outputDir = saveFolderInput.value.trim() || null;
   const options   = { addDate: !!(chkAddDate && chkAddDate.checked) };
 
+  // Validate: save folder must be selected
+  if (!outputDir) {
+    showToast('✖ Сначала выберите папку для сохранения документов', 'error');
+    saveFolderInput.classList.add('input-error-highlight');
+    saveFolderInput.focus();
+    setTimeout(() => saveFolderInput.classList.remove('input-error-highlight'), 2500);
+    return;
+  }
+
   // Collect checked, enabled checkboxes that have a data-template
   const checked = [...document.querySelectorAll(
     '.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]:checked'
