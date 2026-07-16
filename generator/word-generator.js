@@ -84,32 +84,53 @@ async function generateWord(templatePath, outputPath, data) {
 }
 
 // ============================================================
-//  Extract readable paragraphs from rendered DOCX XML
-//  Uses a paragraph regex that matches <w:p> / <w:p attr...>
-//  but NOT <w:pPr>, <w:pStyle>, etc. (all start with <w:p too).
+//  Extract readable paragraphs from rendered DOCX XML.
+//
+//  Two key regex rules that prevent false matches:
+//
+//  Paragraph regex:  <w:p(?:\s[^>]*)?>
+//    Matches <w:p> and <w:p attr...> but NOT <w:pPr>, <w:pStyle>,
+//    <w:pBdr>, etc., because those continue with a letter (not space/'>').
+//
+//  Text regex:  <w:t(?:[ ][^>]*)?>
+//    Matches <w:t> and <w:t attr...> but NOT <w:tbl>, <w:tabs>,
+//    <w:tc>, <w:trPr>, etc., which all start with <w:t but continue
+//    with a letter, not a space or '>'.
+//    The previous pattern /<w:t(?:[^>]*)>/ was the root cause of the
+//    raw-XML-in-preview bug: [^>]* allows any non-> char, including
+//    'b' in <w:tbl>, 'c' in <w:tc>, etc.
 // ============================================================
 function extractParagraphs(xml) {
     const paragraphs = [];
 
-    // <w:p(?:\s[^>]*)?>  matches:  <w:p>  or  <w:p attr="...">
-    //   but NOT  <w:pPr>  (because 'P' after 'p' is neither '>' nor whitespace)
     const paraRe = /<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g;
     let m;
     while ((m = paraRe.exec(xml)) !== null) {
         const pXml = m[0];
+
+        // Remove <w:pPr>…</w:pPr> (paragraph formatting — contains no text).
+        // This eliminates any stray matches that could survive in pPr content.
+        const noPPr = pXml.replace(/<w:pPr[\s\S]*?<\/w:pPr>/g, '');
+
+        // Extract text from <w:t> elements only.
+        // Lookahead (?=>|[ ]) ensures the char right after 't' is '>' or space.
+        // This excludes <w:tbl>, <w:tabs>, <w:tc>, <w:trPr>, etc. which all
+        // continue with a letter — the previous bug: [^>]* allowed those letters.
         let text = '';
-        const textRe = /<w:t(?:[^>]*)>([\s\S]*?)<\/w:t>/g;
+        const textRe = /<w:t(?=>|[ ])[^>]*>([\s\S]*?)<\/w:t>/g;
         let t;
-        while ((t = textRe.exec(pXml)) !== null) {
+        while ((t = textRe.exec(noPPr)) !== null) {
             text += t[1];
         }
-        // Decode basic XML entities that may appear in text content
+
+        // Decode XML character entities
         text = text
             .replace(/&amp;/g,  '&')
             .replace(/&lt;/g,   '<')
             .replace(/&gt;/g,   '>')
             .replace(/&quot;/g, '"')
             .replace(/&apos;/g, "'");
+
         paragraphs.push(text);
     }
 
