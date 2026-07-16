@@ -44,6 +44,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document generation — Согласие на обработку данных
   generateSoglasie: (data, outputDir, options)    => ipcRenderer.invoke('word:generateSoglasie', data, outputDir, options),
 
+  // Document generation — Договор ЭКС 1 собственник
+  generateDkp1Eksklyuziv: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp1Eksklyuziv', data, outputDir, options),
+
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
 

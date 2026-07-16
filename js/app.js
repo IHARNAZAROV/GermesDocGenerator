@@ -1053,6 +1053,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'dkp-1-eksklyuziv': {
+    label: 'Договор оказания риэлтерских услуг (1 собственник, эксклюзив)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDkp1Eksklyuziv(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
 };
 
 // ============================================================
