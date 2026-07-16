@@ -661,7 +661,7 @@
     },
     "fullName": {
       "value": "",
-      "description": "Полное ФИО риэлтера"
+      "description": "Полное ФИО риэлтера. Источник: ячейка B10 шаблона Excel (поле «Ответственный риэлтер»). Подстановка из config/agents.json по фамилии."
     },
     "phone": {
       "value": "",
@@ -670,6 +670,22 @@
     "email": {
       "value": "",
       "description": "Электронная почта риэлтера"
+    },
+    "attestationNumber": {
+      "value": "",
+      "description": "Номер свидетельства об аттестации риэлтера, выданного Министерством юстиции РБ. Плейсхолдер в Word: {{agent.attestationNumber}}"
+    },
+    "attestationDate": {
+      "value": "",
+      "description": "Дата выдачи свидетельства об аттестации риэлтера (ДД.ММ.ГГГГ). Плейсхолдер в Word: {{agent.attestationDate}}"
+    },
+    "attestationExpiry": {
+      "value": "",
+      "description": "Дата окончания действия свидетельства об аттестации риэлтера (ДД.ММ.ГГГГ). Плейсхолдер в Word: {{agent.attestationExpiry}}"
+    },
+    "cardNumber": {
+      "value": "",
+      "description": "Номер идентификационной пластиковой карточки риэлтера. Плейсхолдер в Word: {{agent.cardNumber}}"
     }
   },
 

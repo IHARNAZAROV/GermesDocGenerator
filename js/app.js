@@ -897,15 +897,38 @@ function buildPlaceholderData() {
     poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
   };
 
-  const agentFullName = getField('deal-Ответственный риэлтер') || '';
-  const agent = {
-    lastName:   '',
-    firstName:  '',
-    middleName: '',
-    fullName:   agentFullName,
-    phone:      '',
-    email:      '',
-  };
+  // Look up agent from AGENTS_CONFIG by matching last name (or any part of the name)
+  // against the value in Excel cell B10 (field «Ответственный риэлтер»)
+  const agentRaw = getField('deal-Ответственный риэлтер') || '';
+  const agentNormalized = agentRaw.trim().toLowerCase();
+  const agentRecord = (window.AGENTS_CONFIG?.agents || []).find((a) =>
+    a.matchKeys.some((key) => agentNormalized.includes(key))
+  );
+  const agent = agentRecord
+    ? {
+        lastName:          agentRecord.lastName,
+        firstName:         agentRecord.firstName,
+        middleName:        agentRecord.middleName,
+        fullName:          agentRecord.fullName,
+        phone:             agentRecord.phone,
+        email:             agentRecord.email,
+        attestationNumber: agentRecord.attestationNumber,
+        attestationDate:   agentRecord.attestationDate,
+        attestationExpiry: agentRecord.attestationExpiry,
+        cardNumber:        agentRecord.cardNumber,
+      }
+    : {
+        lastName:          '',
+        firstName:         '',
+        middleName:        '',
+        fullName:          agentRaw,
+        phone:             '',
+        email:             '',
+        attestationNumber: '',
+        attestationDate:   '',
+        attestationExpiry: '',
+        cardNumber:        '',
+      };
 
   const agency = {
     name: '', shortName: '', director: '', address: '',
