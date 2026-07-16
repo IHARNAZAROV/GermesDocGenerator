@@ -1021,6 +1021,106 @@ async function handleGenerate() {
   errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
 }
 
+// ============================================================
+//  Preview modal
+// ============================================================
+const previewOverlay       = document.getElementById('preview-overlay');
+const previewTabs          = document.getElementById('preview-tabs');
+const previewContent       = document.getElementById('preview-content');
+const previewLoader        = document.getElementById('preview-loader');
+const previewCloseBtn      = document.getElementById('preview-close');
+const previewCloseFooter   = document.getElementById('btn-preview-close-footer');
+
+function closePreviewModal() {
+  previewOverlay.hidden = true;
+  previewTabs.innerHTML = '';
+  previewContent.innerHTML = '';
+}
+
+function renderParagraphs(paragraphs) {
+  const page = document.createElement('div');
+  page.className = 'preview-page';
+
+  for (const text of paragraphs) {
+    const p = document.createElement('div');
+    p.className = 'preview-para' + (text.trim() === '' ? ' empty' : '');
+    p.textContent = text || '';
+    page.appendChild(p);
+  }
+
+  previewContent.innerHTML = '';
+  previewContent.appendChild(page);
+}
+
+async function loadPreviewTab(templateKey, data) {
+  previewContent.innerHTML = '';
+  previewLoader.hidden = false;
+
+  try {
+    const result = await window.electronAPI.previewDocument(templateKey, data);
+    previewLoader.hidden = true;
+
+    if (!result || !result.success) {
+      previewContent.innerHTML =
+        `<div style="padding:32px;color:var(--error-text);font-size:13px;">
+           ✖ Ошибка предпросмотра: ${result?.error || 'неизвестная ошибка'}
+         </div>`;
+      return;
+    }
+
+    renderParagraphs(result.paragraphs);
+  } catch (err) {
+    previewLoader.hidden = true;
+    previewContent.innerHTML =
+      `<div style="padding:32px;color:var(--error-text);font-size:13px;">✖ ${err.message}</div>`;
+  }
+}
+
+function openPreviewModal(templateKeys) {
+  const data = buildPlaceholderData();
+
+  // Build tabs
+  previewTabs.innerHTML = '';
+  templateKeys.forEach((key, idx) => {
+    const entry = TEMPLATE_REGISTRY[key];
+    const btn = document.createElement('button');
+    btn.className = 'preview-tab' + (idx === 0 ? ' active' : '');
+    btn.textContent = entry.label;
+    btn.addEventListener('click', () => {
+      previewTabs.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      loadPreviewTab(key, data);
+    });
+    previewTabs.appendChild(btn);
+  });
+
+  previewOverlay.hidden = false;
+  previewContent.innerHTML = '';
+  loadPreviewTab(templateKeys[0], data);
+}
+
+previewCloseBtn.addEventListener('click', closePreviewModal);
+previewCloseFooter.addEventListener('click', closePreviewModal);
+previewOverlay.addEventListener('click', (e) => {
+  if (e.target === previewOverlay) closePreviewModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !previewOverlay.hidden) closePreviewModal();
+});
+
 btnPreview.addEventListener('click', () => {
-  showToast('Предварительный просмотр будет доступен в следующей версии');
+  const checked = [...document.querySelectorAll(
+    '.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]:checked'
+  )];
+
+  const toPreview = checked
+    .map(cb => cb.closest('.tpl-item')?.dataset.template)
+    .filter(key => key && TEMPLATE_REGISTRY[key]);
+
+  if (toPreview.length === 0) {
+    showToast('✖ Выберите хотя бы один реализованный шаблон', 'error');
+    return;
+  }
+
+  openPreviewModal(toPreview);
 });

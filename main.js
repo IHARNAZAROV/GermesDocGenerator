@@ -1,7 +1,17 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const ExcelJS = require('exceljs');
-const { generateWord } = require("./generator/word-generator");
+const { generateWord, previewWord } = require("./generator/word-generator");
+
+// Map of template keys → filenames in templates/working/
+const TEMPLATE_FILES = {
+  'doverennost-pnd':  'Доверенность_ПНД.docx',
+  'raspiska-klyuchi': 'РАСПИСКА_в_получении_ключей.docx',
+  'reklama':          'Договор_реклама.docx',
+  'rastorzhenie':     'Соглашение_о_расторжении.docx',
+  'zapros-pnd':       'Запрос_на_ПНД.docx',
+  'zapros-rsc':       'Запрос_в_РСЦ.docx',
+};
 
 // ============================================================
 //  Helper — build output file path, optionally appending date
@@ -177,6 +187,16 @@ ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
 // ============================================================
 ipcMain.handle('shell:openFile', async (_event, filePath) => {
   await shell.openPath(filePath);
+});
+
+// ============================================================
+//  IPC — preview document (render template, return text lines)
+// ============================================================
+ipcMain.handle('word:preview', async (_event, templateKey, data) => {
+  const fileName = TEMPLATE_FILES[templateKey];
+  if (!fileName) return { success: false, error: `Шаблон не найден: ${templateKey}` };
+  const templatePath = path.join(__dirname, 'templates', 'working', fileName);
+  return previewWord(templatePath, data);
 });
 
 // ============================================================

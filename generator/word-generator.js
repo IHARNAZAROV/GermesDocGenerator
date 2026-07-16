@@ -83,6 +83,81 @@ async function generateWord(templatePath, outputPath, data) {
 
 }
 
+// ============================================================
+//  Extract readable paragraphs from a rendered DOCX buffer
+// ============================================================
+function extractParagraphs(xml) {
+    const paragraphs = [];
+    // Split by closing paragraph tag — each chunk contains one <w:p> block
+    const parts = xml.split('</w:p>');
+    for (const part of parts) {
+        // Only look at content from the last opening <w:p in this chunk
+        const idx = part.lastIndexOf('<w:p');
+        const pXml = idx >= 0 ? part.slice(idx) : part;
+        // Collect all <w:t> text runs inside this paragraph
+        let text = '';
+        const tRegex = /<w:t(?:[^>]*)>([\s\S]*?)<\/w:t>/g;
+        let m;
+        while ((m = tRegex.exec(pXml)) !== null) {
+            text += m[1];
+        }
+        paragraphs.push(text);
+    }
+    // Drop trailing empty lines
+    while (paragraphs.length && paragraphs[paragraphs.length - 1].trim() === '') {
+        paragraphs.pop();
+    }
+    return paragraphs;
+}
+
+// ============================================================
+//  previewWord — same as generateWord but returns text lines
+//  instead of writing a file
+// ============================================================
+async function previewWord(templatePath, data) {
+    try {
+        const content = fs.readFileSync(templatePath, "binary");
+        const zip = new PizZip(content);
+        cleanProofErrors(zip);
+
+        function dotParser(tag) {
+            return {
+                get(scope) {
+                    return tag.split('.').reduce((obj, key) => {
+                        if (obj == null) return '';
+                        return obj[key] !== undefined ? obj[key] : '';
+                    }, scope);
+                }
+            };
+        }
+
+        const doc = new Docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+            delimiters: { start: '{{', end: '}}' },
+            parser: dotParser,
+        });
+
+        doc.render(data);
+
+        const renderedZip = doc.getZip();
+        const xml = renderedZip.files['word/document.xml'].asText();
+        const paragraphs = extractParagraphs(xml);
+
+        return { success: true, paragraphs };
+
+    } catch (error) {
+        let message = error.message;
+        if (error.properties && error.properties.errors) {
+            message = error.properties.errors
+                .map((e) => e.message || String(e))
+                .join("; ");
+        }
+        return { success: false, error: message };
+    }
+}
+
 module.exports = {
-    generateWord
+    generateWord,
+    previewWord,
 };

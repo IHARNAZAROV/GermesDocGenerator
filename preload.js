@@ -43,4 +43,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
+
+  // Document preview — renders template in-memory, returns text paragraphs
+  previewDocument: (templateKey, data)         => ipcRenderer.invoke('word:preview', templateKey, data),
 });

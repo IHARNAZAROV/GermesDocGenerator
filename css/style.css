@@ -1015,3 +1015,188 @@ html, body {
    TEXT SELECTION
    ============================================================ */
 ::selection { background: #c3e4d8; color: var(--text); }
+
+/* ============================================================
+   PREVIEW MODAL
+   ============================================================ */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 30, 26, .55);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .18s ease-out;
+}
+.preview-overlay[hidden] { display: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.preview-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(860px, 92vw);
+  height: min(88vh, 780px);
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: 0 20px 60px rgba(0,0,0,.28), 0 4px 16px rgba(0,0,0,.12);
+  overflow: hidden;
+  animation: slideUp .2s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ── */
+.preview-header {
+  display: flex;
+  align-items: stretch;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.preview-tabs {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.preview-tab {
+  padding: 0 var(--sp-4);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: var(--fs-sm) / 1 var(--font);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.preview-tab:hover { color: var(--text); background: rgba(0,0,0,.04); }
+.preview-tab.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+  font-weight: 600;
+  background: #fff;
+}
+
+.preview-close-btn {
+  width: 40px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  transition: color .15s, background .15s;
+}
+.preview-close-btn:hover { color: var(--text); background: rgba(0,0,0,.06); }
+
+/* ── Body ── */
+.preview-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #eaecee;
+}
+
+.preview-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  background: #eaecee;
+  z-index: 2;
+}
+.preview-loader[hidden] { display: none; }
+
+.preview-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--sp-5) var(--sp-4);
+}
+
+/* ── Paper sheet ── */
+.preview-page {
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 48px 52px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.13);
+  border-radius: 2px;
+  min-height: 500px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #1a1a1a;
+}
+
+.preview-para {
+  margin-bottom: .15em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.preview-para.empty {
+  min-height: .9em;
+}
+.preview-para.centered { text-align: center; }
+
+/* ── Footer ── */
+.preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px var(--sp-4);
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: var(--sp-3);
+}
+
+.preview-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.btn-preview-close-footer {
+  padding: 5px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: #fff;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+}
+.btn-preview-close-footer:hover {
+  background: var(--brand-light);
+  border-color: var(--brand-mid);
+  color: var(--brand);
+}

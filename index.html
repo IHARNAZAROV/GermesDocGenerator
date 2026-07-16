@@ -265,6 +265,32 @@
 
   </div><!-- /app-wrapper -->
 
+  <!-- ===== PREVIEW MODAL ===== -->
+  <div class="preview-overlay" id="preview-overlay" hidden>
+    <div class="preview-modal">
+      <div class="preview-header">
+        <div class="preview-tabs" id="preview-tabs"></div>
+        <button class="preview-close-btn" id="preview-close" title="Закрыть (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="preview-body">
+        <div class="preview-loader" id="preview-loader" hidden>
+          <div class="loader-spinner"></div>
+          <span>Формирование предпросмотра…</span>
+        </div>
+        <div class="preview-content" id="preview-content"></div>
+      </div>
+      <div class="preview-footer">
+        <span class="preview-hint">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Предпросмотр. Форматирование в готовом документе может отличаться.
+        </span>
+        <button class="btn-preview-close-footer" id="btn-preview-close-footer">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
   <!--
     Порядок загрузки скриптов важен:
     1. fields-config.js  — задаёт window.FIELDS_CONFIG (генерируется scan-excel.js)
