@@ -930,9 +930,13 @@ function buildPlaceholderData() {
     inventoryNumber: getField('property-Инвентарный номер')|| '',
     wallMaterial:    getField('property-Материал стен')    || '',
     yearBuilt:    getField('property-Год постройки')   || '',
-    priceUSD:     getField('deal-Стоимость USD')        || '',
-    priceBYN:     getField('deal-Стоимость BYN')        || '',
-    priceWords:   getField('deal-Стоимость прописью')   || '',
+    priceUSD:          getField('deal-Стоимость USD')   || '',
+    priceBYN:          getField('deal-Стоимость BYN')   || '',
+    priceWords:        getField('deal-Стоимость прописью') || '',
+    priceWordsUSD:     (() => {
+      const raw = (getField('deal-Стоимость USD') || '').replace(',', '.').trim();
+      return raw ? window.moneyToTextUSD(raw) : '';
+    })(),
   };
 
   const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
