@@ -943,7 +943,26 @@ function buildPlaceholderData() {
   const keys  = { count: '', countWords: '' };
   const money = { amount: '', amountWords: '', currency: '' };
 
-  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money };
+  // ── Комиссия агентства ──────────────────────────────────────
+  // Вычисляется по тарифной таблице: priceBYN / baseValue → строка → процент → сумма
+  const priceBYNRaw = parseFloat(
+    (getField('deal-Стоимость BYN') || '0').replace(',', '.')
+  );
+  const commissionResult = window.calculateCommission(
+    priceBYNRaw,
+    window.COMMISSION_CONFIG.baseValue
+  );
+  const commission = {
+    percent:     commissionResult.percent    ? String(commissionResult.percent)    : '',
+    amountBYN:   commissionResult.amountBYN  || '',
+    amountWords: commissionResult.amountWords || '',
+    baseValue:   String(window.COMMISSION_CONFIG.baseValue),
+    baseUnits:   commissionResult.baseUnits
+                   ? commissionResult.baseUnits.toFixed(2).replace(/\.?0+$/, '')
+                   : '',
+  };
+
+  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission };
 }
 
 // ============================================================
