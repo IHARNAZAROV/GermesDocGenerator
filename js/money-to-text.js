@@ -143,16 +143,12 @@
     const num = parseFloat(str);
     if (isNaN(num) || num < 0) return '';
 
-    const totalCents = Math.round(num * 100);
-    const dollars = Math.floor(totalCents / 100);
-    const cents   = totalCents % 100;
+    const dollars = Math.floor(num);
 
     const dollarWord = pluralForm(dollars, 'доллар США', 'доллара США', 'долларов США');
-    const centStr    = String(cents).padStart(2, '0');
-    const centWord   = pluralForm(cents, 'цент', 'цента', 'центов');
 
     const dollarsText = dollars === 0 ? 'ноль' : rublesInWords(dollars);
-    const raw = dollarsText + ' ' + dollarWord + ' ' + centStr + ' ' + centWord;
+    const raw = dollarsText + ' ' + dollarWord;
 
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
