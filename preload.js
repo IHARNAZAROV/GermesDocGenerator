@@ -26,20 +26,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (filePath)                         => ipcRenderer.invoke('shell:openFile', filePath),
 
   // Document generation
-  generateDoverennost: (data, outputDir)       => ipcRenderer.invoke('word:generateDoverennost', data, outputDir),
-  generateReklama:     (data, outputDir)       => ipcRenderer.invoke('word:generateReklama',     data, outputDir),
+  generateDoverennost: (data, outputDir, options) => ipcRenderer.invoke('word:generateDoverennost', data, outputDir, options),
+  generateReklama:     (data, outputDir, options) => ipcRenderer.invoke('word:generateReklama',     data, outputDir, options),
 
   // Document generation — Расписка в получении ключей
-  generateRaspiska:  (data, outputDir)         => ipcRenderer.invoke('word:generateRaspiska',  data, outputDir),
+  generateRaspiska:  (data, outputDir, options)   => ipcRenderer.invoke('word:generateRaspiska',  data, outputDir, options),
 
   // Document generation — Соглашение о расторжении
-  generateRastorzhenie: (data, outputDir)      => ipcRenderer.invoke('word:generateRastorzhenie', data, outputDir),
+  generateRastorzhenie: (data, outputDir, options) => ipcRenderer.invoke('word:generateRastorzhenie', data, outputDir, options),
 
   // Document generation — Запрос на ПНД
-  generateZaprosPnd: (data, outputDir)         => ipcRenderer.invoke('word:generateZaprosPnd', data, outputDir),
+  generateZaprosPnd: (data, outputDir, options)   => ipcRenderer.invoke('word:generateZaprosPnd', data, outputDir, options),
 
   // Document generation — Запрос в РСЦ
-  generateZaprosRsc: (data, outputDir)         => ipcRenderer.invoke('word:generateZaprosRsc', data, outputDir),
+  generateZaprosRsc: (data, outputDir, options)   => ipcRenderer.invoke('word:generateZaprosRsc', data, outputDir, options),
 
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),

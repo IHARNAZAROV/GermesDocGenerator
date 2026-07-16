@@ -30,6 +30,7 @@ const btnDeselectAll  = document.getElementById('btn-deselect-all');
 const btnBrowse       = document.getElementById('btn-browse');
 const saveFolderInput = document.getElementById('save-folder');
 const chkOpenAfter    = document.getElementById('chk-open-after');
+const chkAddDate      = document.getElementById('chk-add-date');
 const filePathDisplay = document.getElementById('file-path-display');
 const fileSuccess     = document.getElementById('file-success');
 const fileName        = document.getElementById('file-name');
@@ -923,43 +924,43 @@ const TEMPLATE_REGISTRY = {
 
   'doverennost-pnd': {
     label: 'Доверенность ПНД',
-    async generate(outputDir) {
-      return window.electronAPI.generateDoverennost(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDoverennost(buildPlaceholderData(), outputDir, options);
     },
   },
 
   'raspiska-klyuchi': {
     label: 'Расписка в получении ключей',
-    async generate(outputDir) {
-      return window.electronAPI.generateRaspiska(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateRaspiska(buildPlaceholderData(), outputDir, options);
     },
   },
 
   'reklama': {
     label: 'Договор на оказание рекламных услуг',
-    async generate(outputDir) {
-      return window.electronAPI.generateReklama(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateReklama(buildPlaceholderData(), outputDir, options);
     },
   },
 
   'rastorzhenie': {
     label: 'Соглашение о расторжении',
-    async generate(outputDir) {
-      return window.electronAPI.generateRastorzhenie(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateRastorzhenie(buildPlaceholderData(), outputDir, options);
     },
   },
 
   'zapros-pnd': {
     label: 'Запрос на ПНД',
-    async generate(outputDir) {
-      return window.electronAPI.generateZaprosPnd(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateZaprosPnd(buildPlaceholderData(), outputDir, options);
     },
   },
 
   'zapros-rsc': {
     label: 'Запрос в РСЦ',
-    async generate(outputDir) {
-      return window.electronAPI.generateZaprosRsc(buildPlaceholderData(), outputDir);
+    async generate(outputDir, options) {
+      return window.electronAPI.generateZaprosRsc(buildPlaceholderData(), outputDir, options);
     },
   },
 
@@ -972,6 +973,7 @@ btnGenerate.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
   const outputDir = saveFolderInput.value.trim() || null;
+  const options   = { addDate: !!(chkAddDate && chkAddDate.checked) };
 
   // Collect checked, enabled checkboxes that have a data-template
   const checked = [...document.querySelectorAll(
@@ -999,7 +1001,7 @@ async function handleGenerate() {
   for (const key of toGenerate) {
     const entry = TEMPLATE_REGISTRY[key];
     try {
-      const result = await entry.generate(outputDir);
+      const result = await entry.generate(outputDir, options);
       if (result && result.success) {
         successCount++;
         if (chkOpenAfter && chkOpenAfter.checked) {

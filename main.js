@@ -3,6 +3,20 @@ const path = require('path');
 const ExcelJS = require('exceljs');
 const { generateWord } = require("./generator/word-generator");
 
+// ============================================================
+//  Helper — build output file path, optionally appending date
+// ============================================================
+function buildOutputPath(dir, baseName, addDate) {
+  if (!addDate) return path.join(dir, baseName);
+  const now = new Date();
+  const dd   = String(now.getDate()).padStart(2, '0');
+  const mm   = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const ext  = path.extname(baseName);
+  const name = path.basename(baseName, ext);
+  return path.join(dir, `${name}_${dd}-${mm}-${yyyy}${ext}`);
+}
+
 let mainWindow;
 let isDirty = false; // renderer notifies us when dirty state changes
 
@@ -192,11 +206,11 @@ ipcMain.handle('template:scan', async () => {
 // ============================================================
 //  IPC — generate "Договор реклама" from current form data
 // ============================================================
-ipcMain.handle('word:generateReklama', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateReklama', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
   const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_реклама.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = path.join(resolvedDir, 'Договор_реклама.docx');
+  const outputPath   = buildOutputPath(resolvedDir, 'Договор_реклама.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
@@ -204,11 +218,11 @@ ipcMain.handle('word:generateReklama', async (_event, data, outputDir) => {
 // ============================================================
 //  IPC — generate "Расписка в получении ключей"
 // ============================================================
-ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
   const templatePath = path.join(__dirname, 'templates', 'working', 'РАСПИСКА_в_получении_ключей.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = path.join(resolvedDir, 'Расписка в получении ключей.docx');
+  const outputPath   = buildOutputPath(resolvedDir, 'Расписка в получении ключей.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
@@ -216,11 +230,11 @@ ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir) => {
 // ============================================================
 //  IPC — generate "Соглашение о расторжении"
 // ============================================================
-ipcMain.handle('word:generateRastorzhenie', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateRastorzhenie', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
   const templatePath = path.join(__dirname, 'templates', 'working', 'Соглашение_о_расторжении.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = path.join(resolvedDir, 'Соглашение о расторжении.docx');
+  const outputPath   = buildOutputPath(resolvedDir, 'Соглашение о расторжении.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
@@ -228,11 +242,11 @@ ipcMain.handle('word:generateRastorzhenie', async (_event, data, outputDir) => {
 // ============================================================
 //  IPC — generate "Запрос на ПНД"
 // ============================================================
-ipcMain.handle('word:generateZaprosPnd', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateZaprosPnd', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
   const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_на_ПНД.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = path.join(resolvedDir, 'Запрос на ПНД.docx');
+  const outputPath   = buildOutputPath(resolvedDir, 'Запрос на ПНД.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
@@ -240,11 +254,11 @@ ipcMain.handle('word:generateZaprosPnd', async (_event, data, outputDir) => {
 // ============================================================
 //  IPC — generate "Запрос в РСЦ"
 // ============================================================
-ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
   const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_в_РСЦ.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = path.join(resolvedDir, 'Запрос в РСЦ.docx');
+  const outputPath   = buildOutputPath(resolvedDir, 'Запрос в РСЦ.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
@@ -252,12 +266,12 @@ ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir) => {
 // ============================================================
 //  IPC — generate "Доверенность ПНД" from current form data
 // ============================================================
-ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir) => {
+ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir, options = {}) => {
   const fs = require('fs');
 
   const templatePath  = path.join(__dirname, 'templates', 'working', 'Доверенность_ПНД.docx');
   const resolvedDir   = outputDir || path.join(__dirname, 'output');
-  const outputPath    = path.join(resolvedDir, 'Доверенность ПНД.docx');
+  const outputPath    = buildOutputPath(resolvedDir, 'Доверенность ПНД.docx', options.addDate);
 
   if (!fs.existsSync(resolvedDir)) {
     fs.mkdirSync(resolvedDir, { recursive: true });
