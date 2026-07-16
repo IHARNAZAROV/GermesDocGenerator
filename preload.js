@@ -41,6 +41,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document generation — Запрос в РСЦ
   generateZaprosRsc: (data, outputDir, options)   => ipcRenderer.invoke('word:generateZaprosRsc', data, outputDir, options),
 
+  // Document generation — Согласие на обработку данных
+  generateSoglasie: (data, outputDir, options)    => ipcRenderer.invoke('word:generateSoglasie', data, outputDir, options),
+
   // Template scanning — opens file dialog, rescans Excel, reloads window
   scanTemplate: ()                             => ipcRenderer.invoke('template:scan'),
 

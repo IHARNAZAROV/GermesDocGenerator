@@ -1043,6 +1043,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'soglasie-obrabotka': {
+    label: 'Согласие на обработку данных',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateSoglasie(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
 };
 
 // ============================================================

@@ -5,12 +5,13 @@ const { generateWord, previewWord } = require("./generator/word-generator");
 
 // Map of template keys → filenames in templates/working/
 const TEMPLATE_FILES = {
-  'doverennost-pnd':  'Доверенность_ПНД.docx',
-  'raspiska-klyuchi': 'РАСПИСКА_в_получении_ключей.docx',
-  'reklama':          'Договор_реклама.docx',
-  'rastorzhenie':     'Соглашение_о_расторжении.docx',
-  'zapros-pnd':       'Запрос_на_ПНД.docx',
-  'zapros-rsc':       'Запрос_в_РСЦ.docx',
+  'doverennost-pnd':    'Доверенность_ПНД.docx',
+  'raspiska-klyuchi':   'РАСПИСКА_в_получении_ключей.docx',
+  'reklama':            'Договор_реклама.docx',
+  'rastorzhenie':       'Соглашение_о_расторжении.docx',
+  'zapros-pnd':         'Запрос_на_ПНД.docx',
+  'zapros-rsc':         'Запрос_в_РСЦ.docx',
+  'soglasie-obrabotka': 'Согласие_на_обработку_данных.docx',
 };
 
 // ============================================================
@@ -279,6 +280,18 @@ ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir, options
   const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_в_РСЦ.docx');
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
   const outputPath   = buildOutputPath(resolvedDir, 'Запрос в РСЦ.docx', options.addDate);
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
+
+// ============================================================
+//  IPC — generate "Согласие на обработку данных"
+// ============================================================
+ipcMain.handle('word:generateSoglasie', async (_event, data, outputDir, options = {}) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Согласие_на_обработку_данных.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = buildOutputPath(resolvedDir, 'Согласие на обработку данных.docx', options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
