@@ -135,7 +135,7 @@
   /**
    * Converts an amount to a Russian written form for USD.
    * @param {number|string} amount  e.g. 105000 or "105000.50"
-   * @returns {string}  e.g. "Сто пять тысяч долларов США 50 центов"
+   * @returns {string}  e.g. "Сто пять тысяч"
    *                    Returns '' for invalid input.
    */
   function moneyToTextUSD(amount) {
@@ -145,12 +145,9 @@
 
     const dollars = Math.floor(num);
 
-    const dollarWord = pluralForm(dollars, 'доллар США', 'доллара США', 'долларов США');
-
     const dollarsText = dollars === 0 ? 'ноль' : rublesInWords(dollars);
-    const raw = dollarsText + ' ' + dollarWord;
 
-    return raw.charAt(0).toUpperCase() + raw.slice(1);
+    return dollarsText.charAt(0).toUpperCase() + dollarsText.slice(1);
   }
 
   window.moneyToTextUSD = moneyToTextUSD;
