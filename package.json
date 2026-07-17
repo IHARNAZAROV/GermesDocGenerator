@@ -10,6 +10,7 @@
   "author": "Игорь",
   "license": "MIT",
   "devDependencies": {
+    "docx": "^9.7.1",
     "electron": "^38.8.6"
   },
   "dependencies": {

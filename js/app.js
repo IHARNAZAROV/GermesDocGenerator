@@ -910,6 +910,8 @@ function buildPlaceholderData() {
     depositContractDate:       '',
     storageContractNumber:     '',
     storageContractDate:       '',
+    btiPayment:                getField('deal-Оплата услуг БТИ') || '',
+    furniture:                 getField('deal-Мебель')            || '',
   };
 
   const property = {
@@ -1118,6 +1120,13 @@ const TEMPLATE_REGISTRY = {
     label: 'Договор о конвертации валюты',
     async generate(outputDir, options) {
       return window.electronAPI.generateKonvertaciya(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
+  'zadatok-standart': {
+    label: 'Договор задатка (стандартный)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateZadatokStandart(buildPlaceholderData(), outputDir, options);
     },
   },
 
