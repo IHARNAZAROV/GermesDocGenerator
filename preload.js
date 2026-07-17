@@ -53,6 +53,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document generation — Договор о конвертации валюты
   generateKonvertaciya: (data, outputDir, options) => ipcRenderer.invoke('word:generateKonvertaciya', data, outputDir, options),
 
+  // Document generation — Договор ЭКС (2 собственника, общий)
+  generateDkp2Eksklyuziv: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp2Eksklyuziv', data, outputDir, options),
+
   // Document generation — Договор оказания риэлтерских услуг (2 собственника, общий)
   generateDkp2Obshiy: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp2Obshiy', data, outputDir, options),
 

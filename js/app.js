@@ -1109,6 +1109,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'dkp-2-eksklyuziv': {
+    label: 'Договор оказания риэлтерских услуг ЭКС (2 собственника, общий)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDkp2Eksklyuziv(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
   'dkp-2-obshiy': {
     label: 'Договор оказания риэлтерских услуг (2 собственника, общий)',
     async generate(outputDir, options) {
