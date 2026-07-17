@@ -4,7 +4,7 @@
  *
  * Запуск:  node scripts/build-eks2-obshiy.js
  * Источник: attached_assets/Договор_ЭКС_2_собств_общий_1784281528395.docx
- * Результат: templates/working/Договор_ЭКС_2_собств_общий.docx
+ * Результат: templates/working/Договор_ЭКС_2_собств.docx
  */
 
 'use strict';
@@ -183,7 +183,7 @@ const finalXml = parts.join('');
 zip.file('word/document.xml', finalXml);
 
 const outPath = path.join(
-  __dirname, '..', 'templates', 'working', 'Договор_ЭКС_2_собств_общий.docx'
+  __dirname, '..', 'templates', 'working', 'Договор_ЭКС_2_собств.docx'
 );
 const buf = zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' });
 fs.writeFileSync(outPath, buf);
