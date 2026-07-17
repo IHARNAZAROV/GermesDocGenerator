@@ -1144,6 +1144,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'dkp-fizlit-komstr': {
+    label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDkpFizlitKomstr(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
 };
 
 // ============================================================

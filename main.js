@@ -390,3 +390,15 @@ ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir, optio
 
   return generateWord(templatePath, outputPath, data);
 });
+
+// ============================================================
+//  IPC — generate "Договор физическое лицо — коммерческая структура"
+// ============================================================
+ipcMain.handle('word:generateDkpFizlitKomstr', async (_event, data, outputDir, options = {}) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_физ_лица_коммерция.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = buildOutputPath(resolvedDir, 'Договор физ лица коммерция.docx', options.addDate);
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
