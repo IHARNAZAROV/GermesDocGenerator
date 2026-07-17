@@ -1123,6 +1123,13 @@ const TEMPLATE_REGISTRY = {
     },
   },
 
+  'dkp-3-obshiy': {
+    label: 'Договор оказания риэлтерских услуг (3 собственника, общий)',
+    async generate(outputDir, options) {
+      return window.electronAPI.generateDkp3Obshiy(buildPlaceholderData(), outputDir, options);
+    },
+  },
+
   'dkp-1-obshiy': {
     label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',
     async generate(outputDir, options) {

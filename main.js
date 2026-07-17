@@ -402,3 +402,15 @@ ipcMain.handle('word:generateDkpFizlitKomstr', async (_event, data, outputDir, o
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
+
+// ============================================================
+//  IPC — generate "Договор оказания риэлтерских услуг (3 собственника, общий)"
+// ============================================================
+ipcMain.handle('word:generateDkp3Obshiy', async (_event, data, outputDir, options = {}) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_3_собств_общий.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = buildOutputPath(resolvedDir, 'Договор 3 собств общий.docx', options.addDate);
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
