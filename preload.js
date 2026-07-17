@@ -64,6 +64,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Document generation — Договор физическое лицо — коммерческая структура
   generateDkpFizlitKomstr: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkpFizlitKomstr', data, outputDir, options),
+  generateDkp3Eksklyuziv: (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp3Eksklyuziv', data, outputDir, options),
   generateDkp3Obshiy:     (data, outputDir, options) => ipcRenderer.invoke('word:generateDkp3Obshiy',     data, outputDir, options),
 
   // Template scanning — opens file dialog, rescans Excel, reloads window

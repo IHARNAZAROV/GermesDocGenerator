@@ -404,6 +404,18 @@ ipcMain.handle('word:generateDkpFizlitKomstr', async (_event, data, outputDir, o
 });
 
 // ============================================================
+//  IPC — generate "Договор оказания риэлтерских услуг (3 собственника, эксклюзив)"
+// ============================================================
+ipcMain.handle('word:generateDkp3Eksklyuziv', async (_event, data, outputDir, options = {}) => {
+  const fs = require('fs');
+  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_ЭКС_3_собств.docx');
+  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const outputPath   = buildOutputPath(resolvedDir, 'Договор ЭКС 3 собств.docx', options.addDate);
+  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
+  return generateWord(templatePath, outputPath, data);
+});
+
+// ============================================================
 //  IPC — generate "Договор оказания риэлтерских услуг (3 собственника, общий)"
 // ============================================================
 ipcMain.handle('word:generateDkp3Obshiy', async (_event, data, outputDir, options = {}) => {
