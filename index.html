@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Генератор договоров ГермесГарант</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -224,9 +223,9 @@
         <div class="win-section">
           <div class="section-hdr">4. Настройки генерации</div>
           <div class="section-body">
-            <div style="font-size:11.5px;color:#555;margin-bottom:4px">Папка для сохранения:</div>
+            <div class="settings-folder-label">Папка для сохранения:</div>
             <div class="settings-row">
-              <input type="text" id="save-folder" value="" style="flex:1" placeholder="Папка не выбрана" />
+              <input type="text" id="save-folder" value="" placeholder="Папка не выбрана" />
               <button class="btn-browse" id="btn-browse">Обзор</button>
             </div>
             <label class="check-row"><input type="checkbox" id="chk-open-after" checked> Открыть файлы после создания</label>

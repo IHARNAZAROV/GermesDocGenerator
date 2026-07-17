@@ -267,12 +267,6 @@ html, body {
   cursor: default;
 }
 
-.save-bar-sep {
-  width: 1px; height: 22px;
-  background: var(--border);
-  margin: 0 var(--sp-1);
-}
-
 /* Toolbar buttons */
 .save-bar-btn {
   display: inline-flex;
@@ -508,31 +502,6 @@ html, body {
   color: var(--muted);
   outline: none;
 }
-.btn-choose {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: var(--input-h);
-  padding: 0 var(--sp-3);
-  background: var(--brand);
-  color: #ffffff;
-  border: none;
-  border-radius: var(--r-md);
-  font-family: var(--font);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: var(--shadow-btn);
-  transition: background .15s, box-shadow .15s;
-  flex-shrink: 0;
-}
-.btn-choose:hover {
-  background: var(--brand-mid);
-  box-shadow: 0 2px 6px rgba(21,89,69,.25);
-}
-.btn-choose:active { background: var(--brand-dark); }
-
 .file-success {
   display: flex;
   align-items: center;
@@ -554,7 +523,6 @@ html, body {
 .data-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   overflow: hidden;
@@ -689,8 +657,9 @@ html, body {
 }
 .tpl-item:hover { background: var(--brand-xlight); }
 
-/* Custom checkbox */
-.tpl-item input[type="checkbox"] {
+/* Custom checkbox — shared by .tpl-item and .check-row */
+.tpl-item input[type="checkbox"],
+.check-row input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   width: 15px; height: 15px;
@@ -703,11 +672,13 @@ html, body {
   transition: border-color .15s, background .15s;
   position: relative;
 }
-.tpl-item input[type="checkbox"]:checked {
+.tpl-item input[type="checkbox"]:checked,
+.check-row input[type="checkbox"]:checked {
   border-color: var(--brand);
   background: var(--brand);
 }
-.tpl-item input[type="checkbox"]:checked::after {
+.tpl-item input[type="checkbox"]:checked::after,
+.check-row input[type="checkbox"]:checked::after {
   content: '';
   position: absolute;
   left: 3px; top: 1px;
@@ -729,7 +700,6 @@ html, body {
   flex-shrink: 0;
   letter-spacing: 0;
 }
-.word-icon.green { background: var(--brand); }
 
 /* ============================================================
    BYN FIELD — VALIDATION ERROR
@@ -888,6 +858,13 @@ html, body {
 }
 .btn-browse:hover { background: var(--brand-xlight); border-color: #9ecabb; }
 
+/* Settings folder label */
+.settings-folder-label {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
 /* Custom checkboxes in settings */
 .check-row {
   display: flex;
@@ -900,32 +877,6 @@ html, body {
   transition: background .12s;
 }
 .check-row:hover { background: var(--brand-xlight); }
-.check-row input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 15px; height: 15px;
-  border: 1.5px solid #b0b8be;
-  border-radius: 3px;
-  background: #fff;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin: 0;
-  transition: border-color .15s, background .15s;
-  position: relative;
-}
-.check-row input[type="checkbox"]:checked {
-  border-color: var(--brand);
-  background: var(--brand);
-}
-.check-row input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 3px; top: 1px;
-  width: 5px; height: 8px;
-  border: 2px solid #fff;
-  border-top: none; border-left: none;
-  transform: rotate(40deg);
-}
 
 /* ============================================================
    RIGHT PANEL — ACTIONS
