@@ -1397,6 +1397,14 @@ html, body {
 /* ============================================================
    TOOLBAR — ABOUT BUTTON & SPACER
    ============================================================ */
+.toolbar-brand-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
 .toolbar-spacer {
   flex: 1;
 }
@@ -1447,16 +1455,19 @@ html, body {
   flex-shrink: 0;
 }
 .about-logo {
-  width: 48px;
-  height: 48px;
-  background: rgba(255,255,255,.12);
-  border-radius: 10px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.18);
+}
+.about-logo-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
 }
 .about-title-block {
   flex: 1;
