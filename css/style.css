@@ -1395,6 +1395,129 @@ html, body {
 }
 
 /* ============================================================
+   DROP ZONE
+   ============================================================ */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  cursor: default;
+  transition: border-color .18s, background .18s;
+  position: relative;
+  user-select: none;
+}
+.drop-zone:hover {
+  border-color: var(--brand-mid);
+  background: var(--brand-xlight);
+}
+
+/* Drag-over state */
+.drop-zone--over {
+  border-color: var(--brand);
+  background: var(--brand-light);
+  box-shadow: 0 0 0 3px rgba(21,89,69,.12);
+}
+
+/* Loaded state */
+.drop-zone--loaded {
+  border-style: solid;
+  border-color: var(--brand-mid);
+  background: var(--brand-xlight);
+}
+
+/* Idle view */
+.drop-zone__idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.drop-zone__icon {
+  color: var(--text-muted);
+  opacity: .55;
+  transition: opacity .15s, color .15s;
+}
+.drop-zone:hover .drop-zone__icon,
+.drop-zone--over .drop-zone__icon { opacity: .9; color: var(--brand); }
+
+.drop-zone__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.drop-zone__sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.drop-zone__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--brand);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.drop-zone__link:hover { color: var(--brand-dark); }
+
+/* Drag-over view */
+.drop-zone__over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+  animation: dropPulse .6s ease infinite alternate;
+}
+@keyframes dropPulse {
+  from { opacity: .75; }
+  to   { opacity: 1; }
+}
+
+/* Success view */
+.drop-zone__success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--brand);
+}
+.drop-zone__success > svg { flex-shrink: 0; }
+.drop-zone__success-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.drop-zone__success-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-all;
+}
+.drop-zone__change {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--brand-mid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-align: left;
+}
+.drop-zone__change:hover { color: var(--brand-dark); }
+
+/* ============================================================
    TOOLBAR — ABOUT BUTTON & SPACER
    ============================================================ */
 .toolbar-brand-logo {

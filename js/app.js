@@ -601,20 +601,24 @@ function handleDeselectAll() {
 }
 
 // ============================================================
-//  Main flow — choose and load Excel file
+//  Main flow — load Excel file (shared between dialog & drag-drop)
 // ============================================================
-async function handleChooseFile() {
-  hideError();
+const dropZone      = document.getElementById('drop-zone');
+const dropIdle      = document.getElementById('drop-idle');
+const dropOver      = document.getElementById('drop-over');
+const dropSuccess   = document.getElementById('drop-success');
+const dropFileName  = document.getElementById('file-name');
 
-  let filePath;
-  try {
-    filePath = await window.electronAPI.openFileDialog();
-  } catch (err) {
-    showError('Не удалось открыть диалог выбора файла: ' + err.message);
-    return;
-  }
-  if (!filePath) return;
+function setDropState(state) {
+  // state: 'idle' | 'over' | 'success'
+  dropIdle.hidden    = state !== 'idle';
+  dropOver.hidden    = state !== 'over';
+  dropSuccess.hidden = state !== 'success';
+  dropZone.classList.toggle('drop-zone--over',   state === 'over');
+  dropZone.classList.toggle('drop-zone--loaded', state === 'success');
+}
 
+async function loadExcelFile(filePath) {
   filePathDisplay.value = filePath;
   fileSuccess.hidden = true;
   setStatus('Чтение файла…');
@@ -625,6 +629,7 @@ async function handleChooseFile() {
     data = await window.electronAPI.readExcel(filePath);
   } catch (err) {
     hideLoader();
+    setDropState('idle');
     showError('Ошибка при чтении файла: ' + err.message);
     setStatus('Ошибка чтения файла');
     return;
@@ -633,6 +638,7 @@ async function handleChooseFile() {
   hideLoader();
 
   if (!data || typeof data !== 'object') {
+    setDropState('idle');
     showError('Файл прочитан, но данные не получены. Проверьте формат файла.');
     setStatus('Ошибка формата файла');
     return;
@@ -640,12 +646,75 @@ async function handleChooseFile() {
 
   currentFilePath = filePath;
   const baseName = filePath.split(/[\\/]/).pop();
-  fileName.textContent = baseName;
-  fileSuccess.hidden = false;
+  dropFileName.textContent = baseName;
+  setDropState('success');
 
   populateForm(data);
   setStatus('Файл загружен: ' + baseName);
 }
+
+async function handleChooseFile() {
+  hideError();
+  let filePath;
+  try {
+    filePath = await window.electronAPI.openFileDialog();
+  } catch (err) {
+    showError('Не удалось открыть диалог выбора файла: ' + err.message);
+    return;
+  }
+  if (!filePath) return;
+  await loadExcelFile(filePath);
+}
+
+// ============================================================
+//  Drag-and-drop handlers
+// ============================================================
+let dragCounter = 0; // track nested drag-enter/leave
+
+dropZone.addEventListener('dragenter', e => {
+  e.preventDefault();
+  dragCounter++;
+  if (dragCounter === 1) setDropState('over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dragCounter--;
+  if (dragCounter === 0) setDropState(currentFilePath ? 'success' : 'idle');
+});
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+});
+
+dropZone.addEventListener('drop', async e => {
+  e.preventDefault();
+  dragCounter = 0;
+  hideError();
+
+  const file = e.dataTransfer.files[0];
+  if (!file) { setDropState(currentFilePath ? 'success' : 'idle'); return; }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx', 'xls'].includes(ext)) {
+    setDropState(currentFilePath ? 'success' : 'idle');
+    showError('Поддерживаются только файлы Excel (.xlsx, .xls)');
+    return;
+  }
+
+  // В Electron file.path — абсолютный путь на диске
+  const filePath = file.path;
+  if (!filePath) {
+    setDropState(currentFilePath ? 'success' : 'idle');
+    showError('Не удалось получить путь к файлу.');
+    return;
+  }
+
+  await loadExcelFile(filePath);
+});
+
+document.getElementById('btn-drop-browse').addEventListener('click', handleChooseFile);
+document.getElementById('btn-drop-change').addEventListener('click', handleChooseFile);
 
 // ============================================================
 //  Event listeners
