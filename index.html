@@ -103,32 +103,24 @@
           </div>
           <div class="section-body">
             <div class="drop-zone" id="drop-zone">
+              <!-- Idle -->
               <div class="drop-zone__idle" id="drop-idle">
-                <svg class="drop-zone__icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                 </svg>
-                <span class="drop-zone__label">Перетащите файл Excel сюда</span>
-                <span class="drop-zone__sub">или <button class="drop-zone__link" id="btn-drop-browse">выберите через диалог</button></span>
+                <span class="drop-zone__label">Перетащите .xlsx сюда или <button class="drop-zone__link" id="btn-drop-browse">выберите файл</button></span>
               </div>
-              <div class="drop-zone__over" id="drop-over" hidden>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <span>Отпустите файл</span>
-              </div>
-              <div class="drop-zone__success" id="drop-success" hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <div class="drop-zone__success-text">
-                  <span class="drop-zone__success-name" id="file-name"></span>
-                  <button class="drop-zone__change" id="btn-drop-change">Изменить файл</button>
-                </div>
+              <!-- Success -->
+              <div class="drop-zone__success" id="drop-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="file-name" class="drop-zone__success-name"></span>
+                <button class="drop-zone__change" id="btn-drop-change">Изменить</button>
               </div>
             </div>
-            <!-- скрытый input для совместимости с остальным кодом -->
+            <!-- скрытые элементы для совместимости -->
             <input type="text" id="file-path-display" style="display:none" readonly />
-            <div class="file-success" id="file-success" hidden></div>
+            <div id="file-success" style="display:none"></div>
           </div>
         </div>
 

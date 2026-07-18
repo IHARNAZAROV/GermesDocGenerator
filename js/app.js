@@ -603,17 +603,15 @@ function handleDeselectAll() {
 // ============================================================
 //  Main flow — load Excel file (shared between dialog & drag-drop)
 // ============================================================
-const dropZone      = document.getElementById('drop-zone');
-const dropIdle      = document.getElementById('drop-idle');
-const dropOver      = document.getElementById('drop-over');
-const dropSuccess   = document.getElementById('drop-success');
-const dropFileName  = document.getElementById('file-name');
+const dropZone     = document.getElementById('drop-zone');
+const dropIdle     = document.getElementById('drop-idle');
+const dropSuccess  = document.getElementById('drop-success');
+const dropFileName = document.getElementById('file-name');
 
 function setDropState(state) {
   // state: 'idle' | 'over' | 'success'
-  dropIdle.hidden    = state !== 'idle';
-  dropOver.hidden    = state !== 'over';
-  dropSuccess.hidden = state !== 'success';
+  dropIdle.classList.toggle('dz-hidden',    state !== 'idle');
+  dropSuccess.classList.toggle('dz-hidden', state !== 'success');
   dropZone.classList.toggle('drop-zone--over',   state === 'over');
   dropZone.classList.toggle('drop-zone--loaded', state === 'success');
 }
@@ -702,8 +700,8 @@ dropZone.addEventListener('drop', async e => {
     return;
   }
 
-  // В Electron file.path — абсолютный путь на диске
-  const filePath = file.path;
+  // Electron 32+: webUtils.getPathForFile() через context bridge
+  const filePath = window.electronAPI.getPathForFile(file);
   if (!filePath) {
     setDropState(currentFilePath ? 'success' : 'idle');
     showError('Не удалось получить путь к файлу.');

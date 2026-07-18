@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // File dialogs
@@ -75,4 +75,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Open external URL in the default browser
   openExternal: (url)                          => ipcRenderer.invoke('shell:openExternal', url),
+
+  // Get absolute file path from a File object (drag-and-drop)
+  getPathForFile: (file)                       => webUtils.getPathForFile(file),
 });
