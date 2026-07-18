@@ -98,9 +98,9 @@
   // ── main export ─────────────────────────────────────────────
 
   /**
-   * Converts an amount to a Russian written form for BYN.
+   * Converts an amount to a Russian written form (number only, no currency label).
    * @param {number|string} amount  e.g. 105000.35 or "105000,35"
-   * @returns {string}  e.g. "Сто пять тысяч белорусских рублей 35 копеек"
+   * @returns {string}  e.g. "Сто пять тысяч"
    *                    Returns '' for invalid input.
    */
   function moneyToText(amount) {
@@ -109,23 +109,10 @@
     const num = parseFloat(str);
     if (isNaN(num) || num < 0) return '';
 
-    // Round to 2 decimal places to avoid floating-point drift
-    const totalKopecks = Math.round(num * 100);
-    const rubles  = Math.floor(totalKopecks / 100);
-    const kopecks = totalKopecks % 100;
+    const rubles = Math.floor(Math.round(num * 100) / 100);
+    const raw = rubles === 0 ? 'ноль' : rublesInWords(rubles);
 
-    const rubWord = pluralForm(rubles,
-      'белорусский рубль',
-      'белорусских рубля',
-      'белорусских рублей',
-    );
-
-    const kopStr  = String(kopecks).padStart(2, '0');
-    const kopWord = pluralForm(kopecks, 'копейка', 'копейки', 'копеек');
-
-    const raw = rublesInWords(rubles) + ' ' + rubWord + ' ' + kopStr + ' ' + kopWord;
-
-    // Capitalise the very first letter of the sentence
+    // Capitalise the very first letter
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 
