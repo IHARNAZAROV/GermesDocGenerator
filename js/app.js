@@ -1430,3 +1430,42 @@ btnPreview.addEventListener('click', () => {
 
   openPreviewModal(toPreview);
 });
+
+// ============================================================
+//  О программе — модальное окно
+// ============================================================
+(function () {
+  const overlay   = document.getElementById('about-overlay');
+  const btnOpen   = document.getElementById('btn-about');
+  const btnClose  = document.getElementById('about-close');
+  const btnOk     = document.getElementById('about-ok');
+  const siteLink  = document.getElementById('about-site-link');
+  const emailLink = document.getElementById('about-email-link');
+
+  function openAbout()  { overlay.hidden = false; }
+  function closeAbout() { overlay.hidden = true; }
+
+  btnOpen.addEventListener('click', openAbout);
+  btnClose.addEventListener('click', closeAbout);
+  btnOk.addEventListener('click', closeAbout);
+
+  // Закрытие по клику на фон
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeAbout(); });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !overlay.hidden) closeAbout();
+  });
+
+  // Открытие ссылок через Electron shell
+  if (window.electronAPI?.openExternal) {
+    siteLink?.addEventListener('click', e => {
+      e.preventDefault();
+      window.electronAPI.openExternal('https://germesgarant.by');
+    });
+    emailLink?.addEventListener('click', e => {
+      e.preventDefault();
+      window.electronAPI.openExternal('mailto:mail@germesgarant.by');
+    });
+  }
+}());

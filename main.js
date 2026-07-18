@@ -193,6 +193,10 @@ ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
 // ============================================================
 //  IPC — open file with default OS application
 // ============================================================
+ipcMain.handle('shell:openExternal', async (_event, url) => {
+  await shell.openExternal(url);
+});
+
 ipcMain.handle('shell:openFile', async (_event, filePath) => {
   await shell.openPath(filePath);
 });

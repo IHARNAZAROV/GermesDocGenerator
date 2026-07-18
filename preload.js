@@ -72,4 +72,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Document preview — renders template in-memory, returns text paragraphs
   previewDocument: (templateKey, data)         => ipcRenderer.invoke('word:preview', templateKey, data),
+
+  // Open external URL in the default browser
+  openExternal: (url)                          => ipcRenderer.invoke('shell:openExternal', url),
 });

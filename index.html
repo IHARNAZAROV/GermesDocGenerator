@@ -74,6 +74,17 @@
           Обновить шаблон
         </button>
       </div>
+
+      <div class="toolbar-spacer"></div>
+
+      <div class="toolbar-group">
+        <button class="save-bar-btn toolbar-about" id="btn-about" title="О программе">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="12" y1="12" x2="12" y2="16"/>
+          </svg>
+          О программе
+        </button>
+      </div>
     </header>
 
     <!-- ===== MAIN BODY ===== -->
@@ -313,6 +324,110 @@
     </div>
 
   </div><!-- /app-wrapper -->
+
+  <!-- ===== ABOUT MODAL ===== -->
+  <div class="about-overlay" id="about-overlay" hidden>
+    <div class="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div class="about-header">
+        <div class="about-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="about-title-block">
+          <h2 id="about-title" class="about-title">Генератор договоров</h2>
+          <span class="about-company">ГермесГарант</span>
+        </div>
+        <button class="about-close-btn" id="about-close" title="Закрыть">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="about-body">
+
+        <!-- Описание -->
+        <div class="about-section">
+          <h3 class="about-section-title">О программе</h3>
+          <p class="about-text">
+            Специализированное программное обеспечение для автоматизированного формирования
+            договоров и сопутствующих документов агентства недвижимости. Приложение считывает
+            данные сделки из файла Excel и подставляет их в шаблоны Word, исключая ручной ввод
+            и снижая вероятность ошибок при оформлении документов.
+          </p>
+          <div class="about-meta">
+            <div class="about-meta-row">
+              <span class="about-meta-label">Версия</span>
+              <span class="about-meta-value">1.0.0</span>
+            </div>
+            <div class="about-meta-row">
+              <span class="about-meta-label">Платформа</span>
+              <span class="about-meta-value">Electron · Windows</span>
+            </div>
+            <div class="about-meta-row">
+              <span class="about-meta-label">Сайт</span>
+              <span class="about-meta-value"><a href="https://germesgarant.by" class="about-link" id="about-site-link">germesgarant.by</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-divider"></div>
+
+        <!-- Авторы -->
+        <div class="about-section">
+          <h3 class="about-section-title">Разработка</h3>
+          <div class="about-authors">
+            <div class="about-author">
+              <div class="about-author-avatar">IN</div>
+              <div class="about-author-info">
+                <span class="about-author-name">INazarov</span>
+                <span class="about-author-role">Архитектура, разработка, шаблоны документов</span>
+                <a href="mailto:mail@germesgarant.by" class="about-author-email" id="about-email-link">mail@germesgarant.by</a>
+              </div>
+            </div>
+          </div>
+          <p class="about-copyright">© 2026 ООО «ГермесГарант». Все права защищены.</p>
+        </div>
+
+        <div class="about-divider"></div>
+
+        <!-- Лицензия -->
+        <div class="about-section">
+          <h3 class="about-section-title">Лицензионное соглашение</h3>
+          <div class="about-license-box">
+            <p>Настоящее программное обеспечение (далее — «Программа») является собственностью
+            ООО «ГермесГарант» (далее — «Правообладатель») и защищено законодательством
+            Республики Беларусь об авторском праве и смежных правах, а также нормами
+            международного права.</p>
+
+            <p>Программа предоставляется исключительно для внутреннего использования
+            сотрудниками и уполномоченными представителями Правообладателя. Любое иное
+            использование, включая, но не ограничиваясь:</p>
+
+            <ul class="about-license-list">
+              <li>распространение, копирование или передачу третьим лицам;</li>
+              <li>декомпиляцию, дизассемблирование или иное изучение исходного кода;</li>
+              <li>создание производных произведений на основе Программы;</li>
+              <li>коммерческое использование в интересах третьих лиц —</li>
+            </ul>
+
+            <p>строго запрещено без предварительного письменного согласия Правообладателя.</p>
+
+            <p>Программа предоставляется «как есть» (AS IS), без каких-либо явных или
+            подразумеваемых гарантий. Правообладатель не несёт ответственности за прямые
+            или косвенные убытки, возникшие в результате использования или невозможности
+            использования Программы.</p>
+
+            <p>По вопросам лицензирования обращайтесь: <strong>mail@germesgarant.by</strong></p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="about-footer">
+        <button class="about-footer-btn" id="about-ok">Закрыть</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== PREVIEW MODAL ===== -->
   <div class="preview-overlay" id="preview-overlay" hidden>
