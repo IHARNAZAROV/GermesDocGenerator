@@ -3,53 +3,40 @@
   "productName": "Генератор договоров ГермесГарант",
   "version": "1.0.0",
   "description": "Генератор договоров агентства недвижимости ГермесГарант",
-
   "author": {
-    "name": "ООО ГермесГарант",
+    "name": "INazarov",
     "email": "mail@germesgarant.by",
     "url": "https://germesgarant.by"
   },
-
   "homepage": "https://germesgarant.by",
   "license": "Proprietary",
-
   "main": "main.js",
-
   "scripts": {
     "start": "electron .",
     "scan": "node scripts/scan-excel.js",
     "dist": "electron-builder",
     "pack": "electron-builder --dir"
   },
-
   "devDependencies": {
     "electron": "^38.8.6",
-    "electron-builder": "^26.0.15"
+    "electron-builder": "^26.15.3"
   },
-
   "dependencies": {
     "docx": "^9.7.1",
     "docxtemplater": "^3.69.0",
     "exceljs": "^4.4.0",
     "pizzip": "^3.2.0"
   },
-
   "build": {
     "appId": "by.germesgarant.contractgenerator",
-
     "artifactName": "${productName}-${version}.${ext}",
-
     "copyright": "© 2026 ООО ГермесГарант",
-
     "directories": {
       "output": "release",
       "buildResources": "build"
     },
-
     "asar": true,
-
     "compression": "maximum",
-
     "files": [
       "**/*",
       "!release/**/*",
@@ -58,7 +45,6 @@
       "!*.log",
       "!README.md"
     ],
-
     "win": {
       "icon": "build/icon.ico",
       "target": [
@@ -66,11 +52,9 @@
         "portable"
       ]
     },
-
     "portable": {
       "artifactName": "Генератор договоров ГермесГарант-Portable.exe"
     },
-
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
