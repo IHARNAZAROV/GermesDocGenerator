@@ -1413,21 +1413,6 @@ function closePreviewModal() {
   previewContent.innerHTML = '';
 }
 
-function renderParagraphs(paragraphs) {
-  const page = document.createElement('div');
-  page.className = 'preview-page';
-
-  for (const text of paragraphs) {
-    const p = document.createElement('div');
-    p.className = 'preview-para' + (text.trim() === '' ? ' empty' : '');
-    p.textContent = text || '';
-    page.appendChild(p);
-  }
-
-  previewContent.innerHTML = '';
-  previewContent.appendChild(page);
-}
-
 async function loadPreviewTab(templateKey, data) {
   previewContent.innerHTML = '';
   previewLoader.hidden = false;
@@ -1444,7 +1429,11 @@ async function loadPreviewTab(templateKey, data) {
       return;
     }
 
-    renderParagraphs(result.paragraphs);
+    const page = document.createElement('div');
+    page.className = 'preview-page';
+    page.innerHTML = result.html;
+    previewContent.innerHTML = '';
+    previewContent.appendChild(page);
   } catch (err) {
     previewLoader.hidden = true;
     previewContent.innerHTML =

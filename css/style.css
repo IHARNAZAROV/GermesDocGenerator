@@ -1350,13 +1350,53 @@ html, body {
   line-height: 1.75;
   color: #1a1a1a;
 }
-.preview-para {
-  margin-bottom: .15em;
+/* ── Mammoth HTML output inside preview page ── */
+.preview-page p {
+  margin: 0 0 .25em;
   white-space: pre-wrap;
   word-break: break-word;
 }
-.preview-para.empty { min-height: .9em; }
-.preview-para.centered { text-align: center; }
+.preview-page p:empty { min-height: .9em; }
+
+.preview-page h1,
+.preview-page h2,
+.preview-page h3 {
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 700;
+  margin: .6em 0 .3em;
+  line-height: 1.3;
+}
+.preview-page h1 { font-size: 15px; }
+.preview-page h2 { font-size: 14px; }
+.preview-page h3 { font-size: 13.5px; }
+
+.preview-page strong { font-weight: 700; }
+.preview-page em     { font-style: italic; }
+
+.preview-page ul,
+.preview-page ol {
+  margin: .25em 0 .25em 1.4em;
+  padding: 0;
+}
+.preview-page li { margin-bottom: .15em; }
+
+.preview-page table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: .5em 0;
+  font-size: 12.5px;
+}
+.preview-page th,
+.preview-page td {
+  border: 1px solid #bbb;
+  padding: 4px 8px;
+  vertical-align: top;
+  text-align: left;
+}
+.preview-page th {
+  background: #f0f4f2;
+  font-weight: 600;
+}
 
 .preview-footer {
   display: flex;
