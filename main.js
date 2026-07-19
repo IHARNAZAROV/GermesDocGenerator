@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron')
 const path = require('path');
 const ExcelJS = require('exceljs');
 const { generateWord, previewWord } = require("./generator/word-generator");
-const { autoUpdater } = require('electron-updater');
+const { checkForUpdates } = require('./updater');
 
 // Map of template keys → filenames in templates/working/
 const TEMPLATE_FILES = {
@@ -95,35 +95,10 @@ function createWindow() {
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   createWindow();
- // === Автообновление ===
-  autoUpdater.checkForUpdatesAndNotify();
-  autoUpdater.on('update-available', () => {
-    dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: 'Доступно обновление',
-      message: 'Найдена новая версия программы. Она скачается в фоне и будет установлена при следующем запуске.',
-      buttons: ['OK'],
-    });
-  });
-  autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox(mainWindow, {
-      type: 'question',
-      title: 'Обновление готово',
-      message: 'Новая версия скачана. Перезапустить программу сейчас?',
-      buttons: ['Перезапустить', 'Позже'],
-    }).then(({ response }) => {
-      if (response === 0) autoUpdater.quitAndInstall();
-    });
-  });
-  autoUpdater.on('error', (err) => {
-    console.error('Ошибка автообновления:', err);
-    // Тихо — не беспокоим пользователя при ошибке сети
-  });
-  // === Конец автообновления ===
-  
-autoUpdater.logger = require('electron-log');
-autoUpdater.logger.transports.file.level = 'info';
 
+  // === Автообновление Portable ===
+  checkForUpdates(mainWindow);
+  // ================================
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

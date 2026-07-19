@@ -1536,3 +1536,74 @@ btnPreview.addEventListener('click', () => {
     });
   }
 }());
+
+// ============================================================
+//  Автообновление — модальное окно (Portable)
+// ============================================================
+(function () {
+  if (!window.electronAPI?.onUpdateAvailable) return;
+
+  const overlay      = document.getElementById('update-overlay');
+  const stepNotify   = document.getElementById('update-step-notify');
+  const stepProgress = document.getElementById('update-step-progress');
+  const stepError    = document.getElementById('update-step-error');
+
+  const versionLabel   = document.getElementById('update-version');
+  const progressFill   = document.getElementById('update-progress-fill');
+  const progressPct    = document.getElementById('update-progress-pct');
+  const errorText      = document.getElementById('update-error-text');
+
+  const btnConfirm    = document.getElementById('update-btn-confirm');
+  const btnCancel     = document.getElementById('update-btn-cancel');
+  const btnErrorClose = document.getElementById('update-btn-error-close');
+
+  function showStep(step) {
+    stepNotify.hidden   = (step !== 'notify');
+    stepProgress.hidden = (step !== 'progress');
+    stepError.hidden    = (step !== 'error');
+  }
+
+  function openModal() { overlay.hidden = false; }
+  function closeModal() { overlay.hidden = true; }
+
+  // Закрытие по клику на фон (только на шаге уведомления)
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay && !stepNotify.hidden) closeModal();
+  });
+
+  // Закрытие по Escape (только на шаге уведомления)
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !overlay.hidden && !stepNotify.hidden) closeModal();
+  });
+
+  // ── Получено событие «Найдено обновление» ─────────────────
+  window.electronAPI.onUpdateAvailable(({ version }) => {
+    if (versionLabel) versionLabel.textContent = `v${version}`;
+    showStep('notify');
+    openModal();
+  });
+
+  // ── Пользователь нажал «Обновить» ─────────────────────────
+  btnConfirm?.addEventListener('click', () => {
+    showStep('progress');
+    window.electronAPI.startUpdate();
+  });
+
+  // ── Пользователь нажал «Позже» ────────────────────────────
+  btnCancel?.addEventListener('click', closeModal);
+
+  // ── Прогресс скачивания ────────────────────────────────────
+  window.electronAPI.onUpdateDownloadProgress(({ percent }) => {
+    const pct = Math.min(100, Math.max(0, percent));
+    if (progressFill) progressFill.style.width = `${pct}%`;
+    if (progressPct)  progressPct.textContent   = `${pct}%`;
+  });
+
+  // ── Ошибка при обновлении ─────────────────────────────────
+  window.electronAPI.onUpdateError(({ message }) => {
+    if (errorText) errorText.textContent = message;
+    showStep('error');
+  });
+
+  btnErrorClose?.addEventListener('click', closeModal);
+}());

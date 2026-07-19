@@ -334,6 +334,53 @@
 
   </div><!-- /app-wrapper -->
 
+  <!-- ===== UPDATE MODAL ===== -->
+  <div class="update-overlay" id="update-overlay" hidden>
+    <div class="update-modal" role="dialog" aria-modal="true" aria-labelledby="update-title">
+
+      <!-- Шаг 1: уведомление о новой версии -->
+      <div id="update-step-notify">
+        <div class="update-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+          <h3 id="update-title" class="update-title">Доступно обновление</h3>
+        </div>
+        <p class="update-text">Найдена новая версия программы: <strong id="update-version"></strong>.<br>Хотите скачать и установить обновление сейчас?</p>
+        <div class="update-actions">
+          <button class="update-btn update-btn--primary" id="update-btn-confirm">Обновить</button>
+          <button class="update-btn update-btn--secondary" id="update-btn-cancel">Позже</button>
+        </div>
+      </div>
+
+      <!-- Шаг 2: прогресс скачивания -->
+      <div id="update-step-progress" hidden>
+        <div class="update-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          <h3 class="update-title">Скачивание обновления…</h3>
+        </div>
+        <div class="update-progress-wrap">
+          <div class="update-progress-bar">
+            <div class="update-progress-fill" id="update-progress-fill" style="width:0%"></div>
+          </div>
+          <span class="update-progress-pct" id="update-progress-pct">0%</span>
+        </div>
+        <p class="update-text update-text--small">Не закрывайте программу. После скачивания она перезапустится автоматически.</p>
+      </div>
+
+      <!-- Шаг 3: ошибка -->
+      <div id="update-step-error" hidden>
+        <div class="update-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <h3 class="update-title update-title--error">Ошибка обновления</h3>
+        </div>
+        <p class="update-text" id="update-error-text"></p>
+        <div class="update-actions">
+          <button class="update-btn update-btn--secondary" id="update-btn-error-close">Закрыть</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ===== ABOUT MODAL ===== -->
   <div class="about-overlay" id="about-overlay" hidden>
     <div class="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title">
