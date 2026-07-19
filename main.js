@@ -120,6 +120,10 @@ app.whenReady().then(() => {
     // Тихо — не беспокоим пользователя при ошибке сети
   });
   // === Конец автообновления ===
+  
+autoUpdater.logger = require('electron-log');
+autoUpdater.logger.transports.file.level = 'info';
+
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
