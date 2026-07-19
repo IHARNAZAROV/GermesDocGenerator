@@ -1,7 +1,7 @@
 {
   "name": "contract-generator",
   "productName": "Генератор договоров ГермесГарант",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Генератор договоров агентства недвижимости ГермесГарант",
   "author": {
     "name": "INazarov",
@@ -66,10 +66,10 @@
       "artifactName": "Генератор договоров ГермесГарант-Portable.exe"
     },
     "publish": {
-    "provider": "github",
-  "owner": "IHARNAZAROV",
-  "repo": "GermesDocGenerator"},
-
+      "provider": "github",
+      "owner": "IHARNAZAROV",
+      "repo": "GermesDocGenerator"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
