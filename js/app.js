@@ -150,12 +150,15 @@ function commitCurrentValues() {
   updateDirtyState();
 }
 
-// Attach change listeners to every tracked input at startup
-for (const inputId of Object.values(FIELD_MAP)) {
-  const el = document.getElementById(inputId);
-  if (!el) continue;
-  el.addEventListener('input', () => onInputChange(inputId, el.value));
-}
+// Event delegation: один слушатель на общий предок вместо N слушателей на каждый input.
+// FIELD_IDS — Set для O(1)-проверки принадлежности элемента к отслеживаемым полям.
+const FIELD_IDS = new Set(Object.values(FIELD_MAP));
+
+document.getElementById('deal-body').addEventListener('input', (e) => {
+  const id = e.target.id;
+  if (!id || !FIELD_IDS.has(id)) return;
+  onInputChange(id, e.target.value);
+});
 
 // ============================================================
 //  Build updates map for writing to Excel
