@@ -136,39 +136,52 @@ function isNewer(remoteVersion, localVersion) {
  * @param {string} currentExePath — путь к текущему running exe
  * @returns {string} путь к созданному .bat файлу
  */
-function writePsScript(newExePath, currentExePath) {
-  const scriptPath = path.join(os.tmpdir(), 'gg_update.ps1');
+/**
+ * Создаёт VBScript-файл для замены exe.
+ * Пути передаются как аргументы командной строки (не внутри файла),
+ * что полностью решает проблему кириллицы и пробелов в путях.
+ * wscript.exe запускается с флагом //B — без какого-либо UI.
+ */
+function writeVbsScript() {
+  const scriptPath = path.join(os.tmpdir(), 'gg_update.vbs');
+  // Тело скрипта не содержит кириллицы — только ASCII
+  const content = [
+    'Dim src, dst, fso, sh, i',
+    'src = WScript.Arguments(0)',
+    'dst = WScript.Arguments(1)',
+    '',
+    '\'  Ждём завершения Electron (5 секунд)',
+    'WScript.Sleep 5000',
+    '',
+    'Set fso = CreateObject("Scripting.FileSystemObject")',
+    'Set sh  = CreateObject("WScript.Shell")',
+    '',
+    'For i = 1 To 15',
+    '  On Error Resume Next',
+    '  Err.Clear',
+    '  fso.CopyFile src, dst, True',
+    '  If Err.Number = 0 Then',
+    '    fso.DeleteFile src, True',
+    '    sh.Run Chr(34) & dst & Chr(34), 1, False',
+    '    fso.DeleteFile WScript.ScriptFullName, True',
+    '    WScript.Quit 0',
+    '  End If',
+    '  On Error GoTo 0',
+    '  WScript.Sleep 2000',
+    'Next',
+    '',
+    '\'  Не удалось заменить — пишем лог и выходим',
+    'Dim logPath',
+    'logPath = fso.GetSpecialFolder(2) & "\\gg_update.log"',
+    'Dim ts',
+    'Set ts = fso.OpenTextFile(logPath, 8, True)',
+    'ts.WriteLine "FAILED to replace: " & src & " -> " & dst',
+    'ts.Close',
+    'fso.DeleteFile WScript.ScriptFullName, True',
+    'WScript.Quit 1',
+  ].join('\r\n');
 
-  // Экранируем одинарные кавычки для PowerShell ('' внутри '...')
-  const src  = newExePath.replace(/'/g, "''");
-  const dst  = currentExePath.replace(/'/g, "''");
-
-  const content = `
-# Ожидаем завершения Electron
-Start-Sleep -Seconds 5
-
-# До 15 попыток переместить файл с паузой 2 сек
-$attempts = 0
-$moved = $false
-while ($attempts -lt 15) {
-    $attempts++
-    try {
-        Move-Item -LiteralPath '${src}' -Destination '${dst}' -Force -ErrorAction Stop
-        $moved = $true
-        break
-    } catch {
-        Start-Sleep -Seconds 2
-    }
-}
-
-if ($moved) {
-    Start-Process -LiteralPath '${dst}'
-}
-
-# Удаляем этот скрипт
-Remove-Item -LiteralPath $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue
-`;
-  fs.writeFileSync(scriptPath, content, { encoding: 'utf8' });
+  fs.writeFileSync(scriptPath, content, { encoding: 'ascii' });
   return scriptPath;
 }
 
@@ -293,28 +306,19 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
   console.log(`[updater] destPath       = ${destPath}`);
 
   if (process.platform === 'win32') {
-    // Передаём команду через Base64 — надёжно работает с любыми путями (кириллица, пробелы)
-    const psCommand = `
-Start-Sleep -Seconds 5
-$src = '${destPath.replace(/'/g, "''")}'
-$dst = '${currentExePath.replace(/'/g, "''")}'
-for ($i = 0; $i -lt 15; $i++) {
-  try {
-    Move-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop
-    Start-Process -LiteralPath $dst
-    break
-  } catch {
-    Start-Sleep -Seconds 2
-  }
-}
-`;
-    const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
-    spawn('powershell.exe', [
-      '-NonInteractive',
-      '-WindowStyle', 'Hidden',
-      '-ExecutionPolicy', 'Bypass',
-      '-EncodedCommand', encoded,
-    ], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+    // wscript.exe //B запускает VBScript полностью скрытно (без окон).
+    // Пути передаются как аргументы — кириллица и пробелы не проблема.
+    const vbsPath = writeVbsScript();
+    spawn('wscript.exe', ['//B', '//NoLogo', vbsPath, destPath, currentExePath], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true,
+    }).unref();
+
+    // Записываем лог для отладки
+    const logPath = path.join(os.tmpdir(), 'gg_update.log');
+    const logLine = `[${new Date().toISOString()}] src="${destPath}" dst="${currentExePath}" PORTABLE_EXECUTABLE_FILE="${process.env.PORTABLE_EXECUTABLE_FILE || ''}"\n`;
+    try { fs.appendFileSync(logPath, logLine); } catch (_) {}
 
   } else {
     const scriptPath = writeShScript(destPath, currentExePath);
