@@ -1,7 +1,7 @@
 {
   "name": "contract-generator",
   "productName": "Генератор договоров ГермесГарант",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Генератор договоров агентства недвижимости ГермесГарант",
   "author": {
     "name": "INazarov",
