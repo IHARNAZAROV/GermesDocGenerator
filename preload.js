@@ -78,4 +78,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Get absolute file path from a File object (drag-and-drop)
   getPathForFile: (file)                       => webUtils.getPathForFile(file),
+
+  // ── Автообновление (Portable) ────────────────────────────────────────────
+  // Main → Renderer: найдена новая версия { version, assetUrl, assetName }
+  onUpdateAvailable: (callback) =>
+    ipcRenderer.on('update-available', (_e, info) => callback(info)),
+
+  // Main → Renderer: прогресс скачивания { percent }
+  onUpdateDownloadProgress: (callback) =>
+    ipcRenderer.on('update-download-progress', (_e, info) => callback(info)),
+
+  // Main → Renderer: ошибка при обновлении { message }
+  onUpdateError: (callback) =>
+    ipcRenderer.on('update-error', (_e, info) => callback(info)),
+
+  // Renderer → Main: пользователь подтвердил скачивание
+  startUpdate: () => ipcRenderer.send('update-start-download'),
 });
