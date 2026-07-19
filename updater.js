@@ -140,13 +140,26 @@ function writeBatScript(newExePath, currentExePath) {
   const scriptPath = path.join(os.tmpdir(), 'gg_update.bat');
   const content = `@echo off
 chcp 65001 >nul
-:: Ожидаем завершения Electron (2 секунды)
-ping -n 3 127.0.0.1 >nul
 
-:: Перемещаем новый exe на место старого
+:: Ожидаем завершения Electron (5 секунд)
+timeout /t 5 /nobreak >nul
+
+:: Пробуем переместить файл — до 10 попыток (файл может быть ещё заблокирован)
+set ATTEMPTS=0
+:RETRY
+set /a ATTEMPTS+=1
 move /y "${newExePath}" "${currentExePath}"
+if errorlevel 1 (
+  if %ATTEMPTS% lss 10 (
+    timeout /t 2 /nobreak >nul
+    goto RETRY
+  ) else (
+    del "%~f0"
+    exit /b 1
+  )
+)
 
-:: Запускаем обновлённую программу
+:: Успех — запускаем обновлённое приложение
 start "" "${currentExePath}"
 
 :: Удаляем этот скрипт
@@ -276,7 +289,7 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
 
   if (process.platform === 'win32') {
     scriptPath = writeBatScript(destPath, currentExePath);
-    spawnArgs  = { shell: false, detached: true, stdio: 'ignore' };
+    spawnArgs  = { shell: false, detached: true, stdio: 'ignore', windowsHide: true };
     spawn('cmd.exe', ['/c', scriptPath], spawnArgs).unref();
   } else {
     scriptPath = writeShScript(destPath, currentExePath);
