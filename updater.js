@@ -22,9 +22,24 @@ const { spawn }         = require('child_process');
 // ─── Настройки ──────────────────────────────────────────────────────────────
 const GITHUB_OWNER = 'IHARNAZAROV';
 const GITHUB_REPO  = 'GermesDocGenerator';
-// Подстрока, по которой ищем Portable-ассет в релизе
-const PORTABLE_ASSET_SUBSTR = 'Portable';
 // ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Выбирает Portable-ассет из списка ассетов релиза.
+ * Приоритет: файл с "portable" в имени → любой .exe без "setup" в имени.
+ */
+function findPortableAsset(assets) {
+  if (!assets || assets.length === 0) return null;
+  const exeAssets = assets.filter(a => a.name.toLowerCase().endsWith('.exe'));
+  // 1. Ищем явно portable
+  const portable = exeAssets.find(a => a.name.toLowerCase().includes('portable'));
+  if (portable) return portable;
+  // 2. Любой .exe, который не является installer/setup
+  const standalone = exeAssets.find(a => !a.name.toLowerCase().includes('setup'));
+  if (standalone) return standalone;
+  // 3. Первый попавшийся .exe
+  return exeAssets[0] || null;
+}
 
 /**
  * Делает HTTPS GET-запрос и возвращает тело ответа как строку.
@@ -199,7 +214,7 @@ async function checkForUpdates(mainWindow) {
 
   // Ищем portable-ассет в релизе
   const assets   = latestRelease.assets || [];
-  const asset    = assets.find(a => a.name.includes(PORTABLE_ASSET_SUBSTR));
+  const asset    = findPortableAsset(assets);
   const assetUrl = asset ? asset.browser_download_url : null;
 
   if (!assetUrl) {
