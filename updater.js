@@ -136,34 +136,37 @@ function isNewer(remoteVersion, localVersion) {
  * @param {string} currentExePath — путь к текущему running exe
  * @returns {string} путь к созданному .bat файлу
  */
-function writeBatScript(newExePath, currentExePath) {
-  const scriptPath = path.join(os.tmpdir(), 'gg_update.bat');
-  const content = `@echo off
-chcp 65001 >nul
+function writePsScript(newExePath, currentExePath) {
+  const scriptPath = path.join(os.tmpdir(), 'gg_update.ps1');
 
-:: Ожидаем завершения Electron (5 секунд)
-timeout /t 5 /nobreak >nul
+  // Экранируем одинарные кавычки для PowerShell ('' внутри '...')
+  const src  = newExePath.replace(/'/g, "''");
+  const dst  = currentExePath.replace(/'/g, "''");
 
-:: Пробуем переместить файл — до 10 попыток (файл может быть ещё заблокирован)
-set ATTEMPTS=0
-:RETRY
-set /a ATTEMPTS+=1
-move /y "${newExePath}" "${currentExePath}"
-if errorlevel 1 (
-  if %ATTEMPTS% lss 10 (
-    timeout /t 2 /nobreak >nul
-    goto RETRY
-  ) else (
-    del "%~f0"
-    exit /b 1
-  )
-)
+  const content = `
+# Ожидаем завершения Electron
+Start-Sleep -Seconds 5
 
-:: Успех — запускаем обновлённое приложение
-start "" "${currentExePath}"
+# До 15 попыток переместить файл с паузой 2 сек
+$attempts = 0
+$moved = $false
+while ($attempts -lt 15) {
+    $attempts++
+    try {
+        Move-Item -LiteralPath '${src}' -Destination '${dst}' -Force -ErrorAction Stop
+        $moved = $true
+        break
+    } catch {
+        Start-Sleep -Seconds 2
+    }
+}
 
-:: Удаляем этот скрипт
-del "%~f0"
+if ($moved) {
+    Start-Process -LiteralPath '${dst}'
+}
+
+# Удаляем этот скрипт
+Remove-Item -LiteralPath $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue
 `;
   fs.writeFileSync(scriptPath, content, { encoding: 'utf8' });
   return scriptPath;
@@ -288,9 +291,14 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
   let spawnArgs;
 
   if (process.platform === 'win32') {
-    scriptPath = writeBatScript(destPath, currentExePath);
+    scriptPath = writePsScript(destPath, currentExePath);
     spawnArgs  = { shell: false, detached: true, stdio: 'ignore', windowsHide: true };
-    spawn('cmd.exe', ['/c', scriptPath], spawnArgs).unref();
+    spawn('powershell.exe', [
+      '-NonInteractive',
+      '-WindowStyle', 'Hidden',
+      '-ExecutionPolicy', 'Bypass',
+      '-File', scriptPath,
+    ], spawnArgs).unref();
   } else {
     scriptPath = writeShScript(destPath, currentExePath);
     spawnArgs  = { shell: true, detached: true, stdio: 'ignore' };
