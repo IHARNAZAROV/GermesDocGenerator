@@ -11,7 +11,7 @@
   "homepage": "https://germesgarant.by",
   "license": "Proprietary",
   "main": "main.js",
-  "scripts": {
+  "scripts": {  
     "start": "electron .",
     "scan": "node scripts/scan-excel.js",
     "dist": "electron-builder",
