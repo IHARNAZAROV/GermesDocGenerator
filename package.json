@@ -43,7 +43,16 @@
       "!build/**/*",
       "!scripts/**/*",
       "!*.log",
-      "!README.md"
+      "!README.md",
+      "!attached_assets/**/*",
+      "!output/**/*",
+      "!.git/**/*",
+      "!.agents/**/*",
+      "!*.md",
+      "!pyproject.toml",
+      "!uv.lock",
+      "!main.py",
+      "!package-lock.json"
     ],
     "win": {
       "icon": "build/icon.ico",
