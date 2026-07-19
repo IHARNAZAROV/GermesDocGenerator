@@ -256,11 +256,11 @@ async function checkForUpdates(mainWindow) {
 }
 
 /**
- * Скачивает ассет, создаёт скрипт-замену, запускает его и закрывает приложение.
+ * Скачивает ассет, запускает замену через PowerShell/sh и закрывает приложение.
  */
 async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersion) {
-  const tempDir    = app.getPath('temp');
-  const destPath   = path.join(tempDir, assetName);
+  const tempDir  = app.getPath('temp');
+  const destPath = path.join(tempDir, assetName);
 
   const sendProgress = (percent) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -284,28 +284,44 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
     return;
   }
 
-  // Путь к текущему запущенному исполняемому файлу
-  const currentExePath = process.execPath;
-
-  let scriptPath;
-  let spawnArgs;
+  // ─── Определяем реальный путь к запущенному portable-exe ───────────────
+  // В portable-сборке electron-builder process.execPath указывает на временно
+  // распакованный бинарник внутри %TEMP%. Переменная PORTABLE_EXECUTABLE_FILE
+  // содержит настоящий путь к .exe на диске пользователя.
+  const currentExePath = process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
+  console.log(`[updater] currentExePath = ${currentExePath}`);
+  console.log(`[updater] destPath       = ${destPath}`);
 
   if (process.platform === 'win32') {
-    scriptPath = writePsScript(destPath, currentExePath);
-    spawnArgs  = { shell: false, detached: true, stdio: 'ignore', windowsHide: true };
+    // Передаём команду через Base64 — надёжно работает с любыми путями (кириллица, пробелы)
+    const psCommand = `
+Start-Sleep -Seconds 5
+$src = '${destPath.replace(/'/g, "''")}'
+$dst = '${currentExePath.replace(/'/g, "''")}'
+for ($i = 0; $i -lt 15; $i++) {
+  try {
+    Move-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop
+    Start-Process -LiteralPath $dst
+    break
+  } catch {
+    Start-Sleep -Seconds 2
+  }
+}
+`;
+    const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
     spawn('powershell.exe', [
       '-NonInteractive',
       '-WindowStyle', 'Hidden',
       '-ExecutionPolicy', 'Bypass',
-      '-File', scriptPath,
-    ], spawnArgs).unref();
+      '-EncodedCommand', encoded,
+    ], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+
   } else {
-    scriptPath = writeShScript(destPath, currentExePath);
-    spawnArgs  = { shell: true, detached: true, stdio: 'ignore' };
-    spawn('sh', [scriptPath], spawnArgs).unref();
+    const scriptPath = writeShScript(destPath, currentExePath);
+    spawn('sh', [scriptPath], { shell: true, detached: true, stdio: 'ignore' }).unref();
   }
 
-  console.log(`[updater] Скрипт замены запущен: ${scriptPath}. Закрываем приложение…`);
+  console.log('[updater] Команда замены запущена. Закрываем приложение…');
 
   // Небольшая задержка, чтобы скрипт успел стартовать
   setTimeout(() => {
