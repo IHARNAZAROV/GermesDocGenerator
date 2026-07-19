@@ -229,27 +229,6 @@ html, body {
   gap: 6px;
 }
 
-/* Warnings strip */
-.sidebar-warnings {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.sidebar-warn {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 5px 9px;
-  border-radius: 7px;
-  font-size: 11.5px;
-  line-height: 1.45;
-  font-family: var(--font);
-  background: #fffbe6;
-  border: 1px solid #f0d060;
-  color: #7a5200;
-}
-.sidebar-warn svg { flex-shrink: 0; margin-top: 1px; color: #c07800; }
-
 /* Template count badge */
 .tpl-count-badge {
   margin-left: auto;
