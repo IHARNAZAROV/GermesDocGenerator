@@ -27,6 +27,7 @@ Requires Node.js with Electron installed (`npm install` handles it via devDepend
 | File | Role |
 |---|---|
 | `main.js` | Electron main process — window, IPC handlers |
+| `updater.js` | Portable auto-updater — GitHub API check, download, bat/sh replacement script |
 | `preload.js` | Context bridge — exposes `window.electronAPI` |
 | `index.html` | Renderer HTML — structural skeleton (no hard-coded fields) |
 | `js/fields-config.js` | **Auto-generated** — `window.FIELDS_CONFIG` (browser-loadable) |
