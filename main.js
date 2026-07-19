@@ -19,6 +19,9 @@ const TEMPLATE_FILES = {
   'zadatok-standart':  'Договор_задатка.docx',
   'dkp-2-obshiy':      'Договор_2_собств_общий.docx',
   'dkp-2-eksklyuziv':  'Договор_ЭКС_2_собств.docx',
+  'dkp-3-obshiy':      'Договор_3_собств_общий.docx',
+  'dkp-3-eksklyuziv':  'Договор_ЭКС_3_собств.docx',
+  'dkp-fizlit-komstr': 'Договор_физ_лица_коммерция.docx',
 };
 
 // ============================================================
