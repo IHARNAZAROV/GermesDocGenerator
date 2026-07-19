@@ -276,7 +276,7 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
 
   if (process.platform === 'win32') {
     scriptPath = writeBatScript(destPath, currentExePath);
-    spawnArgs  = { shell: false, detached: true, stdio: 'ignore' };
+    spawnArgs  = { shell: false, detached: true, stdio: 'ignore', windowsHide: true };
     spawn('cmd.exe', ['/c', scriptPath], spawnArgs).unref();
   } else {
     scriptPath = writeShScript(destPath, currentExePath);
