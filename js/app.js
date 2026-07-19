@@ -598,10 +598,52 @@ function resetContractAvailability() {
 // ============================================================
 function handleSelectAll() {
   document.querySelectorAll('.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
+  updateSidebarStatus();
 }
 function handleDeselectAll() {
   document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
+  updateSidebarStatus();
 }
+
+// ============================================================
+//  Sidebar status — count badge + warnings
+// ============================================================
+function updateSidebarStatus() {
+  const warningsEl = document.getElementById('sidebar-warnings');
+  const badgeEl    = document.getElementById('tpl-count-badge');
+  if (!warningsEl || !badgeEl) return;
+
+  const hasFolder = saveFolderInput.value.trim() !== '';
+  const checkedCount = document.querySelectorAll(
+    '.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]:checked'
+  ).length;
+
+  // Count badge in the Templates header
+  if (checkedCount > 0) {
+    badgeEl.textContent = checkedCount;
+    badgeEl.hidden = false;
+  } else {
+    badgeEl.hidden = true;
+  }
+
+  // Warning messages
+  const warnIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  const warnings = [];
+  if (!hasFolder)       warnings.push('Не выбрана папка сохранения');
+  if (checkedCount === 0) warnings.push('Не выбран ни один шаблон');
+
+  warningsEl.innerHTML = warnings
+    .map(t => `<div class="sidebar-warn">${warnIcon}${t}</div>`)
+    .join('');
+}
+
+// React to individual template checkbox changes
+document.addEventListener('change', (e) => {
+  if (e.target.matches('.tpl-item input[type="checkbox"]')) updateSidebarStatus();
+});
+
+// React to manual edits / clear of the folder input
+saveFolderInput.addEventListener('input', updateSidebarStatus);
 
 // ============================================================
 //  Main flow — load Excel file (shared between dialog & drag-drop)
@@ -769,7 +811,7 @@ if (btnScanTemplate) {
 btnBrowse.addEventListener('click', async () => {
   const current = saveFolderInput.value.trim() || undefined;
   const chosen = await window.electronAPI.selectFolder(current);
-  if (chosen) saveFolderInput.value = chosen;
+  if (chosen) { saveFolderInput.value = chosen; updateSidebarStatus(); }
 });
 
 // ============================================================
@@ -1598,4 +1640,7 @@ btnPreview.addEventListener('click', () => {
   });
 
   btnErrorClose?.addEventListener('click', closeModal);
+
+  // Initial sidebar state on app load
+  updateSidebarStatus();
 }());
