@@ -127,6 +127,9 @@ function renderFields(groupId, fields) {
     if (rendered.has(field.key)) continue;
     rendered.add(field.key);
 
+    // Скрытые поля — не отображаются в форме, логика работает через них как обычно
+    if (field.hidden) continue;
+
     // Пропускаем "дочерние" поля — они рендерятся внутри "родительского"
     if (field.pairedUnder) continue;
 
