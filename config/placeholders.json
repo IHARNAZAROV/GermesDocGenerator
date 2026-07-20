@@ -8,7 +8,7 @@
   "deal": {
     "number": {
       "value": "",
-      "description": "Номер сделки"
+      "description": "Номер договора"
     },
     "date": {
       "value": "",
@@ -25,10 +25,6 @@
     "endDateText": {
       "value": "",
       "description": "Дата окончания договора в длинном формате (например: 16 июля 2027)"
-    },
-    "exclusive": {
-      "value": "",
-      "description": "Признак эксклюзивного договора (да / нет)"
     },
     "contractNumber": {
       "value": "",

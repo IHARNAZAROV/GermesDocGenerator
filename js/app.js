@@ -327,10 +327,9 @@ function handleCheckData() {
 
   // ── СДЕЛКА ───────────────────────────────────────────────
   chk('deal-Стоимость BYN',              'Сделка → Цена BYN');
-  chk('deal-Номер сделки',               'Сделка → Номер сделки');
+  chk('deal-Номер договора',              'Сделка → Номер договора');
   chk('deal-Дата договора',              'Сделка → Дата договора');
   chk('deal-Дата окончания договора',    'Сделка → Дата окончания договора');
-  chk('deal-Тип договора',              'Сделка → Тип договора');
   chk('deal-Количество собственников',  'Сделка → Кол-во собственников');
   chk('deal-Ответственный риэлтер',     'Сделка → Риэлтер');
   // Комиссия и Стоимость прописью — вычисляются, не проверяем
@@ -1139,13 +1138,12 @@ function buildPlaceholderData() {
 
   const _endDateRaw = getField('deal-Дата окончания договора') || '';
   const deal = {
-    number:                    getField('deal-Номер сделки')    || '',
+    number:                    getField('deal-Номер договора')  || '',
     date:                      getField('deal-Дата договора')   || '',
     dateText:                  '',
     endDate:                   _endDateRaw,
     endDateText:               dateToLongRussian(_endDateRaw),
-    exclusive:                 getField('deal-Эксклюзив')       || '',
-    contractNumber:            getField('deal-Номер сделки')    || '',
+    contractNumber:            getField('deal-Номер договора')  || '',
     contractDate:              getField('deal-Дата договора')   || '',
     advertisingContractNumber: '',
     advertisingContractDate:   '',
