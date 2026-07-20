@@ -425,11 +425,13 @@ html, body {
   color: var(--text-muted);
   font-weight: 600;
   text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
   padding-right: 4px;
   letter-spacing: .1px;
+  align-self: center;
+  line-height: 1.3;
 }
 .fr .input-wrap {
   display: flex;
