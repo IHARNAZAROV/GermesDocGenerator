@@ -137,6 +137,10 @@ function onInputChange(inputId, currentValue) {
   ) {
     updateContractAvailability();
   }
+  // Re-evaluate object-type-dependent field visibility
+  if (inputId === 'property-Тип объекта') {
+    applyObjectTypeVisibility();
+  }
 }
 
 function commitCurrentValues() {
@@ -287,6 +291,7 @@ function populateForm(data) {
   btnSaveAs.disabled = false;
   switchTab('owner1');
   updateContractAvailability();
+  applyObjectTypeVisibility();
 }
 
 // ============================================================
@@ -306,6 +311,7 @@ function handleClearForm() {
   setStatus('Готов к работе');
   switchTab('owner1');
   resetContractAvailability();
+  applyObjectTypeVisibility();
 }
 
 // ============================================================
@@ -341,8 +347,21 @@ function handleCheckData() {
   chk('property-Общая площадь',  'Объект → Общая площадь');
   chk('property-Жилая площадь',  'Объект → Жилая площадь');
   chk('property-Площадь кухни',  'Объект → Площадь кухни');
-  chk('property-Кадастровый номер',  'Объект → Кадастровый №');
-  chk('property-Инвентарный номер',  'Объект → Инвентарный №');
+  // Поля зависят от типа объекта
+  const _propTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
+  const _isHouseCheck = _propTypeRaw === 'дом' || _propTypeRaw === 'жилой дом';
+  const _isFlatCheck  = _propTypeRaw === 'квартира' || _propTypeRaw === 'апартаменты' || _propTypeRaw === 'комната';
+  if (_isHouseCheck) {
+    chk('property-Кадастровый номер',    'Объект → Кадастровый №');
+    chk('property-Площадь участка',      'Объект → Площадь участка');
+    chk('property-Форма собственности',  'Объект → Форма собственности');
+  } else if (_isFlatCheck) {
+    chk('property-Инвентарный номер',    'Объект → Инвентарный №');
+  } else {
+    // Тип не выбран или нестандартный — проверяем оба
+    chk('property-Кадастровый номер',    'Объект → Кадастровый №');
+    chk('property-Инвентарный номер',    'Объект → Инвентарный №');
+  }
 
   // ── ПРОДАВЕЦ ─────────────────────────────────────────────
   chk('seller-Фамилия',                 'Продавец → Фамилия');
@@ -590,6 +609,32 @@ function resetContractAvailability() {
     delete label.dataset.tooltip;
     const cb = label.querySelector('input[type="checkbox"]');
     if (cb) cb.disabled = false;
+  });
+}
+
+// ============================================================
+//  Object-type-dependent field visibility
+//  Поля с data-object-type="дом" — только для домов.
+//  Поля с data-object-type="квартира" — только для квартир.
+//  Когда тип не выбран — показываем все поля.
+// ============================================================
+function applyObjectTypeVisibility() {
+  const raw  = (getField('property-Тип объекта') || '').trim().toLowerCase();
+  const isHouse = raw === 'дом' || raw === 'жилой дом';
+  const isFlat  = raw === 'квартира' || raw === 'апартаменты' || raw === 'комната';
+  const isEmpty = raw === '';
+
+  document.querySelectorAll('[data-object-type]').forEach((el) => {
+    const type = el.dataset.objectType;
+    if (isEmpty) {
+      el.style.display = '';
+      return;
+    }
+    if (type === 'дом') {
+      el.style.display = isHouse ? '' : 'none';
+    } else if (type === 'квартира') {
+      el.style.display = isFlat ? '' : 'none';
+    }
   });
 }
 
@@ -1127,6 +1172,8 @@ function buildPlaceholderData() {
     areaLiving:   getField('property-Жилая площадь')   || '',
     areaKitchen:  getField('property-Площадь кухни')   || '',
     cadastre:        getField('property-Кадастровый номер') || '',
+    landArea:        getField('property-Площадь участка')   || '',
+    ownershipForm:   getField('property-Форма собственности') || '',
     inventoryNumber: getField('property-Инвентарный номер')|| '',
     wallMaterial:    getField('property-Материал стен')    || '',
     yearBuilt:    getField('property-Год постройки')   || '',

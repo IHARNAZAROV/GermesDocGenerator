@@ -133,39 +133,48 @@ function renderFields(groupId, fields) {
     // Computed-propis рендерится внутри BYN-блока
     if (field.type === 'computed-propis') continue;
 
+    let fieldHtml = '';
+
     // BYN-поле: рендерим вместе с прописью
     if (field.type === 'byn') {
       const propis = fields.find(f => f.type === 'computed-propis');
-      html += htmlByn(groupId, field, propis || null);
+      fieldHtml = htmlByn(groupId, field, propis || null);
       if (propis) rendered.add(propis.key);
-      continue;
     }
 
     // Поле с парой (Корпус/Квартира или Этаж/Этажность)
-    if (field.pairWith) {
+    else if (field.pairWith) {
       const pair = byKey[field.pairWith];
       if (pair) {
         rendered.add(pair.key);
         if (field.pairStyle === 'floor') {
-          html += htmlFloorPair(groupId, field, pair);
+          fieldHtml = htmlFloorPair(groupId, field, pair);
         } else {
-          html += htmlSlashPair(groupId, field, pair);
+          fieldHtml = htmlSlashPair(groupId, field, pair);
         }
-        continue;
       }
     }
 
     // Стандартные типы
-    switch (field.type) {
-      case 'date':
-        html += htmlDate(groupId, field);
-        break;
-      case 'readonly':
-        html += htmlReadonly(groupId, field);
-        break;
-      default:
-        html += htmlText(groupId, field);
+    else {
+      switch (field.type) {
+        case 'date':
+          fieldHtml = htmlDate(groupId, field);
+          break;
+        case 'readonly':
+          fieldHtml = htmlReadonly(groupId, field);
+          break;
+        default:
+          fieldHtml = htmlText(groupId, field);
+      }
     }
+
+    // Если поле привязано к типу объекта — добавляем data-атрибут на обёртку
+    if (fieldHtml && field.objectType) {
+      fieldHtml = fieldHtml.replace('<div class="fr ', `<div data-object-type="${field.objectType}" class="fr `);
+    }
+
+    html += fieldHtml;
   }
 
   return html;
