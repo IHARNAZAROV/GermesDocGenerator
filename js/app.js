@@ -140,6 +140,7 @@ function onInputChange(inputId, currentValue) {
   // Re-evaluate object-type-dependent field visibility
   if (inputId === 'property-Тип объекта') {
     applyObjectTypeVisibility();
+    autoUpdateCommission();
   }
 }
 
@@ -506,7 +507,11 @@ function autoUpdateCommission() {
     return;
   }
 
-  const result = window.calculateCommission(parseFloat(raw), window.COMMISSION_CONFIG.baseValue);
+  const propType = (document.getElementById('property-Тип объекта')?.value || '').trim().toLowerCase();
+  const isCommercial = propType === 'коммерческая недвижимость';
+  const cfg = isCommercial ? window.COMMISSION_CONFIG_COMMERCIAL : window.COMMISSION_CONFIG;
+
+  const result = window.calculateCommission(parseFloat(raw), cfg.baseValue, cfg.brackets);
   commissionInput.value = result.amountBYN ? `${result.amountBYN} (${result.percent}%)` : '';
 }
 
@@ -619,8 +624,9 @@ function resetContractAvailability() {
 // ============================================================
 function applyObjectTypeVisibility() {
   const raw  = (getField('property-Тип объекта') || '').trim().toLowerCase();
-  const isHouse = raw === 'дом' || raw === 'жилой дом';
-  const isFlat  = raw === 'квартира' || raw === 'апартаменты' || raw === 'комната';
+  const isHouse      = raw === 'дом' || raw === 'жилой дом';
+  const isFlat       = raw === 'квартира' || raw === 'апартаменты' || raw === 'комната';
+  const isCommercial = raw === 'коммерческая недвижимость';
   const isEmpty = raw === '';
 
   document.querySelectorAll('[data-object-type]').forEach((el) => {
@@ -633,6 +639,8 @@ function applyObjectTypeVisibility() {
       el.style.display = isHouse ? '' : 'none';
     } else if (type === 'квартира') {
       el.style.display = isFlat ? '' : 'none';
+    } else if (type === 'коммерческая недвижимость') {
+      el.style.display = isCommercial ? '' : 'none';
     }
   });
 }
@@ -1135,8 +1143,9 @@ function buildPersonBlock(prefix) {
 
 function buildPlaceholderData() {
   const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
-  const isHouse     = propertyTypeRaw === 'дом';
-  const isApartment = propertyTypeRaw === 'квартира';
+  const isHouse      = propertyTypeRaw === 'дом';
+  const isApartment  = propertyTypeRaw === 'квартира';
+  const isCommercial = propertyTypeRaw === 'коммерческая недвижимость';
 
   const _endDateRaw = getField('deal-Дата окончания договора') || '';
   const deal = {
@@ -1161,6 +1170,7 @@ function buildPlaceholderData() {
   const property = {
     isHouse,
     isApartment,
+    isCommercial,
     type:         getField('property-Тип объекта')      || '',
     typeGenitive: GENITIVE_MAP[propertyTypeRaw] || getField('property-Тип объекта') || '',
     city:         getField('property-Город')            || '',
@@ -1180,6 +1190,8 @@ function buildPlaceholderData() {
     inventoryNumber: getField('property-Инвентарный номер')|| '',
     wallMaterial:    getField('property-Материал стен')    || '',
     yearBuilt:    getField('property-Год постройки')   || '',
+    commercialKind:    getField('property-Вид коммерческой недвижимости')       || '',
+    commercialPurpose: getField('property-Назначение коммерческой недвижимости') || '',
     priceUSD:          getField('deal-Стоимость USD')   || '',
     priceBYN:          getField('deal-Стоимость BYN')   || '',
     priceWords:        getField('deal-Стоимость прописью') || '',
@@ -1258,13 +1270,18 @@ function buildPlaceholderData() {
   const money = { amount: '', amountWords: '', currency: '' };
 
   // ── Комиссия агентства ──────────────────────────────────────
-  // Вычисляется по тарифной таблице: priceBYN / baseValue → строка → процент → сумма
+  // Для коммерческой недвижимости — отдельная тарифная таблица.
+  // Для остальных объектов — стандартная.
   const priceBYNRaw = parseFloat(
     (getField('deal-Стоимость BYN') || '0').replace(',', '.')
   );
+  const commissionCfg = isCommercial
+    ? window.COMMISSION_CONFIG_COMMERCIAL
+    : window.COMMISSION_CONFIG;
   const commissionResult = window.calculateCommission(
     priceBYNRaw,
-    window.COMMISSION_CONFIG.baseValue
+    commissionCfg.baseValue,
+    commissionCfg.brackets
   );
   const commission = {
     percent:     commissionResult.percent    ? String(commissionResult.percent)    : '',
