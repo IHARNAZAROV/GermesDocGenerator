@@ -76,7 +76,8 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Сумма задатка USD",
-          "label": "Задаток, USD:"
+          "label": "Задаток, USD:",
+          "hidden": true
         },
         {
           "key": "Дополнительные условия",
@@ -158,7 +159,7 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Площадь участка",
-          "label": "Площадь участка, сот.:",
+          "label": "Площадь участка, га.:",
           "objectType": "дом"
         },
         {
