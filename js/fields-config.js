@@ -66,8 +66,7 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Сумма задатка USD",
-          "label": "Задаток, USD:",
-          "hidden": true
+          "label": "Задаток, USD:"
         },
         {
           "key": "Дополнительные условия",
