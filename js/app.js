@@ -1153,6 +1153,7 @@ function buildPlaceholderData() {
     depositContractDate:       '',
     storageContractNumber:     '',
     storageContractDate:       '',
+    additionalTerms:           getField('deal-Дополнительные условия') || '',
     btiPayment:                getField('deal-Оплата услуг БТИ') || '',
     furniture:                 getField('deal-Мебель')            || '',
   };
