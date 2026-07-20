@@ -1135,6 +1135,8 @@ function buildPersonBlock(prefix) {
 
 function buildPlaceholderData() {
   const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
+  const isHouse     = propertyTypeRaw === 'дом';
+  const isApartment = propertyTypeRaw === 'квартира';
 
   const _endDateRaw = getField('deal-Дата окончания договора') || '';
   const deal = {
@@ -1157,6 +1159,8 @@ function buildPlaceholderData() {
   };
 
   const property = {
+    isHouse,
+    isApartment,
     type:         getField('property-Тип объекта')      || '',
     typeGenitive: GENITIVE_MAP[propertyTypeRaw] || getField('property-Тип объекта') || '',
     city:         getField('property-Город')            || '',

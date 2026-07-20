@@ -84,6 +84,14 @@
   },
 
   "property": {
+    "isHouse": {
+      "value": false,
+      "description": "true если тип объекта — дом. Используйте {#property.isHouse}...{/property.isHouse} для условных блоков в шаблоне"
+    },
+    "isApartment": {
+      "value": false,
+      "description": "true если тип объекта — квартира. Используйте {#property.isApartment}...{/property.isApartment} для условных блоков в шаблоне"
+    },
     "type": {
       "value": "",
       "description": "Тип объекта недвижимости в именительном падеже (квартира, дом, комната и т.д.)"
