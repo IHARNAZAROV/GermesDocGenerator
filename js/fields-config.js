@@ -16,13 +16,13 @@ window.FIELDS_CONFIG = {
       "fields": [
         {
           "key": "Стоимость USD",
-          "label": "Цена, USD:",
+          "label": "Стоимость, USD:",
           "type": "text",
           "section": "deal-prices"
         },
         {
           "key": "Стоимость BYN",
-          "label": "Цена, BYN:",
+          "label": "Стоимость, BYN:",
           "type": "byn",
           "section": "deal-prices"
         },
