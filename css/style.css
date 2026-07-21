@@ -753,6 +753,25 @@ html, body {
 }
 
 /* ============================================================
+   TWO-COLUMN FORM LAYOUT  (property / extras / deal-prices)
+   ============================================================ */
+.form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  align-items: start;
+}
+.form-col {
+  min-width: 0;
+}
+
+/* Разделитель между колонками */
+.form-col + .form-col {
+  padding-left: 14px;
+  border-left: 1px solid var(--border-light);
+}
+
+/* ============================================================
    SELLER / BUYER — TWO-COLUMN GRID
    ============================================================ */
 .seller-grid {

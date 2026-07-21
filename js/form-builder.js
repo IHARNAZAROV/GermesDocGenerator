@@ -35,6 +35,9 @@ const SECTION_CONTAINERS = {
 // Секции собственников: рендерятся в две колонки (.tab-inner-grid > div)
 const OWNER_SECTIONS = new Set(['owner1', 'owner2', 'owner3']);
 
+// Секции с двухколоночным layout через col-свойство поля
+const TWO_COL_SECTIONS = new Set(['property', 'extras', 'deal-prices']);
+
 // ── Генераторы HTML ───────────────────────────────────────────
 
 function escHtml(str) {
@@ -111,6 +114,72 @@ function htmlFloorPair(groupId, mainField, pairField) {
        + `<span>из</span>`
        + `<input type="text" id="${pairId}" style="width:42px" />`
        + `</div></div></div>`;
+}
+
+// ── Двухколоночный рендер (по свойству col поля) ─────────────
+
+function renderFieldsTwoCol(groupId, fields) {
+  const byKey = {};
+  fields.forEach(f => { byKey[f.key] = f; });
+
+  // Разделяем «первичные» поля по колонкам
+  // pairedUnder-поля и computed-propis следуют за родителем — классифицируем позже
+  const col1Primary = [], col2Primary = [], fullPrimary = [];
+
+  for (const field of fields) {
+    if (field.hidden) continue;
+    if (field.pairedUnder) continue;       // следует за родительским
+    if (field.type === 'computed-propis') continue; // следует за BYN
+
+    if (field.col === 'full') fullPrimary.push(field);
+    else if (field.col === 2)  col2Primary.push(field);
+    else                       col1Primary.push(field); // col:1 или без col
+  }
+
+  // Строим набор полей для каждой колонки (первичные + зависимые)
+  function buildSubset(primaries) {
+    const primaryKeys = new Set(primaries.map(f => f.key));
+    const subset = [...primaries];
+    for (const field of fields) {
+      // Дочернее поле пары → в колонку родителя
+      if (field.pairedUnder && primaryKeys.has(field.pairedUnder)) {
+        subset.push(field);
+      }
+      // Прописью → в колонку BYN (если BYN в этой колонке)
+      if (field.type === 'computed-propis' && primaries.some(f => f.type === 'byn')) {
+        subset.push(field);
+      }
+    }
+    return subset;
+  }
+
+  const col1Fields = buildSubset(col1Primary);
+  const col2Fields = buildSubset(col2Primary);
+
+  let html = '';
+
+  // Двухколоночная сетка
+  if (col1Fields.length > 0 || col2Fields.length > 0) {
+    html += '<div class="form-two-col">';
+    html += `<div class="form-col">${renderFields(groupId, col1Fields)}</div>`;
+    html += `<div class="form-col">${renderFields(groupId, col2Fields)}</div>`;
+    html += '</div>';
+  }
+
+  // Поля на всю ширину (col:"full") — после сетки
+  for (const field of fullPrimary) {
+    if (field.type === 'computed-propis') {
+      html += htmlReadonly(groupId, field, 'Вычисляется автоматически из поля «Цена BYN»');
+    } else if (field.type === 'date') {
+      html += htmlDate(groupId, field);
+    } else if (field.type === 'readonly') {
+      html += htmlReadonly(groupId, field);
+    } else {
+      html += htmlText(groupId, field);
+    }
+  }
+
+  return html;
 }
 
 // ── Рендер массива полей одной группы ────────────────────────
@@ -233,7 +302,12 @@ function buildForm(config) {
     // Для остальных секций все поля из одной группы (groupId одинаков в секции)
     const groupId = entries[0]?.groupId;
     const fields  = entries.map(e => e.field);
-    container.innerHTML = renderFields(groupId, fields);
+
+    if (TWO_COL_SECTIONS.has(sectionId)) {
+      container.innerHTML = renderFieldsTwoCol(groupId, fields);
+    } else {
+      container.innerHTML = renderFields(groupId, fields);
+    }
   }
 
   // 3. Строим FIELD_MAP: "groupId-key" → "groupId-key"

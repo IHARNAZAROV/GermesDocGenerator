@@ -18,20 +18,23 @@ window.FIELDS_CONFIG = {
           "key": "Стоимость USD",
           "label": "Стоимость, USD:",
           "type": "text",
-          "section": "deal-prices"
+          "section": "deal-prices",
+          "col": 1
         },
         {
           "key": "Стоимость BYN",
           "label": "Стоимость, BYN:",
           "type": "byn",
-          "section": "deal-prices"
+          "section": "deal-prices",
+          "col": 2
         },
         {
           "key": "Стоимость прописью",
           "label": "Цена прописью:",
           "type": "computed-propis",
           "section": "deal-prices",
-          "computed": true
+          "computed": true,
+          "col": "full"
         },
         {
           "key": "Номер договора",
@@ -63,19 +66,23 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Сумма задатка BYN",
-          "label": "Задаток, BYN:"
+          "label": "Задаток, BYN:",
+          "col": 2
         },
         {
           "key": "Сумма задатка USD",
-          "label": "Задаток, USD:"
+          "label": "Задаток, USD:",
+          "col": 2
         },
         {
           "key": "Дополнительные условия",
-          "label": "Доп. условия:"
+          "label": "Доп. условия:",
+          "col": 2
         },
         {
           "key": "Оплата услуг БТИ",
-          "label": "Оплата услуг БТИ:"
+          "label": "Оплата услуг БТИ:",
+          "col": 2
         }
       ]
     },
@@ -138,39 +145,47 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Количество комнат",
-          "label": "Кол-во комнат:"
+          "label": "Кол-во комнат:",
+          "col": 2
         },
         {
           "key": "Общая площадь",
-          "label": "Общая площадь:"
+          "label": "Общая площадь:",
+          "col": 2
         },
         {
           "key": "Жилая площадь",
-          "label": "Жилая площадь:"
+          "label": "Жилая площадь:",
+          "col": 2
         },
         {
           "key": "Площадь кухни",
-          "label": "Площадь кухни:"
+          "label": "Площадь кухни:",
+          "col": 2
         },
         {
           "key": "Кадастровый номер",
           "label": "Кадастровый №:",
-          "objectType": "дом"
+          "objectType": "дом",
+          "col": 2
         },
         {
           "key": "Площадь участка",
           "label": "Площадь, га:",
-          "objectType": "дом"
+          "objectType": "дом",
+          "col": 2
         },
         {
           "key": "Форма собственности",
           "label": "Форма собственности:",
-          "objectType": "дом"
+          "objectType": "дом",
+          "col": 2
         },
         {
           "key": "Инвентарный номер",
           "label": "Инвентарный №:",
-          "objectType": "квартира"
+          "objectType": "квартира",
+          "col": 2
         },
         {
           "key": "Материал стен",
