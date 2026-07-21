@@ -207,15 +207,22 @@ function buildDefaultSaveAsName() {
   const address     = (document.getElementById('property-Адрес')?.value || '').trim();
   const dealDate    = (document.getElementById('deal-Дата договора')?.value || '').trim();
 
-  const parts = ['Сделка'];
+  // Sanitize a string for use in a filename: replace characters forbidden on Windows/macOS
+  function sanitize(str) {
+    return str.replace(/[/\\:*?"<>|]/g, '-').replace(/-+/g, '-').trim();
+  }
+
+  const parts = [];
 
   if (contractNum || address) {
-    if (contractNum) parts.push(contractNum);
-    if (address)     parts.push(address);
+    if (contractNum) parts.push(sanitize(contractNum));
+    if (address)     parts.push(sanitize(address));
   } else if (dealDate) {
     // Fallback: convert dd.mm.yyyy → yyyy-mm-dd for a clean filename
     const dateParts = dealDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    parts.push(dateParts ? `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}` : dealDate);
+    parts.push(dateParts ? `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}` : sanitize(dealDate));
+  } else {
+    parts.push('Сделка');
   }
 
   return parts.join('_') + '.xlsx';
