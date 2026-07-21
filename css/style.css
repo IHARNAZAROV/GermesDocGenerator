@@ -2221,12 +2221,12 @@ html, body {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 10px;
+  padding: 5px 10px;
   border-radius: var(--r-md);
   cursor: pointer;
   outline: none;
   transition: background .13s, color .13s;
-  min-height: 44px;
+  min-height: 36px;
 }
 .nav-item:hover { background: var(--brand-xlight); }
 .nav-item:focus-visible { box-shadow: 0 0 0 2px var(--brand-mid); }
@@ -2527,7 +2527,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 220px;
+  max-height: 110px;
   overflow-y: auto;
 }
 .sp-validation-empty {
@@ -2664,6 +2664,84 @@ html, body {
 /* ── Seller-grid inside accordion ── */
 /* The #form-section-seller and #form-section-buyer get class ws-fields-grid--2col
    which already applies 2-col grid */
+
+/* ============================================================
+   TIPS CAROUSEL
+   ============================================================ */
+.tips-carousel {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  background: var(--brand-xlight);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tips-track-wrap {
+  overflow: hidden;
+}
+
+.tips-track {
+  display: flex;
+  transition: transform 280ms cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+.tips-slide {
+  min-width: 100%;
+  padding: 11px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tips-slide-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--brand-light);
+  border: 1px solid #B2D8C9;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+.tips-slide-icon svg { color: var(--brand); flex-shrink: 0; }
+
+.tips-slide-title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--brand-dark);
+  line-height: 1.25;
+}
+
+.tips-slide-desc {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.tips-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 12px 8px;
+}
+
+.tips-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: #B2D8C9;
+  padding: 0;
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+  flex-shrink: 0;
+}
+.tips-dot:hover { background: var(--brand-mid); }
+.tips-dot--active {
+  background: var(--brand);
+  transform: scale(1.25);
+  cursor: default;
+}
 
 /* ── Compat: win-left no longer used, but keep class in case of legacy refs ── */
 .win-left { display: none; }

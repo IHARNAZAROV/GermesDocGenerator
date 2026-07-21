@@ -240,6 +240,69 @@
               </div>
             </div>
           </div>
+
+          <!-- ── Tips Carousel ── -->
+          <div class="tips-carousel" id="tips-carousel" aria-label="Советы">
+            <div class="tips-track-wrap">
+              <div class="tips-track" id="tips-track">
+
+                <!-- Слайд 1: Быстрое начало -->
+                <div class="tips-slide" role="group" aria-label="Совет 1 из 5">
+                  <div class="tips-slide-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  </div>
+                  <div class="tips-slide-title">Быстрое начало</div>
+                  <div class="tips-slide-desc">Нажмите «Выбрать Excel», загрузите файл сделки — поля заполнятся автоматически.</div>
+                </div>
+
+                <!-- Слайд 2: Сохраняйте данные -->
+                <div class="tips-slide" role="group" aria-label="Совет 2 из 5">
+                  <div class="tips-slide-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  </div>
+                  <div class="tips-slide-title">Сохраняйте прогресс</div>
+                  <div class="tips-slide-desc">Нажимайте «Сохранить» после изменений — данные запишутся обратно в Excel-файл.</div>
+                </div>
+
+                <!-- Слайд 3: Шаблоны -->
+                <div class="tips-slide" role="group" aria-label="Совет 3 из 5">
+                  <div class="tips-slide-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  </div>
+                  <div class="tips-slide-title">Выбор шаблонов</div>
+                  <div class="tips-slide-desc">Отметьте нужные договоры в правой панели «Документы» перед нажатием «Сформировать».</div>
+                </div>
+
+                <!-- Слайд 4: Несколько собственников -->
+                <div class="tips-slide" role="group" aria-label="Совет 4 из 5">
+                  <div class="tips-slide-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                  <div class="tips-slide-title">Несколько собственников</div>
+                  <div class="tips-slide-desc">Укажите кол-во собственников в разделе «Сделка» — появятся дополнительные вкладки.</div>
+                </div>
+
+                <!-- Слайд 5: Проверка перед генерацией -->
+                <div class="tips-slide" role="group" aria-label="Совет 5 из 5">
+                  <div class="tips-slide-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="tips-slide-title">Проверка перед выдачей</div>
+                  <div class="tips-slide-desc">Убедитесь, что блок «Проверка данных» не показывает ошибок, прежде чем формировать договор.</div>
+                </div>
+
+              </div>
+            </div>
+            <!-- Dots -->
+            <div class="tips-footer">
+              <button class="tips-dot tips-dot--active" data-tip="0" aria-label="Совет 1" title="Быстрое начало"></button>
+              <button class="tips-dot" data-tip="1" aria-label="Совет 2" title="Сохраняйте прогресс"></button>
+              <button class="tips-dot" data-tip="2" aria-label="Совет 3" title="Выбор шаблонов"></button>
+              <button class="tips-dot" data-tip="3" aria-label="Совет 4" title="Несколько собственников"></button>
+              <button class="tips-dot" data-tip="4" aria-label="Совет 5" title="Проверка перед выдачей"></button>
+            </div>
+          </div>
+
         </div>
 
       </nav>
@@ -712,5 +775,35 @@
   <script src="js/realtor-service.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ui-controller.js"></script>
+  <script>
+    /* ── Tips Carousel ─────────────────────────────────────────── */
+    (function () {
+      const track  = document.getElementById('tips-track');
+      const dots   = document.querySelectorAll('.tips-dot');
+      const total  = dots.length;
+      let current  = 0;
+      let timer    = null;
+
+      function goTo(idx) {
+        current = (idx + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('tips-dot--active', i === current));
+      }
+
+      function startAuto() {
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), 6000);
+      }
+
+      dots.forEach(d => {
+        d.addEventListener('click', () => {
+          goTo(+d.dataset.tip);
+          startAuto(); // reset timer on manual nav
+        });
+      });
+
+      startAuto();
+    })();
+  </script>
 </body>
 </html>
