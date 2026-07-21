@@ -203,14 +203,21 @@ function buildFieldGroups() {
 //  Default "Save As" filename
 // ============================================================
 function buildDefaultSaveAsName() {
-  const lastName = (document.getElementById('seller-Фамилия')?.value || '').trim();
-  const dealDate = (document.getElementById('deal-Дата договора')?.value || '').trim();
-  let dateStr = dealDate;
-  const dateParts = dealDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  if (dateParts) dateStr = `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}`;
+  const contractNum = (document.getElementById('deal-Номер договора')?.value || '').trim();
+  const address     = (document.getElementById('property-Адрес')?.value || '').trim();
+  const dealDate    = (document.getElementById('deal-Дата договора')?.value || '').trim();
+
   const parts = ['Сделка'];
-  if (lastName) parts.push(lastName);
-  if (dateStr)  parts.push(dateStr);
+
+  if (contractNum || address) {
+    if (contractNum) parts.push(contractNum);
+    if (address)     parts.push(address);
+  } else if (dealDate) {
+    // Fallback: convert dd.mm.yyyy → yyyy-mm-dd for a clean filename
+    const dateParts = dealDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    parts.push(dateParts ? `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}` : dealDate);
+  }
+
   return parts.join('_') + '.xlsx';
 }
 
