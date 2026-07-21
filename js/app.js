@@ -812,7 +812,7 @@ btnChooseFile.addEventListener('click', handleChooseFile);
 btnSave.addEventListener('click', handleSave);
 btnSaveAs.addEventListener('click', handleSaveAs);
 btnClear.addEventListener('click', handleClearForm);
-btnCheck.addEventListener('click', handleCheckData);
+if (btnCheck) btnCheck.addEventListener('click', handleCheckData);
 errorClose.addEventListener('click', hideError);
 btnSelectAll.addEventListener('click', handleSelectAll);
 btnDeselectAll.addEventListener('click', handleDeselectAll);
