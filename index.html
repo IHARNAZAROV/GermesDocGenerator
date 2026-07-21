@@ -211,6 +211,36 @@
 
         </ul>
 
+        <!-- Nav validation block -->
+        <div class="nav-validation-wrap">
+          <div class="sp-block" id="sp-block-validation">
+            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-validation-toggle" role="button" tabindex="0" aria-expanded="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Проверка данных</span>
+              <span class="sp-block-badge" id="sp-issues-count" hidden>0</span>
+              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sp-block-body" id="sp-validation-body">
+              <div class="sp-validation-list" id="sp-validation-list">
+                <div class="sp-validation-empty" id="sp-validation-empty">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Данные не заполнены</span>
+                </div>
+              </div>
+              <!-- Error navigation -->
+              <div class="sp-err-nav" id="sp-err-nav" hidden>
+                <button class="sp-err-nav-btn" id="sp-err-prev" title="Предыдущая проблема">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="sp-err-nav-label" id="sp-err-nav-label">1 / 1</span>
+                <button class="sp-err-nav-btn" id="sp-err-next" title="Следующая проблема">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </nav>
 
       <!-- ══════════════════════════════════════
@@ -416,34 +446,6 @@
         <!-- Scrollable content -->
         <div class="sp-scroll">
 
-          <!-- ── Validation block ── -->
-          <div class="sp-block" id="sp-block-validation">
-            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-validation-toggle" role="button" tabindex="0" aria-expanded="true">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Проверка данных</span>
-              <span class="sp-block-badge" id="sp-issues-count" hidden>0</span>
-              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div class="sp-block-body" id="sp-validation-body">
-              <div class="sp-validation-list" id="sp-validation-list">
-                <div class="sp-validation-empty" id="sp-validation-empty">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Данные не заполнены</span>
-                </div>
-              </div>
-              <!-- Error navigation -->
-              <div class="sp-err-nav" id="sp-err-nav" hidden>
-                <button class="sp-err-nav-btn" id="sp-err-prev" title="Предыдущая проблема">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <span class="sp-err-nav-label" id="sp-err-nav-label">1 / 1</span>
-                <button class="sp-err-nav-btn" id="sp-err-next" title="Следующая проблема">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
           <!-- ── Documents block ── -->
           <div class="sp-block" id="sp-document">
             <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-docs-toggle" role="button" tabindex="0" aria-expanded="true">
@@ -531,10 +533,6 @@
             <button class="sp-quick-btn sp-quick-btn--danger" id="btn-clear" title="Очистить все поля формы">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
               Очистить
-            </button>
-            <button class="sp-quick-btn sp-quick-btn--check" id="btn-check" title="Проверить заполненность формы">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Проверить
             </button>
           </div>
           <button class="btn-generate" id="btn-generate">

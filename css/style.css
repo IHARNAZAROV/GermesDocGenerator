@@ -2178,12 +2178,19 @@ html, body {
 }
 .nav-list {
   list-style: none;
-  flex: 1;
   overflow-y: auto;
   padding: 6px 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* Validation block in left nav */
+.nav-validation-wrap {
+  flex: 1;
+  padding: 8px 8px 8px;
+  border-top: 1px solid var(--border-light);
+  overflow-y: auto;
 }
 .nav-item {
   display: flex;
