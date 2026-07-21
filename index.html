@@ -213,34 +213,6 @@
 
         <!-- Nav validation + settings blocks -->
         <div class="nav-validation-wrap">
-          <!-- ── Settings block ── -->
-          <div class="sp-block" id="sp-block-settings">
-            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-settings-toggle" role="button" tabindex="0" aria-expanded="true">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-                <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-              </svg>
-              <span>Настройки генерации</span>
-              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div class="sp-block-body" id="sp-settings-body">
-              <div class="settings-folder-label">Папка для сохранения:</div>
-              <div class="settings-row">
-                <input type="text" id="save-folder" value="" placeholder="Папка не выбрана" />
-                <button class="btn-browse" id="btn-browse">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                  Обзор
-                </button>
-              </div>
-              <label class="check-row"><input type="checkbox" id="chk-open-after" checked>
-                <span>Открыть файлы после создания</span>
-              </label>
-              <label class="check-row"><input type="checkbox" id="chk-add-date">
-                <span>Добавить дату к имени файла</span>
-              </label>
-            </div>
-          </div>
-
           <!-- ── Validation block ── -->
           <div class="sp-block" id="sp-block-validation">
             <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-validation-toggle" role="button" tabindex="0" aria-expanded="true">
@@ -522,6 +494,34 @@
               </div>
             </div>
           </div><!-- /#sp-document -->
+
+          <!-- ── Settings block ── -->
+          <div class="sp-block" id="sp-block-settings">
+            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-settings-toggle" role="button" tabindex="0" aria-expanded="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+              <span>Настройки генерации</span>
+              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sp-block-body" id="sp-settings-body">
+              <div class="settings-folder-label">Папка для сохранения:</div>
+              <div class="settings-row">
+                <input type="text" id="save-folder" value="" placeholder="Папка не выбрана" />
+                <button class="btn-browse" id="btn-browse">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Обзор
+                </button>
+              </div>
+              <label class="check-row"><input type="checkbox" id="chk-open-after" checked>
+                <span>Открыть файлы после создания</span>
+              </label>
+              <label class="check-row"><input type="checkbox" id="chk-add-date">
+                <span>Добавить дату к имени файла</span>
+              </label>
+            </div>
+          </div>
 
           <!-- compat div expected by app.js updateSidebarStatus -->
           <div id="sidebar-warnings" style="display:none"></div>

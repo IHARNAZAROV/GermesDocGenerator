@@ -1076,13 +1076,12 @@ html, body {
    ============================================================ */
 .settings-row {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 5px;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 10px;
 }
 .settings-row input[type="text"] {
-  width: 100%;
+  flex: 1;
   height: 32px;
   border: 1px solid var(--input-bdr);
   border-radius: var(--r-md);
@@ -1099,12 +1098,10 @@ html, body {
   box-shadow: 0 0 0 3px rgba(21,89,69,.10);
 }
 .btn-browse {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 5px;
   height: 32px;
-  width: 100%;
   padding: 0 10px;
   background: var(--surface);
   border: 1px solid var(--border);
