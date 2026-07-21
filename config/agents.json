@@ -1,13 +1,16 @@
 {
-  "_comment": "Справочник риэлтеров ГермесГарант. Выбор риэлтера происходит автоматически по фамилии из ячейки B10 шаблона Excel (поле «Ответственный риэлтер»). Ключи массива matchKeys — варианты написания фамилии для поиска (в нижнем регистре). Свидетельство об аттестации выдаётся на 5 лет, attestationExpiry вычислено автоматически.",
+  "_comment": "Справочник риэлтеров ГермесГарант. id — уникальный ключ (латиница). photo — относительный путь от корня проекта. position — должность для UI. matchKeys — варианты написания фамилии для поиска в Excel (нижний регистр). Свидетельство об аттестации выдаётся на 5 лет.",
   "agents": [
     {
+      "id": "turko",
       "matchKeys": ["турко", "turko"],
       "lastName": "Турко",
       "firstName": "Ольга",
       "middleName": "Ростиславовна",
       "fullName": "Турко Ольга Ростиславовна",
       "initials": "Турко О.Р.",
+      "position": "Директор, риэлтер",
+      "photo": "assets/olga-turko.webp",
       "phone": "",
       "email": "",
       "attestationNumber": "1931",
@@ -17,12 +20,15 @@
       "cardDate": "26.06.2026"
     },
     {
+      "id": "yushkevich",
       "matchKeys": ["юшкевич", "yushkevich"],
       "lastName": "Юшкевич",
       "firstName": "Наталья",
       "middleName": "Вячеславовна",
       "fullName": "Юшкевич Наталья Вячеславовна",
       "initials": "Юшкевич Н.В.",
+      "position": "Риэлтер",
+      "photo": "assets/natalya-yushkevich.webp",
       "phone": "",
       "email": "",
       "attestationNumber": "1839",
@@ -32,12 +38,15 @@
       "cardDate": "26.06.2026"
     },
     {
+      "id": "moskalenko",
       "matchKeys": ["москаленко", "moskalenko"],
       "lastName": "Москаленко",
       "firstName": "Екатерина",
       "middleName": "Викторовна",
       "fullName": "Москаленко Екатерина Викторовна",
       "initials": "Москаленко Е.В.",
+      "position": "Риэлтер",
+      "photo": "",
       "phone": "",
       "email": "",
       "attestationNumber": "2030",
@@ -47,12 +56,15 @@
       "cardDate": "26.06.2026"
     },
     {
+      "id": "eismont",
       "matchKeys": ["эйсмонт", "eismont"],
       "lastName": "Эйсмонт",
       "firstName": "Ольга",
       "middleName": "Ивановна",
       "fullName": "Эйсмонт Ольга Ивановна",
       "initials": "Эйсмонт О.И.",
+      "position": "Агент по недвижимости",
+      "photo": "assets/olga-eysmont.webp",
       "phone": "",
       "email": "",
       "attestationNumber": "2448",

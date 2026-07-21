@@ -38,7 +38,6 @@ Requires Node.js with Electron installed (`npm install` handles it via devDepend
 | `css/style.css` | All styles — compact CRM theme |
 | `excel/excel-reader.js` | Parses `.xlsx` using ExcelJS |
 | `generator/word-generator.js` | Fills Word templates via docxtemplater |
-| `data/realtors.json` | Realtor list — names, positions, photo paths, attestation data. Edit here to add/remove staff. |
 | `fields-config.json` | **Single source of truth** — all field definitions, labels, types |
 | `scripts/scan-excel.js` | CLI scanner — reads Excel, updates fields-config.json + js/fields-config.js |
 

@@ -2,17 +2,30 @@
 
 // ============================================================
 //  RealtorService — единый источник правды о выбранном риэлтере
-//  Загружает data/realtors.json, хранит выбор в localStorage,
-//  уведомляет подписчиков об изменении.
+//
+//  Данные берутся из window.AGENTS_CONFIG (js/agents-config.js),
+//  который загружается раньше этого скрипта. Отдельный JSON-файл
+//  не нужен — agents-config.js / config/agents.json являются
+//  единственным справочником сотрудников.
+//
+//  Выбор сохраняется в localStorage и восстанавливается при
+//  следующем запуске. При первом запуске автоматически выбирается
+//  первый сотрудник в списке.
 // ============================================================
 
 (function () {
   const STORAGE_KEY = 'gg-selected-realtor-id';
 
-  let _realtors   = [];
-  let _currentId  = null;
+  // ── Данные из уже загруженного AGENTS_CONFIG ──────────────
+  const _realtors = (window.AGENTS_CONFIG?.agents || []).filter(a => a.id);
+
+  const _savedId  = (() => {
+    try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; }
+  })();
+  const _hasSaved = _realtors.some(r => r.id === _savedId);
+  let _currentId  = _hasSaved ? _savedId : (_realtors[0]?.id ?? null);
+
   let _listeners  = [];
-  let _readyPromise = null;
 
   // ── Helpers ───────────────────────────────────────────────
 
@@ -24,7 +37,7 @@
 
   function _notify(realtor) {
     _listeners.forEach(fn => {
-      try { fn(realtor); } catch (e) { /* listener must not crash service */ }
+      try { fn(realtor); } catch (_) {}
     });
   }
 
@@ -32,7 +45,7 @@
 
   const RealtorService = {
     /** @returns {Object[]} */
-    getAll()    { return _realtors; },
+    getAll()     { return _realtors; },
 
     /** @returns {Object|null} */
     getCurrent() {
@@ -48,60 +61,29 @@
       _notify(found);
     },
 
-    /** @param {function} fn  Called with the new realtor object on every change. */
+    /** @param {function} fn  Вызывается с новым объектом риэлтера при каждом изменении. */
     onChange(fn) { _listeners.push(fn); },
 
-    /** @returns {Promise<void>}  Resolves once JSON is loaded and UI is ready. */
-    ready() { return _readyPromise; },
-
-    /** @returns {string}  Initials for a realtor record (e.g. "ОТ"). */
+    /** @returns {string} */
     getInitials: _getInitials,
   };
 
-  // ── Data loading ──────────────────────────────────────────
-
-  _readyPromise = fetch('./data/realtors.json')
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      _realtors = Array.isArray(data) ? data : [];
-
-      const savedId = (() => {
-        try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; }
-      })();
-      const found = _realtors.find(r => r.id === savedId);
-      _currentId  = found ? savedId : (_realtors[0]?.id ?? null);
-
-      _initUI();
-    })
-    .catch(err => {
-      console.warn('[RealtorService] Не удалось загрузить data/realtors.json:', err);
-      _initUI(); // render empty state gracefully
-    });
-
   // ── UI ────────────────────────────────────────────────────
 
-  /** Build an avatar element (img or initials fallback). */
-  function _buildAvatar(realtor, size) {
+  function _buildAvatar(realtor, sizePx) {
     const wrap = document.createElement('div');
-    wrap.className  = 'realtor-avatar';
-    wrap.style.width  = size + 'px';
-    wrap.style.height = size + 'px';
+    wrap.className   = 'realtor-avatar';
+    wrap.style.width  = sizePx + 'px';
+    wrap.style.height = sizePx + 'px';
     wrap.setAttribute('aria-hidden', 'true');
 
     if (realtor && realtor.photo) {
-      const img = document.createElement('img');
-      img.src     = realtor.photo;
-      img.alt     = '';
-      img.loading = 'lazy';
+      const img    = document.createElement('img');
+      img.src      = realtor.photo;
+      img.alt      = '';
+      img.loading  = 'lazy';
       img.decoding = 'async';
-      img.onerror = () => {
-        // replace with initials on load failure
-        img.remove();
-        _appendInitials(wrap, realtor);
-      };
+      img.onerror  = () => { img.remove(); _appendInitials(wrap, realtor); };
       wrap.appendChild(img);
     } else if (realtor) {
       _appendInitials(wrap, realtor);
@@ -110,58 +92,57 @@
   }
 
   function _appendInitials(wrap, realtor) {
-    const span = document.createElement('span');
+    const span       = document.createElement('span');
     span.className   = 'realtor-avatar__initials';
     span.textContent = _getInitials(realtor);
     wrap.appendChild(span);
   }
 
-  /** Update the trigger button to reflect the currently selected realtor. */
   function _updateTrigger(realtor) {
-    const trigger      = document.getElementById('realtor-trigger');
-    const avatarSlot   = document.getElementById('realtor-avatar-slot');
-    const nameEl       = document.getElementById('realtor-name-trigger');
-    const positionEl   = document.getElementById('realtor-position-trigger');
-    if (!trigger) return;
+    const slot      = document.getElementById('realtor-avatar-slot');
+    const nameEl    = document.getElementById('realtor-name-trigger');
+    const posEl     = document.getElementById('realtor-position-trigger');
+    if (!slot) return;
 
-    if (avatarSlot) {
-      avatarSlot.innerHTML = '';
-      if (realtor) avatarSlot.appendChild(_buildAvatar(realtor, 36));
-    }
-    if (nameEl)     nameEl.textContent     = realtor ? `${realtor.firstName} ${realtor.lastName}` : '—';
-    if (positionEl) positionEl.textContent = realtor ? (realtor.position || '') : '';
+    slot.innerHTML = '';
+    if (realtor) slot.appendChild(_buildAvatar(realtor, 34));
+    if (nameEl) nameEl.textContent = realtor
+      ? `${realtor.firstName} ${realtor.lastName}` : '—';
+    if (posEl)  posEl.textContent  = realtor ? (realtor.position || '') : '';
   }
 
-  /** Build and return a menu item element. */
-  function _buildMenuItem(realtor, isSelected, focusIndex) {
+  function _buildMenuItem(realtor, isSelected) {
     const li = document.createElement('li');
-    li.className    = 'realtor-item' + (isSelected ? ' realtor-item--selected' : '');
-    li.role         = 'option';
-    li.tabIndex     = focusIndex === 0 ? 0 : -1;
-    li.dataset.id   = realtor.id;
+    li.className   = 'realtor-item' + (isSelected ? ' realtor-item--selected' : '');
+    li.role        = 'option';
+    li.tabIndex    = -1;
+    li.dataset.id  = realtor.id;
     li.setAttribute('aria-selected', String(isSelected));
-    li.setAttribute('aria-label', `${realtor.firstName} ${realtor.lastName}, ${realtor.position || ''}`);
+    li.setAttribute('aria-label',
+      `${realtor.firstName} ${realtor.lastName}${realtor.position ? ', ' + realtor.position : ''}`);
 
     const avatar = _buildAvatar(realtor, 36);
-    avatar.className += ' realtor-item__avatar';
 
     const info  = document.createElement('div');
-    info.className  = 'realtor-item__info';
-    const nameEl    = document.createElement('span');
-    nameEl.className = 'realtor-item__name';
+    info.className = 'realtor-item__info';
+    const nameEl   = document.createElement('span');
+    nameEl.className   = 'realtor-item__name';
     nameEl.textContent = `${realtor.firstName} ${realtor.lastName}`;
-    const posEl     = document.createElement('span');
-    posEl.className = 'realtor-item__position';
-    posEl.textContent = realtor.position || '';
+    const posEl        = document.createElement('span');
+    posEl.className    = 'realtor-item__position';
+    posEl.textContent  = realtor.position || '';
     info.appendChild(nameEl);
     info.appendChild(posEl);
 
-    const check = document.createElement('span');
+    const check  = document.createElement('span');
     check.className = 'realtor-item__check';
     check.setAttribute('aria-hidden', 'true');
-    check.innerHTML = isSelected
-      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-      : '';
+    if (isSelected) {
+      check.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+        ' stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<polyline points="20 6 9 17 4 12"/></svg>';
+    }
 
     li.appendChild(avatar);
     li.appendChild(info);
@@ -169,7 +150,6 @@
     return li;
   }
 
-  /** Render (or re-render) the dropdown menu items. */
   function _renderMenu() {
     const menu = document.getElementById('realtor-menu');
     if (!menu) return;
@@ -183,44 +163,40 @@
       return;
     }
 
-    _realtors.forEach((r, i) => {
-      const isSelected = r.id === _currentId;
-      const li = _buildMenuItem(r, isSelected, i);
-
-      li.addEventListener('click', () => {
-        RealtorService.setCurrentById(r.id);
-        _closeMenu();
-      });
-      li.addEventListener('keydown', e => _handleItemKey(e));
+    _realtors.forEach(r => {
+      const li = _buildMenuItem(r, r.id === _currentId);
+      li.addEventListener('click',        () => { RealtorService.setCurrentById(r.id); _closeMenu(); });
+      li.addEventListener('keydown',      e  => _handleItemKey(e));
       li.addEventListener('pointerenter', () => li.focus());
-
       menu.appendChild(li);
     });
   }
 
-  // ── Menu open / close ─────────────────────────────────────
+  // ── Open / close ──────────────────────────────────────────
+
+  function _isOpen() {
+    const m = document.getElementById('realtor-menu');
+    return m && !m.hidden;
+  }
 
   function _openMenu() {
     const dropdown = document.getElementById('realtor-dropdown');
     const menu     = document.getElementById('realtor-menu');
     const trigger  = document.getElementById('realtor-trigger');
-    if (!dropdown || !menu) return;
+    if (!menu) return;
 
     _renderMenu();
     menu.hidden = false;
-    dropdown.setAttribute('aria-expanded', 'true');
+    dropdown?.setAttribute('aria-expanded', 'true');
     trigger?.setAttribute('aria-expanded', 'true');
 
-    // Focus selected item (or first)
     requestAnimationFrame(() => {
-      const selected = menu.querySelector('.realtor-item--selected');
-      const first    = menu.querySelector('.realtor-item');
-      (selected || first)?.focus();
+      const sel   = menu.querySelector('.realtor-item--selected');
+      const first = menu.querySelector('.realtor-item');
+      (sel || first)?.focus();
     });
 
-    // Close on outside click
-    setTimeout(() => document.addEventListener('click', _onOutsideClick), 0);
-    setTimeout(() => document.addEventListener('pointerdown', _onOutsideClick), 0);
+    setTimeout(() => document.addEventListener('pointerdown', _onOutside), 0);
   }
 
   function _closeMenu() {
@@ -229,22 +205,20 @@
     const trigger  = document.getElementById('realtor-trigger');
     if (!menu) return;
 
-    menu.hidden = true;
+    menu.hidden = false; // briefly visible so animation plays
+    menu.classList.add('realtor-menu--closing');
+    setTimeout(() => {
+      menu.hidden = true;
+      menu.classList.remove('realtor-menu--closing');
+    }, 160);
+
     dropdown?.setAttribute('aria-expanded', 'false');
     trigger?.setAttribute('aria-expanded', 'false');
-
-    document.removeEventListener('click',       _onOutsideClick);
-    document.removeEventListener('pointerdown', _onOutsideClick);
-
+    document.removeEventListener('pointerdown', _onOutside);
     trigger?.focus();
   }
 
-  function _isMenuOpen() {
-    const menu = document.getElementById('realtor-menu');
-    return menu && !menu.hidden;
-  }
-
-  function _onOutsideClick(e) {
+  function _onOutside(e) {
     const dropdown = document.getElementById('realtor-dropdown');
     if (dropdown && !dropdown.contains(e.target)) _closeMenu();
   }
@@ -255,7 +229,7 @@
     const menu  = document.getElementById('realtor-menu');
     if (!menu) return;
     const items = Array.from(menu.querySelectorAll('.realtor-item:not(.realtor-item--empty)'));
-    const idx   = items.indexOf(e.currentTarget);
+    const idx   = items.indexOf(document.activeElement);
 
     switch (e.key) {
       case 'ArrowDown':
@@ -270,7 +244,7 @@
       case 'Enter':
       case ' ':
         e.preventDefault();
-        e.currentTarget.click();
+        document.activeElement?.click();
         break;
       case 'Escape':
       case 'Tab':
@@ -280,36 +254,34 @@
     }
   }
 
-  // ── Initialize DOM ────────────────────────────────────────
+  // ── Init ──────────────────────────────────────────────────
 
-  function _initUI() {
-    // Trigger button behaviour
+  function _init() {
     const trigger = document.getElementById('realtor-trigger');
-    if (trigger) {
-      trigger.addEventListener('click', e => {
-        e.stopPropagation();
-        _isMenuOpen() ? _closeMenu() : _openMenu();
-      });
-      trigger.addEventListener('keydown', e => {
-        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (!_isMenuOpen()) _openMenu();
-        } else if (e.key === 'Escape') {
-          _closeMenu();
-        }
-      });
-    }
+    if (!trigger) return;
 
-    // Subscribe to changes → update trigger + re-render menu
-    RealtorService.onChange(realtor => {
-      _updateTrigger(realtor);
-      _renderMenu(); // refresh checkmarks
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      _isOpen() ? _closeMenu() : _openMenu();
+    });
+    trigger.addEventListener('keydown', e => {
+      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (!_isOpen()) _openMenu();
+      } else if (e.key === 'Escape') {
+        _closeMenu();
+      }
     });
 
-    // Initial render
+    RealtorService.onChange(r => { _updateTrigger(r); _renderMenu(); });
     _updateTrigger(RealtorService.getCurrent());
   }
 
-  // ── Export ────────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
   window.RealtorService = RealtorService;
 }());
