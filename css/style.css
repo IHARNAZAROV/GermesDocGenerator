@@ -2259,32 +2259,6 @@ html, body {
 .nav-item-badge--warn { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
 .nav-item-badge--info { background: var(--brand-light); color: var(--brand-dark); border: 1px solid #B2D8C9; }
 
-.nav-footer {
-  flex-shrink: 0;
-  padding: 10px 14px;
-  border-top: 1px solid var(--border-light);
-}
-.nav-progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--fs-2xs);
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-.nav-progress-track {
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.nav-progress-fill {
-  height: 100%;
-  background: var(--brand);
-  border-radius: 2px;
-  transition: width .4s ease;
-}
-
 /* ── Work Area (center) ── */
 .work-area {
   overflow-y: auto;
@@ -2292,7 +2266,7 @@ html, body {
   padding: 10px 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   border-right: 1px solid var(--border);
 }
 
@@ -2447,7 +2421,6 @@ html, body {
   overflow: hidden;
   flex-shrink: 0;
 }
-.sp-block--progress { padding: 10px 12px 12px; }
 
 .sp-block-hdr {
   display: flex;
@@ -2508,26 +2481,13 @@ html, body {
 }
 .sp-block-body--collapsed { display: none; }
 
-/* ── Progress ── */
-.sp-progress-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 6px;
+/* Settings block padding */
+#sp-settings-body {
+  padding: 10px 12px 10px;
 }
-.sp-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--brand-mid) 0%, var(--brand) 100%);
-  border-radius: 3px;
-  transition: width .4s ease;
-}
-.sp-progress-pct {
-  margin-left: auto;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  color: var(--brand);
-}
+
+/* Prevent CSS display from overriding [hidden] attribute */
+[hidden] { display: none !important; }
 
 /* ── Validation ── */
 .sp-validation-list {

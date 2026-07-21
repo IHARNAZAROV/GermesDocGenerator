@@ -125,26 +125,7 @@ function getIssues() {
   return issues;
 }
 
-// ── Прогресс заполнения ───────────────────────────────────────
-function calcProgress() {
-  const inputs = getAllFormInputs();
-  if (inputs.length === 0) return 0;
-  const filled = inputs.filter(el => el.value.trim() !== '').length;
-  return Math.round((filled / inputs.length) * 100);
-}
-
-// ── Обновить индикаторы прогресса ─────────────────────────────
-function updateProgress() {
-  const pct = calcProgress();
-  const fill = document.getElementById('sp-progress-fill');
-  const label = document.getElementById('sp-progress-pct');
-  const navFill = document.getElementById('nav-progress-fill');
-  const navPct  = document.getElementById('nav-progress-pct');
-  if (fill)  fill.style.width  = pct + '%';
-  if (label) label.textContent = pct + '%';
-  if (navFill) navFill.style.width  = pct + '%';
-  if (navPct)  navPct.textContent   = pct + '%';
-}
+// calcProgress / updateProgress removed — progress bar feature removed
 
 // ── Обновить Smart Panel: проверка данных ─────────────────────
 let _currentIssues = [];
@@ -375,7 +356,6 @@ function updateExcelNavStatus(loaded, fileName) {
 
 // ── Полное обновление Smart Panel ─────────────────────────────
 function refreshUI() {
-  updateProgress();
   updateValidationPanel();
   updateDocsNavStatus();
   // Проверяем статус Excel по drop zone
@@ -556,7 +536,6 @@ document.getElementById('deal-body')?.addEventListener('input', () => {
   // Debounce: обновлять не чаще 1 раза за 120ms
   clearTimeout(UIController._debounce);
   UIController._debounce = setTimeout(() => {
-    updateProgress();
     updateValidationPanel();
   }, 120);
 });
