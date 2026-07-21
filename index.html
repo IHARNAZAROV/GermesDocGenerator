@@ -120,224 +120,445 @@
       </div>
     </header>
 
-    <!-- ===== MAIN BODY ===== -->
+    <!-- ===== MAIN BODY — 3-panel workspace ===== -->
     <div class="win-body">
 
       <!-- ══════════════════════════════════════
-           LEFT PANEL
+           LEFT NAVIGATION PANEL
       ══════════════════════════════════════ -->
-      <div class="win-left">
+      <nav class="nav-panel" role="navigation" aria-label="Разделы сделки">
+        <div class="nav-panel-header">
+          <span>Разделы</span>
+        </div>
+        <ul class="nav-list" role="list">
 
-        <!-- ── CARD 1: Excel ── -->
-        <div class="win-section">
-          <div class="section-hdr">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Загрузка данных из Excel
-          </div>
-          <div class="section-body">
-            <div class="drop-zone" id="drop-zone">
-              <!-- Idle -->
-              <div class="drop-zone__idle" id="drop-idle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <span class="drop-zone__label">Перетащите .xlsx сюда или <button class="drop-zone__link" id="btn-drop-browse">выберите файл</button></span>
-              </div>
-              <!-- Success -->
-              <div class="drop-zone__success" id="drop-success">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span id="file-name" class="drop-zone__success-name"></span>
-                <button class="drop-zone__change" id="btn-drop-change">Изменить</button>
-              </div>
+          <li class="nav-item" data-target="ws-excel" tabindex="0" role="listitem" title="Загрузка данных из Excel">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Excel</span>
+              <span class="nav-item-sub" id="nav-status-excel">Файл не загружен</span>
             </div>
-            <!-- скрытые элементы для совместимости -->
-            <input type="text" id="file-path-display" style="display:none" readonly />
-            <div id="file-success" style="display:none"></div>
+            <span class="nav-item-badge" id="nav-badge-excel" hidden></span>
+          </li>
+
+          <li class="nav-item" data-target="ws-deal" tabindex="0" role="listitem" title="Данные сделки">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Сделка</span>
+              <span class="nav-item-sub" id="nav-status-deal"></span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-deal" hidden></span>
+          </li>
+
+          <li class="nav-item" data-target="ws-property" tabindex="0" role="listitem" title="Объект недвижимости">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Объект</span>
+              <span class="nav-item-sub" id="nav-status-property"></span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-property" hidden></span>
+          </li>
+
+          <li class="nav-item" data-target="ws-seller" tabindex="0" role="listitem" title="Данные продавца">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Продавец</span>
+              <span class="nav-item-sub" id="nav-status-seller"></span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-seller" hidden></span>
+          </li>
+
+          <li class="nav-item" data-target="ws-owners" tabindex="0" role="listitem" title="Данные собственников">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Собственники</span>
+              <span class="nav-item-sub" id="nav-status-owners"></span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-owners" hidden></span>
+          </li>
+
+          <li class="nav-item" data-target="ws-buyer" tabindex="0" role="listitem" title="Данные покупателя">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Покупатель</span>
+              <span class="nav-item-sub" id="nav-status-buyer"></span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-buyer" hidden></span>
+          </li>
+
+          <li class="nav-item nav-item--docs" data-target="sp-document" tabindex="0" role="listitem" title="Шаблоны документов">
+            <span class="nav-item-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <div class="nav-item-text">
+              <span class="nav-item-label">Документы</span>
+              <span class="nav-item-sub" id="nav-status-docs">Не выбраны</span>
+            </div>
+            <span class="nav-item-badge" id="nav-badge-docs" hidden></span>
+          </li>
+
+        </ul>
+
+        <!-- Nav footer: fill progress -->
+        <div class="nav-footer">
+          <div class="nav-progress-label">
+            <span>Заполнено</span>
+            <span id="nav-progress-pct">0%</span>
+          </div>
+          <div class="nav-progress-track">
+            <div class="nav-progress-fill" id="nav-progress-fill" style="width:0%"></div>
           </div>
         </div>
-
-        <!-- ── CARD 2: Deal data ── -->
-        <div class="win-section">
-          <div class="section-hdr">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-            </svg>
-            Данные сделки
-          </div>
-          <div class="section-body" id="deal-body">
-
-            <!-- Объект + Продавец (two columns) -->
-            <div class="data-two-col">
-
-              <!-- LEFT: Объект недвижимости + цены -->
-              <div class="data-col">
-                <div class="sub-hdr">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                  Объект недвижимости
-                </div>
-                <div id="form-section-property"></div>
-                <div id="form-section-deal-prices"></div>
-              </div>
-
-              <!-- RIGHT: Продавец -->
-              <div class="data-col">
-                <div class="sub-hdr">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  Продавец
-                </div>
-                <div id="form-section-seller"></div>
-              </div>
-
-            </div><!-- /data-two-col -->
-
-            <!-- ── Покупатель ── -->
-            <div class="sub-hdr mt">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Покупатель
-            </div>
-            <div class="seller-grid" id="form-section-buyer"></div>
-
-            <!-- ── Собственники ── -->
-            <div class="sub-hdr mt">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Продавцы / Собственники (до 3 человек)
-            </div>
-            <div class="tabs-wrapper">
-              <div class="tab-bar">
-                <button class="tab-btn active" data-tab="owner1">Собственник 1</button>
-                <button class="tab-btn" data-tab="owner2">Собственник 2</button>
-                <button class="tab-btn" data-tab="owner3">Собственник 3</button>
-              </div>
-
-              <div id="tab-pane-owner1" class="tab-pane active">
-                <div class="tab-inner-grid">
-                  <div></div>
-                  <div></div>
-                </div>
-              </div>
-
-              <div id="tab-pane-owner2" class="tab-pane">
-                <div class="tab-inner-grid">
-                  <div></div>
-                  <div></div>
-                </div>
-              </div>
-
-              <div id="tab-pane-owner3" class="tab-pane">
-                <div class="tab-inner-grid">
-                  <div></div>
-                  <div></div>
-                </div>
-              </div>
-            </div><!-- /tabs-wrapper -->
-
-            <!-- ── Дополнительные данные ── -->
-            <div class="sub-hdr mt">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-              Дополнительные данные
-            </div>
-            <div class="add-data-grid" id="form-section-extras"></div>
-
-          </div><!-- /section-body -->
-        </div><!-- /win-section -->
-
-        <!-- ── Bottom action buttons ── -->
-        <div class="bottom-actions">
-          <button class="btn-bottom btn-bottom--danger" id="btn-clear">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            Очистить форму
-          </button>
-          <button class="btn-bottom btn-bottom--check" id="btn-check">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Проверить данные
-          </button>
-        </div>
-
-      </div><!-- /win-left -->
+      </nav>
 
       <!-- ══════════════════════════════════════
-           RIGHT PANEL
+           CENTER WORK AREA  (accordion)
       ══════════════════════════════════════ -->
-      <div class="win-right">
+      <main class="work-area" id="work-area" role="main">
 
-        <div class="win-right-scroll">
+        <!-- All form inputs MUST stay inside #deal-body for event delegation -->
+        <div id="deal-body">
 
-        <!-- Card 3: Templates -->
-        <div class="win-section">
-          <div class="section-hdr">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-            Шаблоны договоров
-            <span class="tpl-count-badge" id="tpl-count-badge" hidden>0</span>
-          </div>
-          <div class="section-body">
+          <!-- ── BLOCK 1: Excel loading ── -->
+          <section class="ws-block ws-block--open" id="ws-excel" data-block="excel" aria-label="Загрузка данных из Excel">
+            <button class="ws-block-hdr" type="button" aria-expanded="true" aria-controls="ws-excel-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Загрузка данных из Excel</span>
+              <span class="ws-block-hdr-status" id="blk-status-excel"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-excel-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <div class="drop-zone" id="drop-zone">
+                    <!-- Idle -->
+                    <div class="drop-zone__idle" id="drop-idle">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="drop-zone__label">Перетащите .xlsx сюда или <button class="drop-zone__link" id="btn-drop-browse">выберите файл</button></span>
+                    </div>
+                    <!-- Success -->
+                    <div class="drop-zone__success" id="drop-success">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span id="file-name" class="drop-zone__success-name"></span>
+                      <button class="drop-zone__change" id="btn-drop-change">Изменить</button>
+                    </div>
+                  </div>
+                  <!-- скрытые элементы для совместимости -->
+                  <input type="text" id="file-path-display" style="display:none" readonly />
+                  <div id="file-success" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <div class="tpl-group-hdr">Риэлтерские услуги</div>
-            <label class="tpl-item" data-owners-required="1" data-template="dkp-1-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (1 собственник, общий)</label>
-            <label class="tpl-item" data-owners-required="1" data-template="dkp-1-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (1 собственник, эксклюзив)</label>
-            <label class="tpl-item" data-owners-required="2" data-template="dkp-2-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (2 собственника, общий)</label>
-            <label class="tpl-item" data-owners-required="2" data-template="dkp-2-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (2 собственника, эксклюзив)</label>
-            <label class="tpl-item" data-owners-required="3" data-template="dkp-3-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (3 собственника, общий)</label>
-            <label class="tpl-item" data-owners-required="3" data-template="dkp-3-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (3 собственника, эксклюзив)</label>
-            <label class="tpl-item" data-owners-required="any" data-template="dkp-fizlit-komstr"><input type="checkbox"><span class="word-icon">W</span>Договор оказания риэлтерских услуг (физ. лицо — коммерческий объект)</label>
+          <!-- ── BLOCK 2: Данные сделки ── -->
+          <section class="ws-block" id="ws-deal" data-block="deal" aria-label="Данные сделки">
+            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-deal-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Данные сделки</span>
+              <span class="ws-block-hdr-status" id="blk-status-deal"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-deal-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <!-- Стоимость (deal-prices section) -->
+                  <div class="ws-subhdr">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Стоимость объекта
+                  </div>
+                  <div id="form-section-deal-prices" class="ws-fields-grid"></div>
 
-            <div class="tpl-divider"></div>
-            <div class="tpl-group-hdr">Договоры и соглашения</div>
-            <label class="tpl-item" data-owners-required="any" data-template="zadatok-standart"><input type="checkbox"><span class="word-icon">W</span>Договор задатка (стандартный)</label>
-            <label class="tpl-item" data-owners-required="any" data-template="reklama"><input type="checkbox"><span class="word-icon">W</span>Договор на оказание рекламных услуг</label>
-            <label class="tpl-item" data-owners-required="any" data-template="konvertaciya"><input type="checkbox"><span class="word-icon">W</span>Договор о конвертации валюты</label>
-            <label class="tpl-item" data-owners-required="any" data-template="rastorzhenie"><input type="checkbox"><span class="word-icon">W</span>Соглашение о расторжении</label>
+                  <!-- Реквизиты договора -->
+                  <div class="ws-subhdr" style="margin-top:14px">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Реквизиты и условия
+                  </div>
+                  <div id="form-section-extras" class="ws-fields-grid"></div>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <div class="tpl-divider"></div>
-            <div class="tpl-group-hdr">Дополнительные документы</div>
-            <label class="tpl-item" data-owners-required="any" data-template="doverennost-pnd"><input type="checkbox"><span class="word-icon">W</span>Доверенность на представительство (ПНД)</label>
-            <label class="tpl-item" data-owners-required="any" data-template="zapros-pnd"><input type="checkbox"><span class="word-icon">W</span>Запрос на ПНД</label>
-            <label class="tpl-item" data-owners-required="any" data-template="zapros-rsc"><input type="checkbox"><span class="word-icon">W</span>Запрос в РСЦ</label>
-            <label class="tpl-item" data-owners-required="any" data-template="soglasie-obrabotka"><input type="checkbox"><span class="word-icon">W</span>Согласие на обработку данных</label>
-            <label class="tpl-item" data-owners-required="any" data-template="raspiska-klyuchi"><input type="checkbox"><span class="word-icon">W</span>Расписка в получении ключей</label>
+          <!-- ── BLOCK 3: Объект недвижимости ── -->
+          <section class="ws-block" id="ws-property" data-block="property" aria-label="Объект недвижимости">
+            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-property-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Объект недвижимости</span>
+              <span class="ws-block-hdr-status" id="blk-status-property"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-property-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <div id="form-section-property" class="ws-fields-grid"></div>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <div class="tpl-actions">
-              <button class="btn-tpl-action" id="btn-select-all">Выбрать все</button>
-              <button class="btn-tpl-action" id="btn-deselect-all">Снять все</button>
+          <!-- ── BLOCK 4: Продавец ── -->
+          <section class="ws-block" id="ws-seller" data-block="seller" aria-label="Продавец">
+            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-seller-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Продавец</span>
+              <span class="ws-block-hdr-status" id="blk-status-seller"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-seller-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <div id="form-section-seller" class="ws-fields-grid ws-fields-grid--2col"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── BLOCK 5: Собственники ── -->
+          <section class="ws-block" id="ws-owners" data-block="owners" aria-label="Собственники">
+            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-owners-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Продавцы / Собственники</span>
+              <span class="ws-block-hdr-status" id="blk-status-owners"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-owners-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <div class="tabs-wrapper">
+                    <div class="tab-bar">
+                      <button class="tab-btn active" data-tab="owner1">Собственник 1</button>
+                      <button class="tab-btn" data-tab="owner2">Собственник 2</button>
+                      <button class="tab-btn" data-tab="owner3">Собственник 3</button>
+                    </div>
+
+                    <div id="tab-pane-owner1" class="tab-pane active">
+                      <div class="tab-inner-grid">
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+
+                    <div id="tab-pane-owner2" class="tab-pane">
+                      <div class="tab-inner-grid">
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+
+                    <div id="tab-pane-owner3" class="tab-pane">
+                      <div class="tab-inner-grid">
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+                  </div><!-- /tabs-wrapper -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── BLOCK 6: Покупатель ── -->
+          <section class="ws-block" id="ws-buyer" data-block="buyer" aria-label="Покупатель">
+            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-buyer-body">
+              <span class="ws-block-hdr-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <span class="ws-block-hdr-title">Покупатель</span>
+              <span class="ws-block-hdr-status" id="blk-status-buyer"></span>
+              <span class="ws-block-hdr-chevron" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </button>
+            <div class="ws-block-body-outer" id="ws-buyer-body">
+              <div class="ws-block-body">
+                <div class="ws-block-inner">
+                  <div id="form-section-buyer" class="ws-fields-grid ws-fields-grid--2col"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div><!-- /#deal-body -->
+
+      </main><!-- /.work-area -->
+
+      <!-- ══════════════════════════════════════
+           RIGHT SMART PANEL
+      ══════════════════════════════════════ -->
+      <aside class="smart-panel" role="complementary" aria-label="Информационная панель">
+
+        <!-- Scrollable content -->
+        <div class="sp-scroll">
+
+          <!-- ── Progress block ── -->
+          <div class="sp-block sp-block--progress" id="sp-block-progress">
+            <div class="sp-block-hdr">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Заполнено</span>
+              <span class="sp-progress-pct" id="sp-progress-pct">0%</span>
+            </div>
+            <div class="sp-progress-track">
+              <div class="sp-progress-fill" id="sp-progress-fill" style="width:0%"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Card 4: Settings -->
-        <div class="win-section">
-          <div class="section-hdr">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-            </svg>
-            Настройки генерации
-          </div>
-          <div class="section-body">
-            <div class="settings-folder-label">Папка для сохранения:</div>
-            <div class="settings-row">
-              <input type="text" id="save-folder" value="" placeholder="Папка не выбрана" />
-              <button class="btn-browse" id="btn-browse">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                Обзор
-              </button>
+          <!-- ── Validation block ── -->
+          <div class="sp-block" id="sp-block-validation">
+            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-validation-toggle" role="button" tabindex="0" aria-expanded="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Проверка данных</span>
+              <span class="sp-block-badge" id="sp-issues-count" hidden>0</span>
+              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <label class="check-row"><input type="checkbox" id="chk-open-after" checked>
-              <span>Открыть файлы после создания</span>
-            </label>
-            <label class="check-row"><input type="checkbox" id="chk-add-date">
-              <span>Добавить дату к имени файла</span>
-            </label>
+            <div class="sp-block-body" id="sp-validation-body">
+              <div class="sp-validation-list" id="sp-validation-list">
+                <div class="sp-validation-empty" id="sp-validation-empty">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Данные не заполнены</span>
+                </div>
+              </div>
+              <!-- Error navigation -->
+              <div class="sp-err-nav" id="sp-err-nav" hidden>
+                <button class="sp-err-nav-btn" id="sp-err-prev" title="Предыдущая проблема">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="sp-err-nav-label" id="sp-err-nav-label">1 / 1</span>
+                <button class="sp-err-nav-btn" id="sp-err-next" title="Следующая проблема">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        </div><!-- /win-right-scroll -->
+          <!-- ── Documents block ── -->
+          <div class="sp-block" id="sp-document">
+            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-docs-toggle" role="button" tabindex="0" aria-expanded="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Шаблоны договоров</span>
+              <span class="sp-block-badge" id="tpl-count-badge" hidden>0</span>
+              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sp-block-body" id="sp-docs-body">
+              <!-- Template search -->
+              <div class="sp-tpl-search-wrap">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="tpl-search" placeholder="Поиск шаблона…" class="sp-tpl-search" autocomplete="off" />
+              </div>
 
-        <!-- Sticky footer: warnings + actions -->
-        <div class="win-right-footer">
+              <div id="sp-templates-list">
+                <div class="tpl-group-hdr">Риэлтерские услуги</div>
+                <label class="tpl-item" data-owners-required="1" data-template="dkp-1-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (1 собств., общий)</label>
+                <label class="tpl-item" data-owners-required="1" data-template="dkp-1-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (1 собств., эксклюзив)</label>
+                <label class="tpl-item" data-owners-required="2" data-template="dkp-2-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (2 собств., общий)</label>
+                <label class="tpl-item" data-owners-required="2" data-template="dkp-2-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (2 собств., эксклюзив)</label>
+                <label class="tpl-item" data-owners-required="3" data-template="dkp-3-obshiy"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (3 собств., общий)</label>
+                <label class="tpl-item" data-owners-required="3" data-template="dkp-3-eksklyuziv"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (3 собств., эксклюзив)</label>
+                <label class="tpl-item" data-owners-required="any" data-template="dkp-fizlit-komstr"><input type="checkbox"><span class="word-icon">W</span>Договор РУ (физ.лицо — коммерч.)</label>
+
+                <div class="tpl-divider"></div>
+                <div class="tpl-group-hdr">Договоры и соглашения</div>
+                <label class="tpl-item" data-owners-required="any" data-template="zadatok-standart"><input type="checkbox"><span class="word-icon">W</span>Договор задатка (стандартный)</label>
+                <label class="tpl-item" data-owners-required="any" data-template="reklama"><input type="checkbox"><span class="word-icon">W</span>Договор на рекламные услуги</label>
+                <label class="tpl-item" data-owners-required="any" data-template="konvertaciya"><input type="checkbox"><span class="word-icon">W</span>Договор о конвертации валюты</label>
+                <label class="tpl-item" data-owners-required="any" data-template="rastorzhenie"><input type="checkbox"><span class="word-icon">W</span>Соглашение о расторжении</label>
+
+                <div class="tpl-divider"></div>
+                <div class="tpl-group-hdr">Дополнительные документы</div>
+                <label class="tpl-item" data-owners-required="any" data-template="doverennost-pnd"><input type="checkbox"><span class="word-icon">W</span>Доверенность на представительство (ПНД)</label>
+                <label class="tpl-item" data-owners-required="any" data-template="zapros-pnd"><input type="checkbox"><span class="word-icon">W</span>Запрос на ПНД</label>
+                <label class="tpl-item" data-owners-required="any" data-template="zapros-rsc"><input type="checkbox"><span class="word-icon">W</span>Запрос в РСЦ</label>
+                <label class="tpl-item" data-owners-required="any" data-template="soglasie-obrabotka"><input type="checkbox"><span class="word-icon">W</span>Согласие на обработку данных</label>
+                <label class="tpl-item" data-owners-required="any" data-template="raspiska-klyuchi"><input type="checkbox"><span class="word-icon">W</span>Расписка в получении ключей</label>
+              </div><!-- /#sp-templates-list -->
+
+              <div class="tpl-actions">
+                <button class="btn-tpl-action" id="btn-select-all">Выбрать все</button>
+                <button class="btn-tpl-action" id="btn-deselect-all">Снять все</button>
+              </div>
+            </div>
+          </div><!-- /#sp-document -->
+
+          <!-- ── Settings block ── -->
+          <div class="sp-block" id="sp-block-settings">
+            <div class="sp-block-hdr sp-block-hdr--toggle" id="sp-settings-toggle" role="button" tabindex="0" aria-expanded="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+              <span>Настройки генерации</span>
+              <svg class="sp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sp-block-body" id="sp-settings-body">
+              <div class="settings-folder-label">Папка для сохранения:</div>
+              <div class="settings-row">
+                <input type="text" id="save-folder" value="" placeholder="Папка не выбрана" />
+                <button class="btn-browse" id="btn-browse">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Обзор
+                </button>
+              </div>
+              <label class="check-row"><input type="checkbox" id="chk-open-after" checked>
+                <span>Открыть файлы после создания</span>
+              </label>
+              <label class="check-row"><input type="checkbox" id="chk-add-date">
+                <span>Добавить дату к имени файла</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- compat div expected by app.js updateSidebarStatus -->
+          <div id="sidebar-warnings" style="display:none"></div>
+
+        </div><!-- /.sp-scroll -->
+
+        <!-- ── Sticky footer: actions ── -->
+        <div class="sp-footer">
+          <div class="sp-quick-actions">
+            <button class="sp-quick-btn sp-quick-btn--danger" id="btn-clear" title="Очистить все поля формы">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              Очистить
+            </button>
+            <button class="sp-quick-btn sp-quick-btn--check" id="btn-check" title="Проверить заполненность формы">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Проверить
+            </button>
+          </div>
           <button class="btn-generate" id="btn-generate">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -351,9 +572,9 @@
           </button>
         </div>
 
-      </div><!-- /win-right -->
+      </aside><!-- /.smart-panel -->
 
-    </div><!-- /win-body -->
+    </div><!-- /.win-body -->
 
     <!-- ===== STATUS BAR ===== -->
     <div class="win-status">
@@ -369,8 +590,6 @@
   <!-- ===== UPDATE MODAL ===== -->
   <div class="update-overlay" id="update-overlay" hidden>
     <div class="update-modal" role="dialog" aria-modal="true" aria-labelledby="update-title">
-
-      <!-- Шаг 1: уведомление о новой версии -->
       <div id="update-step-notify">
         <div class="update-header">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
@@ -382,8 +601,6 @@
           <button class="update-btn update-btn--secondary" id="update-btn-cancel">Позже</button>
         </div>
       </div>
-
-      <!-- Шаг 2: прогресс скачивания -->
       <div id="update-step-progress" hidden>
         <div class="update-header">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
@@ -397,8 +614,6 @@
         </div>
         <p class="update-text update-text--small">Не закрывайте программу. После скачивания она перезапустится автоматически.</p>
       </div>
-
-      <!-- Шаг 3: ошибка -->
       <div id="update-step-error" hidden>
         <div class="update-header">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -409,7 +624,6 @@
           <button class="update-btn update-btn--secondary" id="update-btn-error-close">Закрыть</button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -428,10 +642,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-
       <div class="about-body">
-
-        <!-- Описание -->
         <div class="about-section">
           <h3 class="about-section-title">О программе</h3>
           <p class="about-text">
@@ -455,10 +666,7 @@
             </div>
           </div>
         </div>
-
         <div class="about-divider"></div>
-
-        <!-- Авторы -->
         <div class="about-section">
           <h3 class="about-section-title">Разработка</h3>
           <div class="about-authors">
@@ -473,42 +681,18 @@
           </div>
           <p class="about-copyright">© 2026 ООО «ГермесГарант». Все права защищены.</p>
         </div>
-
         <div class="about-divider"></div>
-
-        <!-- Лицензия -->
         <div class="about-section">
           <h3 class="about-section-title">Лицензионное соглашение</h3>
           <div class="about-license-box">
-            <p>Настоящее программное обеспечение (далее — «Программа») является собственностью
-            ООО «ГермесГарант» (далее — «Правообладатель») и защищено законодательством
-            Республики Беларусь об авторском праве и смежных правах, а также нормами
-            международного права.</p>
-
+            <p>Настоящее программное обеспечение является собственностью ООО «ГермесГарант»
+            и защищено законодательством Республики Беларусь об авторском праве.</p>
             <p>Программа предоставляется исключительно для внутреннего использования
-            сотрудниками и уполномоченными представителями Правообладателя. Любое иное
-            использование, включая, но не ограничиваясь:</p>
-
-            <ul class="about-license-list">
-              <li>распространение, копирование или передачу третьим лицам;</li>
-              <li>декомпиляцию, дизассемблирование или иное изучение исходного кода;</li>
-              <li>создание производных произведений на основе Программы;</li>
-              <li>коммерческое использование в интересах третьих лиц —</li>
-            </ul>
-
-            <p>строго запрещено без предварительного письменного согласия Правообладателя.</p>
-
-            <p>Программа предоставляется «как есть» (AS IS), без каких-либо явных или
-            подразумеваемых гарантий. Правообладатель не несёт ответственности за прямые
-            или косвенные убытки, возникшие в результате использования или невозможности
-            использования Программы.</p>
-
-            <p>По вопросам лицензирования обращайтесь: <strong>mail@germesgarant.by</strong></p>
+            сотрудниками Правообладателя.</p>
+            <p>Программа предоставляется «как есть» (AS IS), без каких-либо гарантий.</p>
           </div>
         </div>
-
       </div>
-
       <div class="about-footer">
         <button class="about-footer-btn" id="about-ok">Закрыть</button>
       </div>
@@ -517,37 +701,39 @@
 
   <!-- ===== PREVIEW MODAL ===== -->
   <div class="preview-overlay" id="preview-overlay" hidden>
-    <div class="preview-modal">
+    <div class="preview-modal" role="dialog" aria-modal="true">
       <div class="preview-header">
-        <div class="preview-tabs" id="preview-tabs"></div>
-        <button class="preview-close-btn" id="preview-close" title="Закрыть (Esc)">
+        <div class="preview-tabs" id="preview-tabs" role="tablist"></div>
+        <button class="preview-close-btn" id="preview-close" aria-label="Закрыть предпросмотр">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="preview-body">
-        <div class="preview-loader" id="preview-loader" hidden>
+        <div class="preview-loader" id="preview-loader">
           <div class="loader-spinner"></div>
           <span>Формирование предпросмотра…</span>
         </div>
         <div class="preview-content" id="preview-content"></div>
       </div>
       <div class="preview-footer">
-        <span class="preview-hint">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Предпросмотр. Форматирование в готовом документе может отличаться.
-        </span>
+        <div class="preview-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          <span>Предварительный просмотр содержимого шаблона</span>
+        </div>
         <button class="btn-preview-close-footer" id="btn-preview-close-footer">Закрыть</button>
       </div>
     </div>
   </div>
 
+  <!-- ===== SCRIPTS ===== -->
   <script src="js/fields-config.js"></script>
-  <script src="js/agents-config.js"></script>
-  <script src="js/realtor-service.js"></script>
-  <script src="js/form-builder.js"></script>
   <script src="js/money-to-text.js"></script>
-  <script src="js/commission.js"></script>
-  <script src="js/app.js"></script>
   <script src="js/datepicker.js"></script>
+  <script src="js/agents-config.js"></script>
+  <script src="js/commission.js"></script>
+  <script src="js/form-builder.js"></script>
+  <script src="js/realtor-service.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ui-controller.js"></script>
 </body>
 </html>

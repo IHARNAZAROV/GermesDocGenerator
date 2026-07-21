@@ -293,6 +293,8 @@ function populateForm(data) {
   switchTab('owner1');
   updateContractAvailability();
   applyObjectTypeVisibility();
+  // Уведомить UIController об обновлении формы
+  document.dispatchEvent(new Event('form:populated'));
 }
 
 // ============================================================
@@ -313,6 +315,8 @@ function handleClearForm() {
   switchTab('owner1');
   resetContractAvailability();
   applyObjectTypeVisibility();
+  // Уведомить UIController об очистке формы
+  document.dispatchEvent(new Event('form:cleared'));
 }
 
 // ============================================================
