@@ -994,20 +994,22 @@ html, body {
   box-shadow: none !important;
 }
 
+.tpl-item-disabled[data-tooltip] { position: relative; }
 .tpl-item-disabled[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: 50%;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
   background: #1A2E25;
   color: #F0F7F4;
   font-size: 11px;
   font-weight: 400;
   line-height: 1.4;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: var(--r-md);
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
   pointer-events: none;
   opacity: 0;
   transition: opacity .15s;
