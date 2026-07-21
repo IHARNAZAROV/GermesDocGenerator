@@ -775,35 +775,6 @@
   <script src="js/realtor-service.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ui-controller.js"></script>
-  <script>
-    /* ── Tips Carousel ─────────────────────────────────────────── */
-    (function () {
-      const track  = document.getElementById('tips-track');
-      const dots   = document.querySelectorAll('.tips-dot');
-      const total  = dots.length;
-      let current  = 0;
-      let timer    = null;
-
-      function goTo(idx) {
-        current = (idx + total) % total;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('tips-dot--active', i === current));
-      }
-
-      function startAuto() {
-        clearInterval(timer);
-        timer = setInterval(() => goTo(current + 1), 6000);
-      }
-
-      dots.forEach(d => {
-        d.addEventListener('click', () => {
-          goTo(+d.dataset.tip);
-          startAuto(); // reset timer on manual nav
-        });
-      });
-
-      startAuto();
-    })();
-  </script>
+  <script src="js/tips-carousel.js"></script>
 </body>
 </html>
