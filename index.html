@@ -73,6 +73,39 @@
         </button>
       </div>
 
+      <!-- ── REALTOR DROPDOWN ─────────────────────────────── -->
+      <div class="toolbar-group">
+        <div class="realtor-dropdown"
+             id="realtor-dropdown"
+             role="combobox"
+             aria-haspopup="listbox"
+             aria-expanded="false"
+             aria-label="Выбор риэлтера">
+          <button class="realtor-trigger"
+                  id="realtor-trigger"
+                  type="button"
+                  aria-label="Текущий риэлтер — нажмите для выбора"
+                  aria-controls="realtor-menu"
+                  aria-expanded="false">
+            <div id="realtor-avatar-slot"></div>
+            <div class="realtor-info">
+              <span class="realtor-name"     id="realtor-name-trigger">Загрузка…</span>
+              <span class="realtor-position" id="realtor-position-trigger"></span>
+            </div>
+            <svg class="realtor-chevron" width="12" height="12" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <ul class="realtor-menu"
+              id="realtor-menu"
+              role="listbox"
+              aria-label="Список риэлтеров"
+              hidden></ul>
+        </div>
+      </div>
+
       <div class="toolbar-spacer"></div>
 
       <div class="toolbar-group">
@@ -508,6 +541,7 @@
 
   <script src="js/fields-config.js"></script>
   <script src="js/agents-config.js"></script>
+  <script src="js/realtor-service.js"></script>
   <script src="js/form-builder.js"></script>
   <script src="js/money-to-text.js"></script>
   <script src="js/commission.js"></script>

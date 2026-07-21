@@ -1223,13 +1223,19 @@ function buildPlaceholderData() {
     poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
   };
 
-  // Look up agent from AGENTS_CONFIG by matching last name (or any part of the name)
-  // against the value in Excel cell B10 (field «Ответственный риэлтер»)
-  const agentRaw = getField('deal-Ответственный риэлтер') || '';
-  const agentNormalized = agentRaw.trim().toLowerCase();
-  const agentRecord = (window.AGENTS_CONFIG?.agents || []).find((a) =>
-    a.matchKeys.some((key) => agentNormalized.includes(key))
-  );
+  // ── Риэлтер — единый источник правды: RealtorService ──────
+  // RealtorService является основным источником текущего риэлтера.
+  // Поле «Ответственный риэлтер» из Excel используется только как
+  // запасной вариант, если RealtorService недоступен.
+  const _realtorRecord = window.RealtorService?.getCurrent?.() ?? null;
+  const agentRecord = _realtorRecord || (() => {
+    const agentRaw        = getField('deal-Ответственный риэлтер') || '';
+    const agentNormalized = agentRaw.trim().toLowerCase();
+    return (window.AGENTS_CONFIG?.agents || []).find((a) =>
+      a.matchKeys.some((key) => agentNormalized.includes(key))
+    ) || null;
+  })();
+  const _agentFallbackRaw = getField('deal-Ответственный риэлтер') || '';
   const agent = agentRecord
     ? {
         lastName:          agentRecord.lastName,
@@ -1249,8 +1255,8 @@ function buildPlaceholderData() {
         lastName:          '',
         firstName:         '',
         middleName:        '',
-        fullName:          agentRaw,
-        initials:          agentRaw,
+        fullName:          _agentFallbackRaw,
+        initials:          _agentFallbackRaw,
         phone:             '',
         email:             '',
         attestationNumber: '',

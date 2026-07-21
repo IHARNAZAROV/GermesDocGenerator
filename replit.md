@@ -33,10 +33,12 @@ Requires Node.js with Electron installed (`npm install` handles it via devDepend
 | `js/fields-config.js` | **Auto-generated** — `window.FIELDS_CONFIG` (browser-loadable) |
 | `js/form-builder.js` | Builds form HTML dynamically from FIELDS_CONFIG; returns FIELD_MAP |
 | `js/app.js` | Renderer logic — uses dynamic FIELD_MAP from form-builder |
+| `js/realtor-service.js` | RealtorService — loads `data/realtors.json`, persists selected realtor in localStorage, drives the header dropdown UI |
 | `js/money-to-text.js` | BYN → written-out price converter |
 | `css/style.css` | All styles — compact CRM theme |
 | `excel/excel-reader.js` | Parses `.xlsx` using ExcelJS |
 | `generator/word-generator.js` | Fills Word templates via docxtemplater |
+| `data/realtors.json` | Realtor list — names, positions, photo paths, attestation data. Edit here to add/remove staff. |
 | `fields-config.json` | **Single source of truth** — all field definitions, labels, types |
 | `scripts/scan-excel.js` | CLI scanner — reads Excel, updates fields-config.json + js/fields-config.js |
 
