@@ -58,7 +58,8 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Ответственный риэлтер",
-          "label": "Риэлтер:"
+          "label": "Риэлтер:",
+          "hidden": true
         },
         {
           "key": "Сумма задатка BYN",
