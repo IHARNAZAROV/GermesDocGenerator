@@ -5,10 +5,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFileDialog:  ()                          => ipcRenderer.invoke('dialog:openFile'),
   saveFileDialog:  (defaultPath)               => ipcRenderer.invoke('dialog:saveFile', defaultPath),
 
-  // Excel read / write
+  // Excel read / write / create
   readExcel:       (filePath)                  => ipcRenderer.invoke('excel:read', filePath),
   writeExcel:      (sourcePath, targetPath, updates) =>
                      ipcRenderer.invoke('excel:write', sourcePath, targetPath, updates),
+  createExcelFromData: (fieldGroups, targetPath) =>
+                     ipcRenderer.invoke('excel:createFromData', fieldGroups, targetPath),
 
   // Dirty-state notification → main process
   notifyDirtyChange: (isDirty)                 => ipcRenderer.send('app:dirty-changed', isDirty),

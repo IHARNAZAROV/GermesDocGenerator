@@ -147,6 +147,58 @@ ipcMain.handle('excel:read', async (_event, filePath) => {
 });
 
 // ============================================================
+//  IPC — create Excel from scratch using fields-config structure
+//  fieldGroups: { deal: {key: value}, property: {...}, ... }
+//  Returns { ok: true, rowMap: { "block-fieldKey": rowNumber } }
+// ============================================================
+ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) => {
+  const fieldsConfig = require('./fields-config.json');
+
+  const BLOCK_HEADER_MAP = {
+    'deal':     'СДЕЛКА',
+    'property': 'ОБЪЕКТ',
+    'seller':   'ПРОДАВЕЦ',
+    'owner1':   'СОБСТВЕННИК №1',
+    'owner2':   'СОБСТВЕННИК №2',
+    'owner3':   'СОБСТВЕННИК №3',
+    'buyer':    'ПОКУПАТЕЛЬ',
+  };
+
+  const workbook  = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Сделка');
+  const rowMap    = {};
+  let   rowNum    = 1;
+
+  for (const group of fieldsConfig.groups) {
+    const blockId = group.id;
+    const header  = BLOCK_HEADER_MAP[blockId];
+    if (!header) continue;
+
+    // Block header row (column A only, no value in B)
+    worksheet.getCell(rowNum, 1).value = header;
+    rowNum++;
+
+    for (const field of group.fields) {
+      // Skip fields computed entirely by the app — they are never stored in Excel
+      if (field.computed) continue;
+
+      const value = ((fieldGroups || {})[blockId] || {})[field.key];
+      worksheet.getCell(rowNum, 1).value = field.key;
+      worksheet.getCell(rowNum, 2).value =
+        (value !== undefined && value !== null && String(value).trim() !== '')
+          ? String(value).trim()
+          : null;
+
+      rowMap[`${blockId}-${field.key}`] = rowNum;
+      rowNum++;
+    }
+  }
+
+  await workbook.xlsx.writeFile(targetPath);
+  return { ok: true, rowMap };
+});
+
+// ============================================================
 //  IPC — write Excel
 //  updates: { [rowNumber]: value }  — only column B is touched
 // ============================================================

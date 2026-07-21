@@ -111,6 +111,8 @@ function clearAllInputs() {
 function updateDirtyState() {
   const hasDirty = dirtyInputIds.size > 0;
   btnSave.disabled = !hasDirty;
+  // Enable Save As when a file is loaded OR when there are filled fields without a file
+  if (hasDirty && !currentFilePath) btnSaveAs.disabled = false;
   window.electronAPI.notifyDirtyChange(hasDirty);
   setStatus(hasDirty ? 'Есть несохранённые изменения' : (currentFilePath ? 'Файл загружен' : 'Готов к работе'));
 }
@@ -180,6 +182,24 @@ function buildUpdates() {
 }
 
 // ============================================================
+//  Build field groups for creating Excel from scratch
+//  Returns { deal: {fieldKey: value}, property: {...}, ... }
+// ============================================================
+function buildFieldGroups() {
+  const groups = { deal: {}, property: {}, seller: {}, owner1: {}, owner2: {}, owner3: {}, buyer: {} };
+  for (const [mapKey, inputId] of Object.entries(FIELD_MAP)) {
+    const dashIdx = mapKey.indexOf('-');
+    if (dashIdx === -1) continue;
+    const blockId  = mapKey.slice(0, dashIdx);
+    const fieldKey = mapKey.slice(dashIdx + 1);
+    if (!groups[blockId]) continue;
+    const el = document.getElementById(inputId);
+    if (el) groups[blockId][fieldKey] = el.value.trim();
+  }
+  return groups;
+}
+
+// ============================================================
 //  Default "Save As" filename
 // ============================================================
 function buildDefaultSaveAsName() {
@@ -198,7 +218,12 @@ function buildDefaultSaveAsName() {
 //  Save
 // ============================================================
 async function handleSave() {
-  if (!currentFilePath || dirtyInputIds.size === 0) return;
+  if (dirtyInputIds.size === 0) return;
+  // No file loaded — delegate to Save As which will create a new file from scratch
+  if (!currentFilePath) {
+    await handleSaveAs();
+    return;
+  }
   const updates = buildUpdates();
   try {
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
@@ -214,8 +239,11 @@ async function handleSave() {
 //  Save As
 // ============================================================
 async function handleSaveAs() {
-  if (!currentFilePath) return;
-  const defaultPath = currentFilePath.replace(/[^/\\]+$/, buildDefaultSaveAsName());
+  const defaultName = buildDefaultSaveAsName();
+  const defaultPath = currentFilePath
+    ? currentFilePath.replace(/[^/\\]+$/, defaultName)
+    : defaultName;
+
   let targetPath;
   try {
     targetPath = await window.electronAPI.saveFileDialog(defaultPath);
@@ -224,13 +252,27 @@ async function handleSaveAs() {
     return;
   }
   if (!targetPath) return;
-  const updates = buildUpdates();
+
   try {
-    await window.electronAPI.writeExcel(currentFilePath, targetPath, updates);
+    if (currentFilePath) {
+      // Existing file loaded — copy its structure and write updates
+      const updates = buildUpdates();
+      await window.electronAPI.writeExcel(currentFilePath, targetPath, updates);
+    } else {
+      // No file loaded — build Excel from scratch using fields-config structure
+      const fieldGroups = buildFieldGroups();
+      const result = await window.electronAPI.createExcelFromData(fieldGroups, targetPath);
+      if (!result.ok) throw new Error('Не удалось создать файл');
+      // Bind the new rowMap so subsequent saves work via writeExcel normally
+      rowMap = result.rowMap;
+    }
+
     currentFilePath = targetPath;
     filePathDisplay.value = targetPath;
     const baseName = targetPath.split(/[\\/]/).pop();
-    fileName.textContent = baseName;
+    dropFileName.textContent = baseName;
+    setDropState('success');
+    btnSaveAs.disabled = false;
     commitCurrentValues();
     setStatus('Файл сохранён: ' + baseName);
     showToast('✔ Файл успешно сохранён');
