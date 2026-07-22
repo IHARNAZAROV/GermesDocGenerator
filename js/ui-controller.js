@@ -87,6 +87,7 @@ function getIssues() {
   const propTypeRaw = (document.getElementById('property-Тип объекта')?.value || '').trim().toLowerCase();
   const isHouse      = propTypeRaw === 'дом' || propTypeRaw === 'жилой дом';
   const isFlat       = propTypeRaw === 'квартира' || propTypeRaw === 'апартаменты' || propTypeRaw === 'комната';
+  const isCommercial = propTypeRaw === 'коммерческая недвижимость';
 
   // Property-type-specific fields
   const extraPropertyFields = [];
@@ -99,6 +100,11 @@ function getIssues() {
   } else if (isFlat) {
     extraPropertyFields.push(
       { id: 'property-Инвентарный номер', label: 'Инвентарный №', block: 'ws-property' },
+    );
+  } else if (isCommercial) {
+    extraPropertyFields.push(
+      { id: 'property-Вид коммерческой недвижимости',        label: 'Вид комм. недвижимости',        block: 'ws-property' },
+      { id: 'property-Назначение коммерческой недвижимости', label: 'Назначение комм. недвижимости', block: 'ws-property' },
     );
   }
 
