@@ -102,7 +102,13 @@ function getIssues() {
     );
   }
 
-  const allRequired = [...REQUIRED_FIELDS, ...extraPropertyFields];
+  // Покупатель обязателен только если указана сумма задатка
+  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
+  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
+  const hasBuyer   = depositBYN !== '' || depositUSD !== '';
+
+  const baseFields  = hasBuyer ? REQUIRED_FIELDS : REQUIRED_FIELDS.filter(f => f.block !== 'ws-buyer');
+  const allRequired = [...baseFields, ...extraPropertyFields];
 
   // Check owner1 if seller is not owner or owner1 has some data
   const sellerIsOwnerRaw = (document.getElementById('seller-Является собственником')?.value || '').trim().toLowerCase();
@@ -290,11 +296,25 @@ function updateNavBadges(issues) {
     'ws-buyer':    'buyer',
   };
 
+  // Нужен ли покупатель — определяем по наличию суммы задатка
+  const _depBYN  = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
+  const _depUSD  = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
+  const _hasBuyer = _depBYN !== '' || _depUSD !== '';
+
   Object.entries(blockToNav).forEach(([blockId, navKey]) => {
     const badge  = document.getElementById('nav-badge-' + navKey);
     const status = document.getElementById('nav-status-' + navKey);
     const count  = countByBlock[blockId] || 0;
     if (!badge || !status) return;
+
+    // Покупатель: особый режим когда задаток не указан
+    if (blockId === 'ws-buyer' && !_hasBuyer) {
+      badge.hidden = true;
+      badge.className = 'nav-item-badge';
+      status.textContent = 'Ещё не найден';
+      status.className = 'nav-item-sub';
+      return;
+    }
 
     if (count > 0) {
       badge.textContent = count;
