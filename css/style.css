@@ -2900,3 +2900,106 @@ html, body {
   .win-body { grid-template-columns: 1fr; }
   .smart-panel { display: none; }
 }
+
+/* ── Section colour-coding (nav items) ──────────────────────────────────────
+   Subtle left-to-right gradient tint per section for peripheral orientation.
+   Each colour set covers: default, hover, active — background + icon + label.
+   More-specific selectors (2 classes) override the generic .nav-item:hover
+   and .nav-item--active rules above.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Сделка — оранжевый ── */
+.nav-item--c-deal {
+  background: linear-gradient(90deg, #FFF3E5 0%, transparent 72%);
+}
+.nav-item--c-deal:hover {
+  background: linear-gradient(90deg, #FFE5C8 0%, #FFF8F0 72%);
+}
+.nav-item--c-deal:hover .nav-item-icon { background: #FFE8CE; border-color: #FDB57A; }
+.nav-item--c-deal .nav-item-icon       { background: #FFF0E0; border-color: #FDC89A; }
+.nav-item--c-deal .nav-item-icon svg   { color: #EA580C; }
+.nav-item--c-deal.nav-item--active {
+  background: linear-gradient(90deg, #FFD9A8 0%, #FFF3E5 72%);
+}
+.nav-item--c-deal.nav-item--active .nav-item-icon  { background: #FFE3C2; border-color: #FB923C; }
+.nav-item--c-deal.nav-item--active .nav-item-label { color: #C2410C; }
+
+/* ── Объект — зелёный ── */
+.nav-item--c-property {
+  background: linear-gradient(90deg, #F0FDF4 0%, transparent 72%);
+}
+.nav-item--c-property:hover {
+  background: linear-gradient(90deg, #DCFCE7 0%, #F7FDF9 72%);
+}
+.nav-item--c-property:hover .nav-item-icon { background: #D8FCE4; border-color: #6EE7A0; }
+.nav-item--c-property .nav-item-icon       { background: #F0FDF4; border-color: #86EFAC; }
+.nav-item--c-property .nav-item-icon svg   { color: #16A34A; }
+.nav-item--c-property.nav-item--active {
+  background: linear-gradient(90deg, #BBF7D0 0%, #F0FDF4 72%);
+}
+.nav-item--c-property.nav-item--active .nav-item-icon  { background: #DCFCE7; border-color: #4ADE80; }
+.nav-item--c-property.nav-item--active .nav-item-label { color: #15803D; }
+
+/* ── Продавец — синий ── */
+.nav-item--c-seller {
+  background: linear-gradient(90deg, #EFF6FF 0%, transparent 72%);
+}
+.nav-item--c-seller:hover {
+  background: linear-gradient(90deg, #DBEAFE 0%, #F5F9FF 72%);
+}
+.nav-item--c-seller:hover .nav-item-icon { background: #D8EAFE; border-color: #7DB8FA; }
+.nav-item--c-seller .nav-item-icon       { background: #EFF6FF; border-color: #93C5FD; }
+.nav-item--c-seller .nav-item-icon svg   { color: #2563EB; }
+.nav-item--c-seller.nav-item--active {
+  background: linear-gradient(90deg, #BFDBFE 0%, #EFF6FF 72%);
+}
+.nav-item--c-seller.nav-item--active .nav-item-icon  { background: #DBEAFE; border-color: #60A5FA; }
+.nav-item--c-seller.nav-item--active .nav-item-label { color: #1D4ED8; }
+
+/* ── Собственники — индиго ── */
+.nav-item--c-owners {
+  background: linear-gradient(90deg, #EEF2FF 0%, transparent 72%);
+}
+.nav-item--c-owners:hover {
+  background: linear-gradient(90deg, #E0E7FF 0%, #F5F6FF 72%);
+}
+.nav-item--c-owners:hover .nav-item-icon { background: #DDE4FF; border-color: #8E9FFB; }
+.nav-item--c-owners .nav-item-icon       { background: #EEF2FF; border-color: #A5B4FC; }
+.nav-item--c-owners .nav-item-icon svg   { color: #4F46E5; }
+.nav-item--c-owners.nav-item--active {
+  background: linear-gradient(90deg, #C7D2FE 0%, #EEF2FF 72%);
+}
+.nav-item--c-owners.nav-item--active .nav-item-icon  { background: #E0E7FF; border-color: #818CF8; }
+.nav-item--c-owners.nav-item--active .nav-item-label { color: #3730A3; }
+
+/* ── Покупатель — фиолетовый ── */
+.nav-item--c-buyer {
+  background: linear-gradient(90deg, #FAF5FF 0%, transparent 72%);
+}
+.nav-item--c-buyer:hover {
+  background: linear-gradient(90deg, #F3E8FF 0%, #FBF8FF 72%);
+}
+.nav-item--c-buyer:hover .nav-item-icon { background: #F0E0FF; border-color: #C77BFB; }
+.nav-item--c-buyer .nav-item-icon       { background: #FAF5FF; border-color: #D8B4FE; }
+.nav-item--c-buyer .nav-item-icon svg   { color: #9333EA; }
+.nav-item--c-buyer.nav-item--active {
+  background: linear-gradient(90deg, #E9D5FF 0%, #FAF5FF 72%);
+}
+.nav-item--c-buyer.nav-item--active .nav-item-icon  { background: #F3E8FF; border-color: #C084FC; }
+.nav-item--c-buyer.nav-item--active .nav-item-label { color: #7E22CE; }
+
+/* ── Документы — изумрудный ── */
+.nav-item--c-docs {
+  background: linear-gradient(90deg, #ECFDF5 0%, transparent 72%);
+}
+.nav-item--c-docs:hover {
+  background: linear-gradient(90deg, #D1FAE5 0%, #F5FFFB 72%);
+}
+.nav-item--c-docs:hover .nav-item-icon { background: #CCFAE3; border-color: #34D399; }
+.nav-item--c-docs .nav-item-icon       { background: #ECFDF5; border-color: #6EE7B7; }
+.nav-item--c-docs .nav-item-icon svg   { color: #059669; }
+.nav-item--c-docs.nav-item--active {
+  background: linear-gradient(90deg, #A7F3D0 0%, #ECFDF5 72%);
+}
+.nav-item--c-docs.nav-item--active .nav-item-icon  { background: #D1FAE5; border-color: #34D399; }
+.nav-item--c-docs.nav-item--active .nav-item-label { color: #065F46; }
