@@ -747,7 +747,7 @@ function resetContractAvailability() {
 //  Object-type-dependent field visibility
 //  Поля с data-object-type="дом" — только для домов.
 //  Поля с data-object-type="квартира" — только для квартир.
-//  Когда тип не выбран — показываем все поля.
+//  Когда тип не выбран — скрываем все условные поля.
 // ============================================================
 function applyObjectTypeVisibility() {
   const raw  = (getField('property-Тип объекта') || '').trim().toLowerCase();
@@ -759,7 +759,7 @@ function applyObjectTypeVisibility() {
   document.querySelectorAll('[data-object-type]').forEach((el) => {
     const type = el.dataset.objectType;
     if (isEmpty) {
-      el.style.display = '';
+      el.style.display = 'none';
       return;
     }
     if (type === 'дом') {
