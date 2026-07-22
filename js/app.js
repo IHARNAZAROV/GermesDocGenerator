@@ -95,20 +95,14 @@ function applyNumericFormat(input) {
 }
 
 // ============================================================
-//  Toast notifications
+//  Toast notifications — тонкая обёртка вокруг NotificationCenter
+//  Оставлена для обратной совместимости; новый код использует
+//  window.NotificationCenter напрямую.
 // ============================================================
 function showToast(message, type = 'success', duration = 3200) {
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-  toastContainer.appendChild(toast);
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => toast.classList.add('toast-visible'));
-  });
-  setTimeout(() => {
-    toast.classList.remove('toast-visible');
-    setTimeout(() => toast.remove(), 320);
-  }, duration);
+  // Убираем устаревшие ✔/✖-префиксы — NotificationCenter рисует иконки сам
+  const clean = message.replace(/^[\u2714\u2716\u2713\u25CF]\s*/, '').trim();
+  window.NotificationCenter?.show({ message: clean, type, duration });
 }
 
 // ============================================================
@@ -125,8 +119,13 @@ function hideError() {
 function showLoader() { loader.hidden = false; }
 function hideLoader() { loader.hidden = true; }
 
-function setStatus(text) {
+function setStatus(text, state = '') {
   if (statusText) statusText.textContent = text;
+  const bar = document.querySelector('.win-status');
+  if (bar) {
+    bar.classList.remove('status--saving', 'status--saved', 'status--error');
+    if (state) bar.classList.add('status--' + state);
+  }
 }
 
 // ============================================================
@@ -291,10 +290,18 @@ async function handleSave() {
   try {
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
     commitCurrentValues();
-    setStatus('Изменения сохранены');
-    showToast('✔ Изменения сохранены');
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setStatus(`✓ Все изменения сохранены · ${time}`, 'saved');
+    window.NotificationCenter?.success('Изменения сохранены');
+    setTimeout(() => {
+      if (!dirtyInputIds.size) setStatus(currentFilePath ? 'Файл загружен' : 'Готов к работе');
+    }, 4000);
   } catch (err) {
-    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
+    setStatus('Ошибка сохранения', 'error');
+    window.NotificationCenter?.error('Не удалось сохранить файл', {
+      subtitle: err.message,
+      actions: [{ label: 'Повторить', onClick: handleSave }],
+    });
   }
 }
 
@@ -303,16 +310,18 @@ async function handleSave() {
 // ============================================================
 async function autoSave() {
   if (!currentFilePath || dirtyInputIds.size === 0) return;
-  setStatus('Автосохранение…');
+  setStatus('● Сохранение…', 'saving');
   try {
     const updates = buildUpdates();
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
     commitCurrentValues();
-    const now = new Date();
-    const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    setStatus(`Автосохранено в ${hhmm}`);
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setStatus(`✓ Все изменения сохранены · ${time}`, 'saved');
+    setTimeout(() => {
+      if (!dirtyInputIds.size) setStatus(currentFilePath ? 'Файл загружен' : 'Готов к работе');
+    }, 4000);
   } catch (err) {
-    setStatus('Ошибка автосохранения: ' + err.message);
+    setStatus('Ошибка автосохранения', 'error');
   }
 }
 
@@ -355,10 +364,18 @@ async function handleSaveAs() {
     setDropState('success');
     btnSaveAs.disabled = false;
     commitCurrentValues();
-    setStatus('Файл сохранён: ' + baseName);
-    showToast('✔ Файл успешно сохранён');
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setStatus(`✓ Все изменения сохранены · ${time}`, 'saved');
+    window.NotificationCenter?.success('Файл успешно сохранён', { subtitle: baseName });
+    setTimeout(() => {
+      if (!dirtyInputIds.size) setStatus('Файл загружен');
+    }, 4000);
   } catch (err) {
-    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
+    setStatus('Ошибка сохранения', 'error');
+    window.NotificationCenter?.error('Не удалось сохранить файл', {
+      subtitle: err.message,
+      actions: [{ label: 'Повторить', onClick: handleSaveAs }],
+    });
   }
 }
 
@@ -424,6 +441,22 @@ function populateForm(data) {
 //  Clear form
 // ============================================================
 function handleClearForm() {
+  // ── Снимок состояния для действия «Отменить» ───────────────
+  const _snapValues      = {};
+  Object.values(FIELD_MAP).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) _snapValues[id] = el.value;
+  });
+  const _snapFilePath     = currentFilePath;
+  const _snapRowMap       = Object.assign({}, rowMap);
+  const _snapOriginals    = Object.assign({}, originalValues);
+  const _snapDirty        = new Set(dirtyInputIds);
+  const _snapFileDisplay  = filePathDisplay.value;
+  const _snapDropFileName = dropFileName ? dropFileName.textContent : '';
+  const _snapDropState    = currentFilePath ? 'success' : 'idle';
+  const _snapCommission   = commissionInput ? commissionInput.value : '';
+
+  // ── Выполнить очистку ─────────────────────────────────────
   clearAllInputs();
   rowMap = {};
   originalValues = {};
@@ -440,6 +473,31 @@ function handleClearForm() {
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
+
+  // ── Тост с возможностью отмены (5 секунд) ─────────────────
+  window.NotificationCenter?.info('Форма очищена', {
+    duration: 5000,
+    actions: [{
+      label: 'Отменить',
+      onClick() {
+        Object.entries(_snapValues).forEach(([id, val]) => setInputValue(id, val));
+        currentFilePath      = _snapFilePath;
+        rowMap               = _snapRowMap;
+        originalValues       = _snapOriginals;
+        dirtyInputIds        = _snapDirty;
+        filePathDisplay.value = _snapFileDisplay;
+        if (dropFileName)    dropFileName.textContent = _snapDropFileName;
+        if (commissionInput) commissionInput.value    = _snapCommission;
+        if (_snapFilePath)   fileSuccess.hidden = false;
+        setDropState(_snapDropState);
+        if (_snapFilePath)   btnSaveAs.disabled = false;
+        updateDirtyState();
+        applyObjectTypeVisibility();
+        document.dispatchEvent(new Event('form:populated'));
+        window.NotificationCenter?.success('Восстановлено');
+      },
+    }],
+  });
 }
 
 // ============================================================
@@ -567,9 +625,12 @@ function handleCheckData() {
 
   // ── Результат ────────────────────────────────────────────
   if (missing.length === 0) {
-    showToast('✔ Все поля заполнены');
+    window.NotificationCenter?.success('Все поля заполнены');
   } else {
-    showToast(`✖ Не заполнено полей: ${missing.length}. ${missing.join(' | ')}`, 'error', 6000);
+    window.NotificationCenter?.error(`Не заполнено: ${missing.length} поля`, {
+      subtitle: missing.join(' | '),
+      duration: 7000,
+    });
   }
 }
 
@@ -955,7 +1016,7 @@ if (btnScanTemplate) {
         return;
       }
       if (!result.ok) {
-        showToast('✖ Ошибка сканирования: ' + result.error, 'error');
+        window.NotificationCenter?.error('Ошибка сканирования', { subtitle: result.error });
         setStatus('Ошибка сканирования');
         return;
       }
@@ -964,9 +1025,11 @@ if (btnScanTemplate) {
       const info = [];
       if (result.added?.length)   info.push(`+${result.added.length} новых`);
       if (result.removed?.length) info.push(`−${result.removed.length} удалено`);
-      showToast('✔ Шаблон обновлён' + (info.length ? ': ' + info.join(', ') : ''));
+      window.NotificationCenter?.success('Шаблон обновлён', {
+        subtitle: info.length ? info.join(', ') : undefined,
+      });
     } catch (err) {
-      showToast('✖ ' + err.message, 'error');
+      window.NotificationCenter?.error(err.message);
       setStatus('Ошибка');
     } finally {
       btnScanTemplate.disabled = false;
@@ -1576,7 +1639,7 @@ async function handleGenerate() {
 
   // Validate: save folder must be selected
   if (!outputDir) {
-    showToast('✖ Сначала выберите папку для сохранения документов', 'error');
+    window.NotificationCenter?.error('Выберите папку для сохранения');
     saveFolderInput.classList.add('input-error-highlight');
     saveFolderInput.focus();
     setTimeout(() => saveFolderInput.classList.remove('input-error-highlight'), 2500);
@@ -1589,7 +1652,7 @@ async function handleGenerate() {
   )];
 
   if (checked.length === 0) {
-    showToast('✖ Выберите хотя бы один шаблон', 'error');
+    window.NotificationCenter?.warn('Выберите хотя бы один шаблон');
     return;
   }
 
@@ -1599,7 +1662,7 @@ async function handleGenerate() {
     .filter(key => key && TEMPLATE_REGISTRY[key]);
 
   if (toGenerate.length === 0) {
-    showToast('Выбранные шаблоны ещё не реализованы');
+    window.NotificationCenter?.info('Выбранные шаблоны ещё не реализованы');
     return;
   }
 
@@ -1624,9 +1687,14 @@ async function handleGenerate() {
   }
 
   if (successCount > 0) {
-    showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
+    window.NotificationCenter?.success(`Сформировано: ${successCount} из ${toGenerate.length}`);
   }
-  errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
+  errors.forEach(msg => {
+    const dashIdx = msg.indexOf(': ');
+    const label   = dashIdx > -1 ? msg.slice(0, dashIdx) : 'Ошибка';
+    const detail  = dashIdx > -1 ? msg.slice(dashIdx + 2) : msg;
+    window.NotificationCenter?.error(label, { subtitle: detail });
+  });
 }
 
 // ============================================================
@@ -1715,7 +1783,7 @@ btnPreview.addEventListener('click', () => {
     .filter(key => key && TEMPLATE_REGISTRY[key]);
 
   if (toPreview.length === 0) {
-    showToast('✖ Выберите хотя бы один реализованный шаблон', 'error');
+    window.NotificationCenter?.warn('Выберите хотя бы один реализованный шаблон');
     return;
   }
 

@@ -56,9 +56,16 @@
     setCurrentById(id) {
       const found = _realtors.find(r => r.id === id);
       if (!found) return;
+      const previous = _currentId;
       _currentId = id;
       try { localStorage.setItem(STORAGE_KEY, id); } catch (_) {}
       _notify(found);
+      // Уведомление только при реальной смене риэлтера (не при первичной инициализации)
+      if (previous && previous !== id) {
+        const fullName = [found.lastName, found.firstName, found.middleName]
+          .filter(Boolean).join(' ') || found.name || id;
+        window.NotificationCenter?.info('Активный риэлтер изменён', { subtitle: fullName });
+      }
     },
 
     /** @param {function} fn  Вызывается с новым объектом риэлтера при каждом изменении. */
