@@ -1834,4 +1834,6 @@ btnPreview.addEventListener('click', () => {
 
   // Initial sidebar state on app load
   updateSidebarStatus();
+  // Скрываем условные поля при старте (тип объекта не выбран)
+  applyObjectTypeVisibility();
 }());
