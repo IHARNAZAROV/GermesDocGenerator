@@ -1429,22 +1429,16 @@ function buildPlaceholderData() {
 
   // ── Задаток ─────────────────────────────────────────────────
   const depositBYNRaw = (getField('deal-Сумма задатка BYN') || '').replace(',', '.').trim();
-  const depositUSDRaw = (getField('deal-Сумма задатка USD') || '').replace(',', '.').trim();
   const deposit = {
     amountBYN:      depositBYNRaw,
-    amountBYNWords: depositBYNRaw ? window.moneyToText(depositBYNRaw)    : '',
-    amountUSD:      depositUSDRaw,
-    amountUSDWords: depositUSDRaw ? window.moneyToTextUSD(depositUSDRaw) : '',
+    amountBYNWords: depositBYNRaw ? window.moneyToText(depositBYNRaw) : '',
+    amountUSD:      '',
+    amountUSDWords: '',
   };
 
-  // ── Остаточная стоимость после задатка (USD) ────────────────
-  // remainderUSD = Стоимость USD − Сумма задатка USD
-  // Вычисляется в памяти; в Excel не хранится.
-  const _priceUSDNum   = parseFloat((getField('deal-Стоимость USD') || '0').replace(',', '.')) || 0;
-  const _depositUSDNum = parseFloat(depositUSDRaw || '0') || 0;
-  const _remainderUSD  = Math.max(0, _priceUSDNum - _depositUSDNum);
-  property.remainderUSD      = _remainderUSD ? String(_remainderUSD) : '';
-  property.remainderUSDWords = _remainderUSD ? window.moneyToTextUSD(_remainderUSD) : '';
+  // remainderUSD не используется (задаток в USD отключён)
+  property.remainderUSD      = '';
+  property.remainderUSDWords = '';
 
   return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit };
 }
