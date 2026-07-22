@@ -75,7 +75,8 @@ window.FIELDS_CONFIG = {
           "key": "Сумма задатка USD",
           "label": "Задаток, USD:",
           "col": 2,
-          "numeric": true
+          "numeric": true,
+          "hidden": true
         },
         {
           "key": "Дата договора задатка",
