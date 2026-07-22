@@ -990,6 +990,11 @@ function getField(id) {
   return (document.getElementById(id)?.value || '').trim();
 }
 
+// Числовые поля: возвращает значение без пробелов-разделителей тысяч (для Word-документов)
+function getNumericField(id) {
+  return getField(id).replace(/\s/g, '');
+}
+
 // ============================================================
 //  Template registry
 //  key matches data-template attribute on .tpl-item labels.
@@ -1320,11 +1325,11 @@ function buildPlaceholderData() {
     yearBuilt:    getField('property-Год постройки')   || '',
     commercialKind:    getField('property-Вид коммерческой недвижимости')       || '',
     commercialPurpose: getField('property-Назначение коммерческой недвижимости') || '',
-    priceUSD:          getField('deal-Стоимость USD')   || '',
-    priceBYN:          getField('deal-Стоимость BYN')   || '',
+    priceUSD:          getNumericField('deal-Стоимость USD'),
+    priceBYN:          getNumericField('deal-Стоимость BYN'),
     priceWords:        getField('deal-Стоимость прописью') || '',
     priceWordsUSD:     (() => {
-      const raw = (getField('deal-Стоимость USD') || '').replace(',', '.').trim();
+      const raw = getNumericField('deal-Стоимость USD').replace(',', '.');
       return raw ? window.moneyToTextUSD(raw) : '';
     })(),
     remainderUSD:      '',   // заполняется ниже, после вычисления задатка
@@ -1428,7 +1433,7 @@ function buildPlaceholderData() {
   };
 
   // ── Задаток ─────────────────────────────────────────────────
-  const depositBYNRaw = (getField('deal-Сумма задатка BYN') || '').replace(',', '.').trim();
+  const depositBYNRaw = getNumericField('deal-Сумма задатка BYN').replace(',', '.');
   const deposit = {
     amountBYN:      depositBYNRaw,
     amountBYNWords: depositBYNRaw ? window.moneyToText(depositBYNRaw) : '',
