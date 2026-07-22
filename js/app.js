@@ -172,7 +172,7 @@ function onInputChange(inputId, currentValue) {
   // Автосохранение: запускаем/сбрасываем дебаунс только если файл уже открыт
   if (currentFilePath) {
     clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(autoSave, 2000);
+    autoSaveTimer = setTimeout(autoSave, 30000);
   }
   // Re-evaluate contract availability whenever owner fields or seller-ownership flag changes
   if (
