@@ -48,6 +48,7 @@ let currentFilePath = null;
 let rowMap          = {};
 let originalValues  = {};
 let dirtyInputIds   = new Set();
+let autoSaveTimer   = null;
 
 // ============================================================
 //  Universal helpers
@@ -168,6 +169,11 @@ function onInputChange(inputId, currentValue) {
     el.classList.remove('input-dirty');
   }
   updateDirtyState();
+  // Автосохранение: запускаем/сбрасываем дебаунс только если файл уже открыт
+  if (currentFilePath) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(autoSave, 2000);
+  }
   // Re-evaluate contract availability whenever owner fields or seller-ownership flag changes
   if (
     inputId.startsWith('owner1-') ||
@@ -289,6 +295,24 @@ async function handleSave() {
     showToast('✔ Изменения сохранены');
   } catch (err) {
     showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
+  }
+}
+
+// ============================================================
+//  Auto-save (debounced, only when file is already open)
+// ============================================================
+async function autoSave() {
+  if (!currentFilePath || dirtyInputIds.size === 0) return;
+  setStatus('Автосохранение…');
+  try {
+    const updates = buildUpdates();
+    await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
+    commitCurrentValues();
+    const now = new Date();
+    const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    setStatus(`Автосохранено в ${hhmm}`);
+  } catch (err) {
+    setStatus('Ошибка автосохранения: ' + err.message);
   }
 }
 
