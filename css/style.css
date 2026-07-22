@@ -2743,6 +2743,150 @@ html, body {
   cursor: default;
 }
 
+/* ============================================================
+   OBJECT TYPE — кастомный select (стиль realtor-dropdown)
+   ============================================================ */
+.obj-type-dropdown {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Trigger ──────────────────────────────────────────────── */
+.obj-sel-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: var(--input-h);
+  padding: 0 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-bdr);
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  text-align: left;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.obj-sel-trigger:hover {
+  border-color: #B2C8BF;
+}
+.obj-sel-trigger:focus-visible,
+.obj-sel-trigger[aria-expanded="true"] {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(21,89,69,.10);
+  background: #FAFDFB;
+}
+
+.obj-sel-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+/* Placeholder style when nothing is selected */
+.obj-sel-trigger .obj-sel-value:empty,
+.obj-sel-trigger .obj-sel-value:first-child:not(:only-child) {
+  color: var(--text-muted);
+}
+.obj-sel-trigger--empty .obj-sel-value {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.obj-sel-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 200ms ease;
+  margin-left: auto;
+}
+.obj-sel-trigger[aria-expanded="true"] .obj-sel-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown menu ────────────────────────────────────────── */
+.obj-sel-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-raise);
+  padding: 5px;
+  list-style: none;
+  z-index: 800;
+  animation: objSelMenuIn 170ms ease;
+  transform-origin: top left;
+}
+.obj-sel-menu[hidden] { display: none; }
+
+@keyframes objSelMenuIn {
+  from { opacity: 0; transform: translateY(-5px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+.obj-sel-menu--closing {
+  animation: objSelMenuOut 160ms ease forwards;
+}
+@keyframes objSelMenuOut {
+  from { opacity: 1; transform: translateY(0)    scale(1);   }
+  to   { opacity: 0; transform: translateY(-4px) scale(.97); }
+}
+
+/* ── Menu item ────────────────────────────────────────────── */
+.obj-sel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  list-style: none;
+  transition: background 120ms ease;
+}
+.obj-sel-item:hover,
+.obj-sel-item:focus-visible {
+  background: var(--brand-xlight);
+}
+.obj-sel-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--brand-light);
+}
+.obj-sel-item--selected {
+  background: var(--brand-light);
+}
+
+.obj-sel-item__label {
+  flex: 1;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+.obj-sel-item--selected .obj-sel-item__label {
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+.obj-sel-item__check {
+  flex-shrink: 0;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+}
+
 /* ── Compat: win-left no longer used, but keep class in case of legacy refs ── */
 .win-left { display: none; }
 .win-right { display: none; }

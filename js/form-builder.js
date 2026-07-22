@@ -68,6 +68,34 @@ function htmlDate(groupId, field) {
        + `<button class="cal-btn" tabindex="-1">${CAL_SVG}</button></div></div>`;
 }
 
+/** Кастомный select (выпадающий список) в стиле realtor-dropdown */
+function htmlSelect(groupId, field) {
+  const id   = inputId(groupId, field.key);
+  const opts = (field.options || []);
+  const optHtml = opts.map(opt =>
+    `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
+    + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
+    + `<span class="obj-sel-item__check" aria-hidden="true"></span>`
+    + `</li>`
+  ).join('');
+
+  return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
+       + `<div class="input-wrap">`
+       + `<div class="obj-type-dropdown" id="osd-${id}">`
+       // Скрытый input — хранит значение; getField / setInputValue работают с ним напрямую
+       + `<input type="text" id="${id}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" tabindex="-1" aria-hidden="true" />`
+       + `<button type="button" class="obj-sel-trigger" id="osd-btn-${id}"`
+       +   ` aria-haspopup="listbox" aria-expanded="false" aria-controls="osd-menu-${id}">`
+       +   `<span class="obj-sel-value" id="osd-val-${id}">— не выбрано —</span>`
+       +   `<svg class="obj-sel-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`
+       + `</button>`
+       + `<ul class="obj-sel-menu" id="osd-menu-${id}" role="listbox" hidden>`
+       + optHtml
+       + `</ul>`
+       + `</div>`
+       + `</div></div>`;
+}
+
 /** Readonly инпут */
 function htmlReadonly(groupId, field, title) {
   const id = inputId(groupId, field.key);
@@ -237,6 +265,9 @@ function renderFields(groupId, fields) {
         case 'readonly':
           fieldHtml = htmlReadonly(groupId, field);
           break;
+        case 'select':
+          fieldHtml = htmlSelect(groupId, field);
+          break;
         default:
           fieldHtml = htmlText(groupId, field);
       }
@@ -321,8 +352,133 @@ function buildForm(config) {
     }
   }
 
+  // 4. Инициализируем кастомные select-дропдауны
+  _initObjTypeDropdowns();
+
   return fieldMap;
 }
 
+// ── Инициализация кастомных select-дропдаунов ─────────────────
+
+function _syncObjSelLabel(wrapper) {
+  const inputEl = wrapper.querySelector('input[type="text"]');
+  const trigger = wrapper.querySelector('.obj-sel-trigger');
+  const valueEl = wrapper.querySelector('.obj-sel-value');
+  const menu    = wrapper.querySelector('.obj-sel-menu');
+  if (!inputEl || !valueEl) return;
+  const val     = (inputEl.value || '').trim();
+  const isEmpty = val === '';
+  valueEl.textContent = isEmpty ? '— не выбрано —' : val;
+  if (trigger) trigger.classList.toggle('obj-sel-trigger--empty', isEmpty);
+  if (menu) {
+    menu.querySelectorAll('.obj-sel-item').forEach(li => {
+      const selected = li.dataset.value === val;
+      li.setAttribute('aria-selected', String(selected));
+      li.classList.toggle('obj-sel-item--selected', selected);
+      const chk = li.querySelector('.obj-sel-item__check');
+      if (chk) chk.innerHTML = selected
+        ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+          + ' stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+          + '<polyline points="20 6 9 17 4 12"/></svg>'
+        : '';
+    });
+  }
+}
+
+function _initObjTypeDropdowns() {
+  document.querySelectorAll('.obj-type-dropdown').forEach(wrapper => {
+    const inputEl = wrapper.querySelector('input[type="text"]');
+    const trigger = wrapper.querySelector('.obj-sel-trigger');
+    const menu    = wrapper.querySelector('.obj-sel-menu');
+    if (!trigger || !menu || !inputEl) return;
+
+    // Синхронизируем начальное состояние (placeholder-стиль)
+    _syncObjSelLabel(wrapper);
+
+    function isOpen() { return !menu.hidden; }
+
+    function openMenu() {
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      setTimeout(() => document.addEventListener('pointerdown', onOutside), 0);
+      requestAnimationFrame(() => {
+        const sel   = menu.querySelector('.obj-sel-item--selected');
+        const first = menu.querySelector('.obj-sel-item');
+        (sel || first)?.focus();
+      });
+    }
+
+    function closeMenu() {
+      menu.classList.add('obj-sel-menu--closing');
+      setTimeout(() => {
+        menu.hidden = true;
+        menu.classList.remove('obj-sel-menu--closing');
+      }, 160);
+      trigger.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('pointerdown', onOutside);
+      trigger.focus();
+    }
+
+    function selectValue(val) {
+      inputEl.value = val;
+      _syncObjSelLabel(wrapper);
+      // Уведомляем app.js через bubbling input event
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+      closeMenu();
+    }
+
+    function onOutside(e) {
+      if (!wrapper.contains(e.target)) closeMenu();
+    }
+
+    trigger.addEventListener('click', () => isOpen() ? closeMenu() : openMenu());
+    trigger.addEventListener('keydown', e => {
+      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (!isOpen()) openMenu();
+      } else if (e.key === 'Escape') {
+        closeMenu();
+      }
+    });
+
+    menu.querySelectorAll('.obj-sel-item').forEach(li => {
+      li.addEventListener('click', () => selectValue(li.dataset.value));
+      li.addEventListener('pointerenter', () => li.focus());
+      li.addEventListener('keydown', e => {
+        const items = Array.from(menu.querySelectorAll('.obj-sel-item'));
+        const idx   = items.indexOf(document.activeElement);
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            items[Math.min(idx + 1, items.length - 1)]?.focus();
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            if (idx <= 0) { closeMenu(); return; }
+            items[Math.max(idx - 1, 0)]?.focus();
+            break;
+          case 'Enter':
+          case ' ':
+            e.preventDefault();
+            li.click();
+            break;
+          case 'Escape':
+          case 'Tab':
+            e.preventDefault();
+            closeMenu();
+            break;
+        }
+      });
+    });
+  });
+
+  // Синхронизация меток при загрузке/очистке формы
+  function syncAll() {
+    document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel);
+  }
+  document.addEventListener('form:populated', syncAll);
+  document.addEventListener('form:cleared',   syncAll);
+}
+
 // ── Публичный API ─────────────────────────────────────────────
-window.FormBuilder = { buildForm };
+window.FormBuilder = { buildForm, syncObjTypeDropdowns: () => document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel) };
