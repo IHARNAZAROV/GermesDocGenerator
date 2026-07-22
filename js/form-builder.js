@@ -56,28 +56,22 @@ function inputId(groupId, key) {
 function htmlText(groupId, field) {
   const id = inputId(groupId, field.key);
   const numAttr = field.numeric ? ' data-numeric="true"' : '';
-  const reqCls  = field.required ? ' fr-required' : '';
-  const reqInd  = field.required ? '<span class="fr-indicator" aria-hidden="true">✓</span>' : '';
-  return `<div class="fr fr-sm${reqCls}" id="fr-${id}"><label>${escHtml(field.label)}${reqInd}</label>`
+  return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
        + `<div class="input-wrap"><input type="text" id="${id}"${numAttr} /></div></div>`;
 }
 
 /** Инпут с кнопкой-календарём */
 function htmlDate(groupId, field) {
   const id = inputId(groupId, field.key);
-  const reqCls = field.required ? ' fr-required' : '';
-  const reqInd = field.required ? '<span class="fr-indicator" aria-hidden="true">✓</span>' : '';
-  return `<div class="fr fr-sm${reqCls}" id="fr-${id}"><label>${escHtml(field.label)}${reqInd}</label>`
+  return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
        + `<div class="input-wrap"><input type="text" id="${id}" class="has-cal" />`
        + `<button class="cal-btn" tabindex="-1">${CAL_SVG}</button></div></div>`;
 }
 
 /** Кастомный select (выпадающий список) в стиле realtor-dropdown */
 function htmlSelect(groupId, field) {
-  const id      = inputId(groupId, field.key);
-  const opts    = (field.options || []);
-  const reqCls  = field.required ? ' fr-required' : '';
-  const reqInd  = field.required ? '<span class="fr-indicator" aria-hidden="true">✓</span>' : '';
+  const id   = inputId(groupId, field.key);
+  const opts = (field.options || []);
   const optHtml = opts.map(opt =>
     `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
     + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
@@ -85,7 +79,7 @@ function htmlSelect(groupId, field) {
     + `</li>`
   ).join('');
 
-  return `<div class="fr fr-sm${reqCls}" id="fr-${id}"><label>${escHtml(field.label)}${reqInd}</label>`
+  return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
        + `<div class="input-wrap">`
        + `<div class="obj-type-dropdown" id="osd-${id}">`
        // Скрытый input — хранит значение; getField / setInputValue работают с ним напрямую

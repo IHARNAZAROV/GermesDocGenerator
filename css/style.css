@@ -86,75 +86,39 @@ html, body {
 }
 
 /* ============================================================
-   TOAST NOTIFICATIONS — rich multi-line toasts
+   TOAST NOTIFICATIONS
    ============================================================ */
 .toast-container {
   position: fixed;
   bottom: calc(var(--status-h) + 12px);
   right: 16px;
-  z-index: 1000;
+  z-index: 900;
   display: flex;
   flex-direction: column;
   gap: 6px;
   pointer-events: none;
-  max-width: 360px;
 }
 .toast {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-radius: var(--r-md);
   font-size: var(--fs-sm);
+  font-weight: 500;
   background: #1A2E25;
   color: #F0F7F4;
   box-shadow: 0 4px 20px rgba(0,0,0,.22);
   opacity: 0;
-  transform: translateY(10px) scale(.97);
-  transition: opacity 180ms ease-out, transform 180ms ease-out;
-  pointer-events: auto;
-  border: 1px solid rgba(255,255,255,.08);
+  transform: translateY(8px) scale(.97);
+  transition: opacity .2s ease-out, transform .2s ease-out;
+  pointer-events: none;
   max-width: 360px;
-  min-width: 220px;
+  border: 1px solid rgba(255,255,255,.08);
 }
-.toast.toast-visible   { opacity: 1; transform: translateY(0) scale(1); }
-.toast.toast-dismissing { opacity: 0; transform: translateY(-4px) scale(.98); }
-
-/* Type variants */
-.toast-warning { background: #7C4F00; border-color: rgba(255,200,100,.15); }
-.toast-error   { background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-bdr); }
-.toast-info    { background: #1A2A3A; border-color: rgba(120,160,220,.15); }
-
-/* Icon */
-.toast-icon { flex-shrink: 0; margin-top: 1px; opacity: .9; }
-
-/* Content */
-.toast-content { flex: 1; min-width: 0; }
-.toast-title   { font-weight: 600; line-height: 1.4; word-break: break-word; }
-.toast-body    { font-size: var(--fs-xs); opacity: .8; margin-top: 3px; white-space: pre-line; line-height: 1.5; }
-
-/* Action buttons */
-.toast-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-.toast-action {
-  font-family: var(--font); font-size: var(--fs-xs); font-weight: 600;
-  padding: 3px 10px; border-radius: var(--r-sm);
-  border: 1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.12); color: inherit;
-  cursor: pointer; transition: background 130ms, border-color 130ms;
+.toast.toast-visible { opacity: 1; transform: translateY(0) scale(1); }
+.toast.toast-error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-bdr);
 }
-.toast-action:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.35); }
-.toast-error .toast-action { border-color: var(--error-bdr); background: rgba(220,38,38,.08); }
-.toast-error .toast-action:hover { background: rgba(220,38,38,.14); }
-.toast-action--undo { border-color: rgba(255,220,100,.35); background: rgba(255,200,50,.12); }
-.toast-action--undo:hover { background: rgba(255,200,50,.22); }
-
-/* Close btn */
-.toast-close {
-  flex-shrink: 0; background: none; border: none; cursor: pointer;
-  color: inherit; opacity: .5; font-size: 12px; padding: 0 0 0 4px;
-  transition: opacity 130ms; align-self: flex-start; margin-top: 1px; line-height: 1;
-}
-.toast-close:hover { opacity: 1; }
 
 /* ============================================================
    ERROR BANNER
@@ -1283,12 +1247,11 @@ html, body {
   gap: 7px;
 }
 .status-dot {
-  width: 7px; height: 7px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: #16A34A;
   box-shadow: 0 0 0 2px rgba(22,163,74,.2);
   flex-shrink: 0;
-  transition: background 250ms, box-shadow 250ms;
 }
 .status-version { color: var(--text-muted); opacity: .7; }
 
@@ -3040,226 +3003,3 @@ html, body {
 }
 .nav-item--c-docs.nav-item--active .nav-item-icon  { background: #D1FAE5; border-color: #34D399; }
 .nav-item--c-docs.nav-item--active .nav-item-label { color: #065F46; }
-
-/* ============================================================
-   MICRO-INTERACTIONS — PROGRESS OVERLAY
-   ============================================================ */
-#progress-overlay {
-  position: fixed; inset: 0;
-  background: rgba(20,35,28,.55);
-  backdrop-filter: blur(6px);
-  z-index: 950;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 200ms ease;
-}
-#progress-overlay[hidden] { display: none; }
-#progress-overlay.po-visible { opacity: 1; }
-
-.po-modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  box-shadow: 0 16px 48px rgba(0,0,0,.22);
-  padding: 24px 28px 22px;
-  min-width: 340px;
-  max-width: 420px;
-  width: 90%;
-}
-.po-title {
-  font-size: 14px; font-weight: 700; color: var(--brand);
-  margin-bottom: 14px; letter-spacing: -.1px;
-}
-.po-bar-wrap {
-  background: var(--border-light);
-  border-radius: 99px; height: 6px;
-  overflow: hidden; margin-bottom: 6px;
-}
-.po-fill {
-  height: 100%; background: var(--brand);
-  border-radius: 99px; width: 0%;
-  transition: width 350ms ease;
-}
-.po-count {
-  font-size: var(--fs-xs); color: var(--text-muted);
-  text-align: right; margin-bottom: 12px; display: block;
-}
-.po-steps {
-  display: flex; flex-direction: column; gap: 5px;
-  max-height: 160px; overflow-y: auto;
-}
-.po-step {
-  display: flex; align-items: center; gap: 8px;
-  font-size: var(--fs-xs); color: var(--text-2);
-  padding: 3px 0;
-}
-.po-step-icon { flex-shrink: 0; color: var(--text-muted); }
-.po-step--done .po-step-icon { color: var(--brand-mid); }
-.po-step--done .po-step-label { color: var(--text-muted); }
-
-/* Progress spinner animation */
-.nt-spin { animation: nt-spin-anim .8s linear infinite; }
-@keyframes nt-spin-anim { to { transform: rotate(360deg); } }
-
-/* Check animation */
-.nt-check-anim { animation: nt-check-pop 200ms ease both; }
-@keyframes nt-check-pop {
-  from { opacity: 0; transform: scale(.6); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* ============================================================
-   STATUS DOT — saving / saved modes
-   ============================================================ */
-.status-dot--saving {
-  background: #F59E0B;
-  box-shadow: 0 0 0 3px rgba(245,158,11,.2);
-  animation: dot-pulse .9s ease-in-out infinite alternate;
-}
-.status-dot--saved {
-  background: #22C55E;
-  box-shadow: 0 0 0 3px rgba(34,197,94,.15);
-}
-@keyframes dot-pulse {
-  from { opacity: .6; } to { opacity: 1; }
-}
-
-/* ============================================================
-   HOVER MICRO-ANIMATIONS — всe интерактивные элементы
-   ============================================================ */
-
-/* Кнопки тулбара — уже есть transition, добавляем scale */
-.save-bar-btn:hover:not(:disabled) { transform: translateY(-1px) scale(1.01); }
-.save-bar-btn:active:not(:disabled) { transform: translateY(1px) scale(.99); }
-
-/* Кнопка генерации */
-.btn-generate {
-  transition: background .15s, box-shadow .15s, transform .12s;
-}
-.btn-generate:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.015);
-  box-shadow: 0 4px 14px rgba(21,89,69,.3);
-}
-.btn-generate:active:not(:disabled) { transform: translateY(1px) scale(.99); }
-
-/* Шаблоны документов */
-.tpl-item {
-  transition: background 130ms, box-shadow 130ms, transform 130ms;
-  border-radius: var(--r-sm);
-}
-.tpl-item:hover:not(.tpl-item-disabled) {
-  transform: translateX(2px);
-  box-shadow: inset 2px 0 0 var(--brand-mid);
-}
-
-/* Пункты навигации */
-.nav-item {
-  transition: background 140ms, box-shadow 130ms, transform 120ms;
-}
-.nav-item:hover { transform: translateX(2px); }
-.nav-item:active { transform: translateX(1px); }
-
-/* Карточки (sp-block) */
-.sp-block {
-  transition: box-shadow 160ms, transform 140ms;
-}
-.sp-block:hover { box-shadow: var(--shadow-card); }
-
-/* Tab buttons */
-.tab-btn {
-  transition: background .13s, color .13s, transform .1s;
-}
-.tab-btn:hover:not(.active) { transform: translateY(-1px); }
-
-/* ============================================================
-   FIELD HIGHLIGHT — переход к ошибке
-   ============================================================ */
-@keyframes field-flash {
-  0%   { box-shadow: 0 0 0 0   rgba(21,89,69,.0);  background: var(--input-bg); }
-  20%  { box-shadow: 0 0 0 4px rgba(21,89,69,.35); background: var(--brand-xlight); }
-  100% { box-shadow: 0 0 0 0   rgba(21,89,69,.0);  background: var(--input-bg); }
-}
-.field-highlight {
-  animation: field-flash 1.6s ease forwards !important;
-  border-color: var(--brand) !important;
-}
-
-/* ============================================================
-   BUTTON LOADING STATE
-   ============================================================ */
-.btn-loading {
-  position: relative;
-  pointer-events: none;
-  opacity: .7;
-}
-.btn-loading::after {
-  content: '';
-  position: absolute;
-  right: 10px; top: 50%; margin-top: -6px;
-  width: 12px; height: 12px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: nt-spin-anim .7s linear infinite;
-  opacity: .8;
-}
-
-/* ============================================================
-   REQUIRED FIELD INDICATOR  ○ → ✓
-   ============================================================ */
-.fr-required .fr-indicator {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 14px; height: 14px; margin-left: 4px;
-  border: 1.5px solid var(--text-muted);
-  border-radius: 50%;
-  font-size: 8px; color: transparent;
-  transition: all 200ms ease;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
-.fr-required.fr-filled .fr-indicator {
-  border-color: var(--brand);
-  background: var(--brand);
-  color: #fff;
-  animation: indicator-pop 220ms ease both;
-}
-@keyframes indicator-pop {
-  0%   { transform: scale(0.5); }
-  70%  { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-/* ============================================================
-   EMPTY STATE CARDS
-   ============================================================ */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 8px; padding: 20px 16px; text-align: center;
-  color: var(--text-muted); font-size: var(--fs-sm);
-}
-.empty-state svg   { opacity: .4; margin-bottom: 2px; }
-.empty-state-title { font-weight: 600; color: var(--text-2); }
-.empty-state-btn {
-  margin-top: 4px; padding: 5px 14px;
-  border-radius: var(--r-md); font-size: var(--fs-xs); font-weight: 600;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--brand); cursor: pointer;
-  transition: background 130ms, border-color 130ms;
-}
-.empty-state-btn:hover { background: var(--brand-xlight); border-color: var(--brand-mid); }
-
-/* ============================================================
-   SMART TIPS — плавный Fade при смене типа объекта
-   ============================================================ */
-.tips-slide { transition: opacity 180ms ease; }
-.tips-slide--fading { opacity: 0; }
-
-/* ============================================================
-   NEXT-STEP BANNER — подсказки после каждого этапа
-   ============================================================ */
-.next-step-banner {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 12px; border-radius: var(--r-md);
-  background: var(--brand-xlight); border: 1px solid var(--brand-light);
-  font-size: var(--fs-xs); color: var(--brand); font-weight: 500;
-  margin-top: 6px; animation: slideDown .18s ease-out;
-}

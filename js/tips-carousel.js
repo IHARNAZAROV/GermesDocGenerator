@@ -11,13 +11,7 @@
 
   function goTo(idx) {
     current = ((idx % total) + total) % total;
-    // Fade-transition при смене слайда
-    track.style.opacity = '0';
-    track.style.transition = 'opacity 160ms ease';
-    setTimeout(function () {
-      track.style.transform = 'translateX(-' + (current * 100) + '%)';
-      track.style.opacity = '1';
-    }, 160);
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
     dots.forEach(function (d, i) {
       d.classList.toggle('tips-dot--active', i === current);
     });

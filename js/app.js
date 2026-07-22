@@ -95,10 +95,20 @@ function applyNumericFormat(input) {
 }
 
 // ============================================================
-//  Toast notifications — делегируем в Notify (notifications.js)
+//  Toast notifications
 // ============================================================
 function showToast(message, type = 'success', duration = 3200) {
-  return Notify.toast({ title: message, type, duration });
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('toast-visible'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    setTimeout(() => toast.remove(), 320);
+  }, duration);
 }
 
 // ============================================================
@@ -115,8 +125,8 @@ function hideError() {
 function showLoader() { loader.hidden = false; }
 function hideLoader() { loader.hidden = true; }
 
-function setStatus(text, mode) {
-  Notify.status(text, mode);
+function setStatus(text) {
+  if (statusText) statusText.textContent = text;
 }
 
 // ============================================================
@@ -146,67 +156,18 @@ function updateDirtyState() {
   setStatus(hasDirty ? 'Есть несохранённые изменения' : (currentFilePath ? 'Файл загружен' : 'Готов к работе'));
 }
 
-// ── Debounced field-change toast (пункт 6 ТЗ) ───────────────
-let _fieldChangeTimer = null;
-let _fieldChangeDirtyCount = 0;
-
 function onInputChange(inputId, currentValue) {
   const original = originalValues[inputId] ?? '';
   const current  = currentValue.trim();
   const el = document.getElementById(inputId);
   if (!el) return;
-
-  const wasEmpty = isFieldEmpty(original);
-  const nowEmpty = isFieldEmpty(current);
-
   if (current !== original) {
     dirtyInputIds.add(inputId);
     el.classList.add('input-dirty');
-    // Debounced toast: после завершения ввода, не каждый символ
-    if (currentFilePath) {
-      _fieldChangeDirtyCount++;
-      clearTimeout(_fieldChangeTimer);
-      _fieldChangeTimer = setTimeout(() => {
-        const n = _fieldChangeDirtyCount;
-        _fieldChangeDirtyCount = 0;
-        Notify.toast({
-          type: 'info',
-          title: n > 1 ? `Изменено ${n} поля(-ей)` : 'Изменения записаны',
-          body: 'Автосохранение через несколько секунд.',
-          duration: 2200,
-        });
-      }, 2000);
-    }
   } else {
     dirtyInputIds.delete(inputId);
     el.classList.remove('input-dirty');
   }
-
-  // Индикатор обязательного поля ○ → ✓ (пункт 14 ТЗ)
-  const fr = document.getElementById('fr-' + inputId);
-  if (fr && fr.classList.contains('fr-required')) {
-    const filled = !nowEmpty;
-    const wasFilled = fr.classList.contains('fr-filled');
-    fr.classList.toggle('fr-filled', filled);
-    // Toast «Все обязательные поля заполнены» (пункт 15 ТЗ) — один раз за сессию
-    if (filled && !wasFilled && !_allFilledToastShown) {
-      clearTimeout(_allFilledTimer);
-      _allFilledTimer = setTimeout(() => {
-        const allFilled = [...document.querySelectorAll('.fr-required')]
-          .every(row => row.classList.contains('fr-filled'));
-        if (allFilled) {
-          _allFilledToastShown = true;
-          Notify.toast({
-            type: 'success',
-            title: '🎉 Все обязательные поля заполнены',
-            body: 'Можно формировать документы.',
-            duration: 5000,
-          });
-        }
-      }, 300);
-    }
-  }
-
   updateDirtyState();
   // Автосохранение: запускаем/сбрасываем дебаунс только если файл уже открыт
   if (currentFilePath) {
@@ -226,25 +187,8 @@ function onInputChange(inputId, currentValue) {
   if (inputId === 'property-Тип объекта') {
     applyObjectTypeVisibility();
     autoUpdateCommission();
-    // Toast при смене типа объекта (только если значение непустое)
-    const typeVal = document.getElementById('property-Тип объекта')?.value?.trim();
-    if (typeVal) {
-      clearTimeout(_objTypeToastTimer);
-      _objTypeToastTimer = setTimeout(() => {
-        Notify.toast({
-          type: 'info',
-          title: `Тип объекта: ${typeVal}`,
-          body: 'Форма обновлена под выбранный тип.',
-          duration: 2800,
-        });
-      }, 400);
-    }
   }
 }
-
-let _objTypeToastTimer = null;
-let _allFilledTimer    = null;
-let _allFilledToastShown = false;
 
 function commitCurrentValues() {
   for (const inputId of Object.values(FIELD_MAP)) {
@@ -347,12 +291,10 @@ async function handleSave() {
   try {
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
     commitCurrentValues();
-    const hhmm = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setStatus(`✓ Изменения сохранены · ${hhmm}`, 'saved');
-    setTimeout(() => setStatus('Файл загружен'), 5000);
-    Notify.toast({ type: 'success', title: `✓ Проект сохранён · ${hhmm}`, duration: 3000 });
+    setStatus('Изменения сохранены');
+    showToast('✔ Изменения сохранены');
   } catch (err) {
-    Notify.toast({ type: 'error', title: 'Не удалось сохранить', body: err.message, duration: 6000, actions: [{ label: 'Повторить', onClick: handleSave }] });
+    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
   }
 }
 
@@ -361,14 +303,14 @@ async function handleSave() {
 // ============================================================
 async function autoSave() {
   if (!currentFilePath || dirtyInputIds.size === 0) return;
-  setStatus('● Сохранение…', 'saving');
+  setStatus('Автосохранение…');
   try {
     const updates = buildUpdates();
     await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
     commitCurrentValues();
-    const hhmm = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setStatus(`✓ Все изменения сохранены · ${hhmm}`, 'saved');
-    setTimeout(() => setStatus(currentFilePath ? 'Файл загружен' : 'Готов к работе'), 5000);
+    const now = new Date();
+    const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    setStatus(`Автосохранено в ${hhmm}`);
   } catch (err) {
     setStatus('Ошибка автосохранения: ' + err.message);
   }
@@ -413,12 +355,10 @@ async function handleSaveAs() {
     setDropState('success');
     btnSaveAs.disabled = false;
     commitCurrentValues();
-    const hhmm2 = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setStatus(`✓ Сохранён · ${hhmm2}`, 'saved');
-    setTimeout(() => setStatus('Файл загружен'), 5000);
-    Notify.toast({ type: 'success', title: `✓ Файл успешно сохранён`, body: baseName, duration: 3500 });
+    setStatus('Файл сохранён: ' + baseName);
+    showToast('✔ Файл успешно сохранён');
   } catch (err) {
-    Notify.toast({ type: 'error', title: 'Не удалось сохранить', body: err.message, duration: 6000, actions: [{ label: 'Повторить', onClick: handleSaveAs }] });
+    showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
   }
 }
 
@@ -478,28 +418,12 @@ function populateForm(data) {
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
-
-  // Инициализировать индикаторы ○→✓ для обязательных полей
-  document.querySelectorAll('.fr-required').forEach(row => {
-    const input = row.querySelector('input');
-    if (input) row.classList.toggle('fr-filled', !isFieldEmpty(input.value));
-  });
-  _allFilledToastShown = false;
 }
 
 // ============================================================
 //  Clear form
 // ============================================================
 function handleClearForm() {
-  // Снимок для undo
-  const _snapshot   = {};
-  const _snapPath   = currentFilePath;
-  const _snapBase   = dropFileName ? dropFileName.textContent : '';
-  Object.values(FIELD_MAP).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) _snapshot[id] = el.value;
-  });
-
   clearAllInputs();
   rowMap = {};
   originalValues = {};
@@ -514,36 +438,8 @@ function handleClearForm() {
   switchTab('owner1');
   resetContractAvailability();
   applyObjectTypeVisibility();
-  setDropState('idle');
-  // Сбросить индикаторы и флаг «все заполнено»
-  document.querySelectorAll('.fr-required').forEach(r => r.classList.remove('fr-filled'));
-  _allFilledToastShown = false;
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
-
-  Notify.toast({
-    type: 'info',
-    title: 'Форма очищена',
-    duration: 5500,
-    onUndo: () => {
-      Object.entries(_snapshot).forEach(([id, val]) => setInputValue(id, val));
-      if (_snapPath) {
-        currentFilePath = _snapPath;
-        filePathDisplay.value = _snapPath;
-        if (dropFileName) dropFileName.textContent = _snapBase;
-        setDropState('success');
-        btnSaveAs.disabled = false;
-      }
-      dirtyInputIds.clear();
-      Object.values(FIELD_MAP).forEach(id => {
-        originalValues[id] = (document.getElementById(id)?.value || '').trim();
-      });
-      applyObjectTypeVisibility();
-      updateContractAvailability();
-      document.dispatchEvent(new Event('form:populated'));
-      setStatus(_snapPath ? 'Файл загружен' : 'Готов к работе');
-    },
-  });
 }
 
 // ============================================================
@@ -671,39 +567,9 @@ function handleCheckData() {
 
   // ── Результат ────────────────────────────────────────────
   if (missing.length === 0) {
-    Notify.toast({
-      type: 'success',
-      title: '🎉 Все обязательные поля заполнены',
-      body: 'Можно формировать документы.',
-      duration: 5000,
-    });
+    showToast('✔ Все поля заполнены');
   } else {
-    // Навигация по ошибкам: первое пустое поле
-    const firstMissingId = (() => {
-      for (const [mapKey, inputId] of Object.entries(FIELD_MAP)) {
-        const el = document.getElementById(inputId);
-        if (el && isFieldEmpty(el.value)) {
-          // Проверяем, входит ли этот key в missing
-          const label = missing.find(m => {
-            const parts = mapKey.split('-');
-            return m.toLowerCase().includes((parts[parts.length - 1] || '').toLowerCase().slice(0, 6));
-          });
-          if (label) return inputId;
-        }
-      }
-      return null;
-    })();
-
-    Notify.toast({
-      type: 'warning',
-      title: `Проверка завершена`,
-      body: `Ошибок: ${missing.length}\n${missing.slice(0, 3).join(' | ')}${missing.length > 3 ? ' …' : ''}`,
-      duration: 7000,
-      actions: firstMissingId ? [{
-        label: 'Перейти',
-        onClick: () => Notify.highlightField(firstMissingId),
-      }] : [],
-    });
+    showToast(`✖ Не заполнено полей: ${missing.length}. ${missing.join(' | ')}`, 'error', 6000);
   }
 }
 
@@ -940,34 +806,9 @@ function updateSidebarStatus() {
   }
 }
 
-// React to individual template checkbox changes — с batch-тостом
-let _docSelectTimer = null;
-let _docAddCount    = 0;
-let _docRemCount    = 0;
-let _docLastLabel   = '';
-
+// React to individual template checkbox changes
 document.addEventListener('change', (e) => {
-  if (!e.target.matches('.tpl-item input[type="checkbox"]')) return;
-  updateSidebarStatus();
-
-  const label   = e.target.closest('.tpl-item')?.textContent?.replace(/^W\s*/, '').trim() || 'Документ';
-  const checked = e.target.checked;
-  if (checked) { _docAddCount++; _docLastLabel = label; }
-  else         { _docRemCount++; }
-
-  clearTimeout(_docSelectTimer);
-  _docSelectTimer = setTimeout(() => {
-    if (_docAddCount > 1) {
-      Notify.toast({ type: 'info', title: `Добавлено ${_docAddCount} документа(-ов)`, duration: 2500 });
-    } else if (_docAddCount === 1) {
-      Notify.toast({ type: 'success', title: `✓ ${_docLastLabel} добавлен`, duration: 2200 });
-    } else if (_docRemCount === 1) {
-      Notify.toast({ type: 'info', title: 'Документ удалён из списка формирования', duration: 2000 });
-    } else if (_docRemCount > 1) {
-      Notify.toast({ type: 'info', title: `Удалено ${_docRemCount} документа(-ов)`, duration: 2000 });
-    }
-    _docAddCount = 0; _docRemCount = 0; _docLastLabel = '';
-  }, 350);
+  if (e.target.matches('.tpl-item input[type="checkbox"]')) updateSidebarStatus();
 });
 
 // React to manual edits / clear of the folder input
@@ -993,10 +834,6 @@ async function loadExcelFile(filePath) {
   filePathDisplay.value = filePath;
   fileSuccess.hidden = true;
   setStatus('Чтение файла…');
-
-  // Состояние загрузки на кнопке
-  btnChooseFile.classList.add('btn-loading');
-  btnChooseFile.disabled = true;
   showLoader();
 
   let data;
@@ -1004,8 +841,6 @@ async function loadExcelFile(filePath) {
     data = await window.electronAPI.readExcel(filePath);
   } catch (err) {
     hideLoader();
-    btnChooseFile.classList.remove('btn-loading');
-    btnChooseFile.disabled = false;
     setDropState('idle');
     showError('Ошибка при чтении файла: ' + err.message);
     setStatus('Ошибка чтения файла');
@@ -1013,8 +848,6 @@ async function loadExcelFile(filePath) {
   }
 
   hideLoader();
-  btnChooseFile.classList.remove('btn-loading');
-  btnChooseFile.disabled = false;
 
   if (!data || typeof data !== 'object') {
     setDropState('idle');
@@ -1030,43 +863,6 @@ async function loadExcelFile(filePath) {
 
   populateForm(data);
   setStatus('Файл загружен: ' + baseName);
-
-  // Считаем заполненные и пустые поля
-  const fieldCount = Object.keys(data._rowMap || {}).length;
-  const emptyFields = [];
-  Object.entries(FIELD_MAP).forEach(([mapKey, inputId]) => {
-    const el = document.getElementById(inputId);
-    if (el && isFieldEmpty(el.value)) emptyFields.push(mapKey);
-  });
-  const warnCount = Math.min(emptyFields.length, 99);
-
-  if (warnCount > 0) {
-    Notify.toast({
-      type: 'warning',
-      title: '⚠ Excel загружен',
-      body: `Импортировано: ${fieldCount} полей\nТребуют проверки: ${warnCount}`,
-      duration: 5000,
-      actions: [{
-        label: 'Следующий шаг',
-        onClick: () => {
-          document.querySelector('.nav-item[data-target="ws-deal"]')?.click();
-        },
-      }],
-    });
-  } else {
-    Notify.toast({
-      type: 'success',
-      title: '✔ Excel успешно загружен',
-      body: `Файл: ${baseName}\nИмпортировано: ${fieldCount} полей`,
-      duration: 4500,
-      actions: [{
-        label: 'Следующий шаг →',
-        onClick: () => {
-          document.querySelector('.nav-item[data-target="ws-deal"]')?.click();
-        },
-      }],
-    });
-  }
 }
 
 async function handleChooseFile() {
@@ -1810,12 +1606,8 @@ async function handleGenerate() {
   let successCount = 0;
   const errors = [];
 
-  Notify.progressStart({ title: 'Формирование документов', total: toGenerate.length });
-
-  for (let _gi = 0; _gi < toGenerate.length; _gi++) {
-    const key   = toGenerate[_gi];
+  for (const key of toGenerate) {
     const entry = TEMPLATE_REGISTRY[key];
-    Notify.progressStep(`Создание: ${entry.label}…`);
     try {
       const result = await entry.generate(outputDir, options);
       if (result && result.success) {
@@ -1829,29 +1621,12 @@ async function handleGenerate() {
     } catch (err) {
       errors.push(`${entry.label}: ${err.message}`);
     }
-    Notify.progressDone(_gi + 1, toGenerate.length);
-    // небольшая пауза чтобы анимация прогресс-бара была видна
-    await new Promise(r => setTimeout(r, 60));
   }
-
-  Notify.progressHide();
 
   if (successCount > 0) {
-    const genActions = [];
-    if (outputDir) genActions.push({
-      label: 'Открыть папку',
-      onClick: () => window.electronAPI.openFile(outputDir),
-      closeOnClick: false,
-    });
-    Notify.toast({
-      type: 'success',
-      title: '✔ Документы успешно сформированы',
-      body: `Создано: ${successCount} из ${toGenerate.length}`,
-      duration: 6000,
-      actions: genActions,
-    });
+    showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
   }
-  errors.forEach(msg => Notify.toast({ type: 'error', title: '✖ Ошибка генерации', body: msg, duration: 7000 }));
+  errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
 }
 
 // ============================================================
@@ -2058,22 +1833,4 @@ btnPreview.addEventListener('click', () => {
 
   // Initial sidebar state on app load
   updateSidebarStatus();
-
-  // ── Toast при смене риэлтера ───────────────────────────────
-  // Флаг: первый вызов onChange при инициализации — пропускаем
-  let _realtorInitDone = false;
-  if (window.RealtorService) {
-    window.RealtorService.onChange((realtor) => {
-      if (!_realtorInitDone) { _realtorInitDone = true; return; }
-      const name = [realtor.firstName, realtor.lastName].filter(Boolean).join(' ');
-      Notify.toast({
-        type: 'info',
-        title: 'Активный риэлтер изменён',
-        body: name || realtor.fullName || '',
-        duration: 3000,
-      });
-    });
-    // Помечаем инициализацию завершённой после первого цикла событий
-    setTimeout(() => { _realtorInitDone = true; }, 0);
-  }
 }());
