@@ -55,8 +55,9 @@ function inputId(groupId, key) {
 /** Обычный текстовый инпут */
 function htmlText(groupId, field) {
   const id = inputId(groupId, field.key);
+  const numAttr = field.numeric ? ' data-numeric="true"' : '';
   return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
-       + `<div class="input-wrap"><input type="text" id="${id}" /></div></div>`;
+       + `<div class="input-wrap"><input type="text" id="${id}"${numAttr} /></div></div>`;
 }
 
 /** Инпут с кнопкой-календарём */
@@ -80,7 +81,7 @@ function htmlByn(groupId, bynField, propisField) {
   const bynId = inputId(groupId, bynField.key);
   let html = `<div class="fr fr-sm" id="fr-${bynId}"><label>${escHtml(bynField.label)}</label>`
            + `<div class="byn-field-wrap">`
-           + `<div class="input-wrap"><input type="text" id="${bynId}" placeholder="например: 105000.50" /></div>`
+           + `<div class="input-wrap"><input type="text" id="${bynId}" data-numeric="true" placeholder="например: 105 000.50" /></div>`
            + `<span class="byn-error" id="byn-error" hidden>Введите корректную сумму</span>`
            + `</div></div>`;
   if (propisField) {

@@ -58,6 +58,42 @@ function isFieldEmpty(value) {
 }
 
 // ============================================================
+//  Numeric input formatter — visual thousands separator (spaces)
+//  Only reformats the display; all read/save helpers strip spaces
+//  before processing so the stored value is always a plain number.
+// ============================================================
+function applyNumericFormat(input) {
+  const selStart = input.selectionStart;
+  const raw = input.value;
+  // Remove all existing thousand-separating spaces
+  const clean = raw.replace(/\s/g, '');
+
+  if (clean === '') { input.value = ''; return; }
+  // Allow only digits with an optional single decimal point
+  if (!/^\d*\.?\d*$/.test(clean)) return;
+
+  const dotIdx = clean.indexOf('.');
+  const intPart = dotIdx >= 0 ? clean.slice(0, dotIdx) : clean;
+  const decPart = dotIdx >= 0 ? clean.slice(dotIdx)    : '';
+
+  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const newVal = formattedInt + decPart;
+
+  if (newVal === raw) return;
+  input.value = newVal;
+
+  // Restore cursor: count non-space chars before old cursor, find same count in new value
+  const charsBeforeCursor = raw.slice(0, selStart).replace(/\s/g, '').length;
+  let newCursor = newVal.length;
+  let counted = 0;
+  for (let i = 0; i < newVal.length; i++) {
+    if (newVal[i] !== ' ') counted++;
+    if (counted === charsBeforeCursor) { newCursor = i + 1; break; }
+  }
+  try { input.setSelectionRange(newCursor, newCursor); } catch (_) {}
+}
+
+// ============================================================
 //  Toast notifications
 // ============================================================
 function showToast(message, type = 'success', duration = 3200) {
@@ -99,6 +135,8 @@ function setInputValue(inputId, value) {
   const el = document.getElementById(inputId);
   if (!el) return;
   el.value = isFieldEmpty(value) ? '' : String(value).trim();
+  // Apply thousands formatting immediately on load for numeric fields
+  if (el.dataset.numeric && el.value) applyNumericFormat(el);
 }
 
 function clearAllInputs() {
@@ -164,6 +202,7 @@ const FIELD_IDS = new Set(Object.values(FIELD_MAP));
 document.getElementById('deal-body').addEventListener('input', (e) => {
   const id = e.target.id;
   if (!id || !FIELD_IDS.has(id)) return;
+  if (e.target.dataset.numeric) applyNumericFormat(e.target);
   onInputChange(id, e.target.value);
 });
 
@@ -176,7 +215,9 @@ function buildUpdates() {
     const rowNum = rowMap[mapKey];
     if (rowNum === undefined) continue;
     const el = document.getElementById(inputId);
-    if (el) updates[rowNum] = el.value.trim();
+    if (el) updates[rowNum] = el.dataset.numeric
+      ? el.value.replace(/\s/g, '').trim()
+      : el.value.trim();
   }
   return updates;
 }
@@ -194,7 +235,9 @@ function buildFieldGroups() {
     const fieldKey = mapKey.slice(dashIdx + 1);
     if (!groups[blockId]) continue;
     const el = document.getElementById(inputId);
-    if (el) groups[blockId][fieldKey] = el.value.trim();
+    if (el) groups[blockId][fieldKey] = el.dataset.numeric
+      ? el.value.replace(/\s/g, '').trim()
+      : el.value.trim();
   }
   return groups;
 }
@@ -526,8 +569,8 @@ if (commissionInput) {
 function autoUpdatePropis() {
   if (!bynInput || !propisInput) return;
 
-  // Normalise: treat comma as decimal separator
-  const raw = bynInput.value.replace(',', '.').trim();
+  // Normalise: strip thousand-separator spaces, treat comma as decimal separator
+  const raw = bynInput.value.replace(/\s/g, '').replace(',', '.').trim();
 
   if (raw === '') {
     propisInput.value = '';
@@ -561,7 +604,7 @@ if (bynInput) {
 function autoUpdateCommission() {
   if (!commissionInput) return;
 
-  const raw = (bynInput ? bynInput.value : '').replace(',', '.').trim();
+  const raw = (bynInput ? bynInput.value : '').replace(/\s/g, '').replace(',', '.').trim();
   if (raw === '' || !/^\d+(\.\d{1,2})?$/.test(raw)) {
     commissionInput.value = '';
     return;

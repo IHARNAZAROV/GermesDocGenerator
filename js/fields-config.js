@@ -19,7 +19,8 @@ window.FIELDS_CONFIG = {
           "label": "Стоимость, USD:",
           "type": "text",
           "section": "deal-prices",
-          "col": 1
+          "col": 1,
+          "numeric": true
         },
         {
           "key": "Стоимость BYN",
@@ -67,12 +68,14 @@ window.FIELDS_CONFIG = {
         {
           "key": "Сумма задатка BYN",
           "label": "Задаток, BYN:",
-          "col": 2
+          "col": 2,
+          "numeric": true
         },
         {
           "key": "Сумма задатка USD",
           "label": "Задаток, USD:",
-          "col": 2
+          "col": 2,
+          "numeric": true
         },
         {
           "key": "Дополнительные условия",
