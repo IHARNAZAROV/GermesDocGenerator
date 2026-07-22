@@ -32,10 +32,8 @@ Requires Node.js with Electron installed (`npm install` handles it via devDepend
 | `index.html` | Renderer HTML — structural skeleton (no hard-coded fields) |
 | `js/fields-config.js` | **Auto-generated** — `window.FIELDS_CONFIG` (browser-loadable) |
 | `js/form-builder.js` | Builds form HTML dynamically from FIELDS_CONFIG; returns FIELD_MAP |
-| `js/app.js` | Renderer logic — uses dynamic FIELD_MAP from form-builder; delegates all toasts to NotificationCenter |
-| `js/notification-center.js` | **New** — unified toast/notification system (`window.NotificationCenter`); max 3 simultaneous, slide-in/out, icons, subtitles, action buttons |
-| `js/micro-interactions.js` | **New** — document batch-selection toasts (debounced), required-field ○→✓ completion indicators |
-| `js/realtor-service.js` | RealtorService — loads `data/realtors.json`, persists selected realtor in localStorage, drives the header dropdown UI; shows NC toast on realtor change |
+| `js/app.js` | Renderer logic — uses dynamic FIELD_MAP from form-builder |
+| `js/realtor-service.js` | RealtorService — loads `data/realtors.json`, persists selected realtor in localStorage, drives the header dropdown UI |
 | `js/money-to-text.js` | BYN → written-out price converter |
 | `css/style.css` | All styles — compact CRM theme |
 | `excel/excel-reader.js` | Parses `.xlsx` using ExcelJS |
