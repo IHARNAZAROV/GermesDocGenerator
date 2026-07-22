@@ -126,30 +126,36 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Адрес",
-          "label": "Адрес:"
+          "label": "Адрес:",
+          "col": "full"
         },
         {
           "key": "Город",
-          "label": "Город:"
+          "label": "Город:",
+          "hidden": true
         },
         {
           "key": "Улица",
-          "label": "Улица:"
+          "label": "Улица:",
+          "hidden": true
         },
         {
           "key": "Дом",
-          "label": "Дом:"
+          "label": "Дом:",
+          "hidden": true
         },
         {
           "key": "Корпус",
           "label": "Корпус / Кв.:",
           "pairWith": "Квартира",
-          "pairStyle": "slash"
+          "pairStyle": "slash",
+          "hidden": true
         },
         {
           "key": "Квартира",
           "label": "Квартира",
-          "pairedUnder": "Корпус"
+          "pairedUnder": "Корпус",
+          "hidden": true
         },
         {
           "key": "Этаж",
