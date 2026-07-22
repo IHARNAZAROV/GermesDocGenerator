@@ -48,7 +48,11 @@
     },
     "depositContractDate": {
       "value": "",
-      "description": "Дата договора задатка"
+      "description": "Дата договора задатка (в формате ДД.ММ.ГГГГ)"
+    },
+    "depositContractEndDate": {
+      "value": "",
+      "description": "Дата окончания договора задатка (в формате ДД.ММ.ГГГГ)"
     },
     "storageContractNumber": {
       "value": "",
