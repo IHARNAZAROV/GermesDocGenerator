@@ -216,13 +216,9 @@ function onInputChange(inputId, currentValue) {
     applyObjectTypeVisibility();
     autoUpdateCommission();
   }
-  // Update block completion badge + object preview
+  // Update block completion badge
   const dashIdx2 = inputId.indexOf('-');
-  if (dashIdx2 !== -1) {
-    const pfx = inputId.slice(0, dashIdx2);
-    updateBlockCompletion(pfx);
-    if (pfx === 'property' || pfx === 'deal') updateObjPreview();
-  }
+  if (dashIdx2 !== -1) updateBlockCompletion(inputId.slice(0, dashIdx2));
 }
 
 function commitCurrentValues() {
@@ -463,7 +459,6 @@ function populateForm(data) {
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
   updateBlockCompletion(null); // пересчитать все блоки после загрузки
-  updateObjPreview();
 }
 
 // ============================================================
@@ -487,7 +482,6 @@ function handleClearForm() {
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
   updateBlockCompletion(null); // сбросить все бейджи после очистки
-  updateObjPreview();
 }
 
 // ============================================================
@@ -716,97 +710,6 @@ function getOwnersCount() {
     if (isOwnerPresent('owner2')) return 2;
     return 1;
   }
-}
-
-// ============================================================
-//  Object preview bar (above accordion)
-// ============================================================
-const OBJ_ICON_SVG = {
-  'дом':      '<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15 16 5l12 10"/><path d="M7 13v14h18V13"/><rect x="13" y="19" width="6" height="8" rx="1"/></svg>',
-  'жилой дом':'<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15 16 5l12 10"/><path d="M7 13v14h18V13"/><rect x="13" y="19" width="6" height="8" rx="1"/></svg>',
-  'квартира': '<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="24" height="24" rx="2"/><line x1="4" y1="13" x2="28" y2="13"/><line x1="4" y1="22" x2="28" y2="22"/><line x1="13" y1="4" x2="13" y2="28"/><line x1="22" y1="4" x2="22" y2="28"/></svg>',
-  'апартаменты':'<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="24" height="24" rx="2"/><line x1="4" y1="13" x2="28" y2="13"/><line x1="4" y1="22" x2="28" y2="22"/><line x1="13" y1="4" x2="13" y2="28"/><line x1="22" y1="4" x2="22" y2="28"/></svg>',
-  'комната':  '<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="18" height="26" rx="2"/><circle cx="21" cy="16" r="1.5" fill="currentColor" stroke="none"/><line x1="7" y1="29" x2="25" y2="29"/></svg>',
-  'коммерческая недвижимость':'<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="26" height="19" rx="1"/><path d="M3 10 9 4h14l6 6"/><rect x="9" y="17" width="5" height="12"/><rect x="18" y="17" width="5" height="8"/></svg>',
-  'default':  '<svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="24" height="18" rx="2"/><path d="M4 13 16 4l12 9"/><line x1="13" y1="29" x2="13" y2="20"/><line x1="19" y1="29" x2="19" y2="20"/><line x1="13" y1="20" x2="19" y2="20"/></svg>',
-};
-
-/** Форматирует число с пробелами как тысячный разделитель (123 456.78) */
-function fmtPrice(raw) {
-  const num = parseFloat(String(raw).replace(/\s/g, '').replace(',', '.'));
-  if (isNaN(num)) return raw;
-  const [int, dec] = num.toFixed(num % 1 !== 0 ? 2 : 0).split('.');
-  const intFmt = int.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0'); // non-breaking space
-  return dec ? `${intFmt}.${dec}` : intFmt;
-}
-
-function updateObjPreview() {
-  const bar = document.getElementById('obj-preview-bar');
-  if (!bar) return;
-
-  const type   = (getField('property-Тип объекта')     || '').trim();
-  const city   = (getField('property-Город')           || '').trim();
-  const street = (getField('property-Улица')           || '').trim();
-  const house  = (getField('property-Дом')             || '').trim();
-  const corps  = (getField('property-Корпус')          || '').trim();
-  const apt    = (getField('property-Квартира')        || '').trim();
-  const rooms  = (getField('property-Количество комнат')|| '').trim();
-  const area   = (getField('property-Общая площадь')   || '').trim();
-  const rawBYN = (getField('deal-Стоимость BYN')       || '').replace(/\s/g, '').trim();
-  const rawUSD = (getField('deal-Стоимость USD')       || '').replace(/\s/g, '').trim();
-
-  const hasData = type || city || street || house || rawBYN || rawUSD;
-  bar.classList.toggle('obj-preview-bar--empty', !hasData);
-
-  // Trigger subtle blink animation on update
-  bar.classList.remove('obj-preview-bar--updating');
-  void bar.offsetWidth;
-  if (hasData) bar.classList.add('obj-preview-bar--updating');
-
-  // Icon
-  const iconEl = document.getElementById('obj-preview-icon');
-  if (iconEl) {
-    const key = type.toLowerCase();
-    iconEl.innerHTML = OBJ_ICON_SVG[key] || OBJ_ICON_SVG['default'];
-  }
-
-  // Title
-  const titleEl = document.getElementById('obj-preview-title');
-  if (titleEl) titleEl.textContent = type ? `Объект: ${type}` : 'Объект не выбран';
-
-  // Address
-  const addrEl = document.getElementById('obj-preview-address');
-  if (addrEl) {
-    const parts = [];
-    if (city) parts.push(city);
-    if (street) {
-      let s = `ул. ${street}`;
-      if (house) {
-        s += `, ${house}`;
-        if (corps) s += ` корп.\u00A0${corps}`;
-        if (apt)   s += `-${apt}`;
-      }
-      parts.push(s);
-    }
-    addrEl.textContent = parts.join(', ');
-  }
-
-  // Details chips
-  const detailEl = document.getElementById('obj-preview-details');
-  if (detailEl) {
-    const chips = [];
-    if (area)  chips.push(`${area}\u00A0м²`);
-    if (rooms) chips.push(`${rooms}\u00A0комн.`);
-    detailEl.textContent = chips.join('  ·  ');
-  }
-
-  // Price BYN
-  const bynEl = document.getElementById('obj-preview-byn');
-  if (bynEl) bynEl.textContent = rawBYN ? `${fmtPrice(rawBYN)}\u00A0BYN` : '—';
-
-  // Price USD
-  const usdEl = document.getElementById('obj-preview-usd');
-  if (usdEl) usdEl.textContent = rawUSD ? `≈\u00A0${fmtPrice(rawUSD)}\u00A0USD` : '';
 }
 
 // ============================================================
