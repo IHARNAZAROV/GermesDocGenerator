@@ -615,6 +615,37 @@ if (dropSuccessEl) {
   obs.observe(dropSuccessEl, { attributes: true, attributeFilter: ['class'] });
 }
 
+// ── Умный автофокус по Enter ──────────────────────────────────
+// Enter на редактируемом поле → следующее видимое поле.
+// Если оно в закрытой секции — секция открывается автоматически.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+
+  const input = e.target;
+  if (!input.matches('.ws-block input[type="text"]:not([readonly]):not([disabled])')) return;
+
+  // Все видимые редактируемые поля в порядке DOM
+  const all = [...document.querySelectorAll(
+    '.ws-block input[type="text"]:not([readonly]):not([disabled])'
+  )].filter(el => el.offsetParent !== null);
+
+  const idx = all.indexOf(input);
+  if (idx === -1 || idx === all.length - 1) return;   // последнее поле — не трогаем
+
+  e.preventDefault();
+
+  const next      = all[idx + 1];
+  const nextBlock = next.closest('.ws-block');
+
+  if (nextBlock && !nextBlock.classList.contains('ws-block--open')) {
+    // Открываем секцию и ждём завершения анимации
+    openBlock(nextBlock.id, true);
+    setTimeout(() => next.focus(), 100);
+  } else {
+    next.focus();
+  }
+});
+
 // ── Публичный API ─────────────────────────────────────────────
 window.UIController = {
   refresh: refreshUI,
