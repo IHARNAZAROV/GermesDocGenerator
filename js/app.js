@@ -469,6 +469,8 @@ function handleClearForm() {
   rowMap = {};
   originalValues = {};
   dirtyInputIds.clear();
+  clearTimeout(autoSaveTimer); // не запускать автосохранение после очистки
+  autoSaveTimer = null;
   currentFilePath = null;
   filePathDisplay.value = '';
   fileSuccess.hidden = true;
@@ -705,10 +707,11 @@ function getOwnersCount() {
                    + (isOwnerPresent('owner3') ? 1 : 0);
     return 1 + coOwners;
   } else {
-    // Продавец действует по доверенности; собственники — только из вкладок
-    if (isOwnerPresent('owner3')) return 3;
-    if (isOwnerPresent('owner2')) return 2;
-    return 1;
+    // Продавец действует по доверенности; собственники — только из вкладок.
+    // Считаем реально заполненных, а не цепочкой if-else
+    // (чтобы owner1+owner3 без owner2 не давали счёт 3).
+    const count = ['owner1', 'owner2', 'owner3'].filter(p => isOwnerPresent(p)).length;
+    return count > 0 ? count : 1;
   }
 }
 
@@ -725,8 +728,9 @@ const BLOCK_COMPLETE_LABELS = {
 
 /** true если el виден в layout (нет скрытого предка) */
 function isInputVisible(el) {
-  // Inputs в скрытых tab-pane (display:none) имеют offsetParent === null
-  if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+  // Inputs в скрытых tab-pane (display:none) имеют offsetParent === null.
+  // Форм-инпуты никогда не имеют position:fixed, поэтому проверка getComputedStyle не нужна.
+  if (el.offsetParent === null) return false;
   // Поля, скрытые по типу объекта — display:none на .fr-строке
   const row = el.closest('.fr');
   if (row && row.style.display === 'none') return false;
@@ -1522,7 +1526,7 @@ function buildPlaceholderData() {
     commissionCfg.brackets
   );
   const commission = {
-    percent:     commissionResult.percent    ? String(commissionResult.percent)    : '',
+    percent:     commissionResult.percent != null ? String(commissionResult.percent) : '',
     amountBYN:   commissionResult.amountBYN  || '',
     amountWords: commissionResult.amountWords || '',
     baseValue:   String(window.COMMISSION_CONFIG.baseValue),

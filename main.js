@@ -143,8 +143,12 @@ ipcMain.handle('dialog:saveFile', async (_event, defaultPath) => {
 //  IPC — read Excel
 // ============================================================
 ipcMain.handle('excel:read', async (_event, filePath) => {
-  const ExcelReader = require('./excel/excel-reader');
-  return ExcelReader.readFile(filePath);
+  try {
+    const ExcelReader = require('./excel/excel-reader');
+    return ExcelReader.readFile(filePath);
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
 
 // ============================================================
@@ -153,46 +157,50 @@ ipcMain.handle('excel:read', async (_event, filePath) => {
 //  Returns { ok: true, rowMap: { "block-fieldKey": rowNumber } }
 // ============================================================
 ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) => {
-  const fieldsConfig = require('./fields-config.json');
+  try {
+    const fieldsConfig = require('./fields-config.json');
 
-  // Инвертируем BLOCK_HEADERS из excel-reader: { deal: 'СДЕЛКА', ... }
-  const { BLOCK_HEADERS } = require('./excel/excel-reader');
-  const BLOCK_HEADER_MAP = Object.fromEntries(
-    Object.entries(BLOCK_HEADERS).map(([header, id]) => [id, header])
-  );
+    // Инвертируем BLOCK_HEADERS из excel-reader: { deal: 'СДЕЛКА', ... }
+    const { BLOCK_HEADERS } = require('./excel/excel-reader');
+    const BLOCK_HEADER_MAP = Object.fromEntries(
+      Object.entries(BLOCK_HEADERS).map(([header, id]) => [id, header])
+    );
 
-  const workbook  = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Сделка');
-  const rowMap    = {};
-  let   rowNum    = 1;
+    const workbook  = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Сделка');
+    const rowMap    = {};
+    let   rowNum    = 1;
 
-  for (const group of fieldsConfig.groups) {
-    const blockId = group.id;
-    const header  = BLOCK_HEADER_MAP[blockId];
-    if (!header) continue;
+    for (const group of fieldsConfig.groups) {
+      const blockId = group.id;
+      const header  = BLOCK_HEADER_MAP[blockId];
+      if (!header) continue;
 
-    // Block header row (column A only, no value in B)
-    worksheet.getCell(rowNum, 1).value = header;
-    rowNum++;
-
-    for (const field of group.fields) {
-      // Skip fields computed entirely by the app — they are never stored in Excel
-      if (field.computed) continue;
-
-      const value = ((fieldGroups || {})[blockId] || {})[field.key];
-      worksheet.getCell(rowNum, 1).value = field.key;
-      worksheet.getCell(rowNum, 2).value =
-        (value !== undefined && value !== null && String(value).trim() !== '')
-          ? String(value).trim()
-          : null;
-
-      rowMap[`${blockId}-${field.key}`] = rowNum;
+      // Block header row (column A only, no value in B)
+      worksheet.getCell(rowNum, 1).value = header;
       rowNum++;
-    }
-  }
 
-  await workbook.xlsx.writeFile(targetPath);
-  return { ok: true, rowMap };
+      for (const field of group.fields) {
+        // Skip fields computed entirely by the app — they are never stored in Excel
+        if (field.computed) continue;
+
+        const value = ((fieldGroups || {})[blockId] || {})[field.key];
+        worksheet.getCell(rowNum, 1).value = field.key;
+        worksheet.getCell(rowNum, 2).value =
+          (value !== undefined && value !== null && String(value).trim() !== '')
+            ? String(value).trim()
+            : null;
+
+        rowMap[`${blockId}-${field.key}`] = rowNum;
+        rowNum++;
+      }
+    }
+
+    await workbook.xlsx.writeFile(targetPath);
+    return { ok: true, rowMap };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
 
 // ============================================================
@@ -200,23 +208,27 @@ ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) =
 //  updates: { [rowNumber]: value }  — only column B is touched
 // ============================================================
 ipcMain.handle('excel:write', async (_event, sourcePath, targetPath, updates) => {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(sourcePath);
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(sourcePath);
 
-  const worksheet = workbook.worksheets[0];
-  if (!worksheet) throw new Error('Файл не содержит листов');
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) return { ok: false, error: 'Файл не содержит листов' };
 
-  for (const [rowNumStr, value] of Object.entries(updates)) {
-    const rowNum = parseInt(rowNumStr, 10);
-    const cell = worksheet.getCell(rowNum, 2); // column B
-    // Preserve cell style — only overwrite the value
-    cell.value = (value !== null && value !== undefined && String(value).trim() !== '')
-      ? String(value).trim()
-      : null;
+    for (const [rowNumStr, value] of Object.entries(updates)) {
+      const rowNum = parseInt(rowNumStr, 10);
+      const cell = worksheet.getCell(rowNum, 2); // column B
+      // Preserve cell style — only overwrite the value
+      cell.value = (value !== null && value !== undefined && String(value).trim() !== '')
+        ? String(value).trim()
+        : null;
+    }
+
+    await workbook.xlsx.writeFile(targetPath);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
   }
-
-  await workbook.xlsx.writeFile(targetPath);
-  return { ok: true };
 });
 
 // ============================================================
@@ -264,8 +276,12 @@ ipcMain.handle('shell:openFile', async (_event, filePath) => {
 ipcMain.handle('word:preview', async (_event, templateKey, data) => {
   const entry = TEMPLATE_FILES[templateKey];
   if (!entry) return { success: false, error: `Шаблон не найден: ${templateKey}` };
-  const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
-  return previewWord(templatePath, data);
+  try {
+    const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
+    return previewWord(templatePath, data);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });
 
 // ============================================================
@@ -299,7 +315,7 @@ ipcMain.handle('word:generate', async (_event, templateKey, data, outputDir, opt
   const entry = TEMPLATE_FILES[templateKey];
   if (!entry) return { success: false, error: `Неизвестный ключ шаблона: ${templateKey}` };
   const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
+  const resolvedDir  = outputDir || path.join(app.getPath('userData'), 'output');
   const outputPath   = buildOutputPath(resolvedDir, entry.out, options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
