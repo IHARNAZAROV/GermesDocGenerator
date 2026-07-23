@@ -216,6 +216,9 @@ function onInputChange(inputId, currentValue) {
     applyObjectTypeVisibility();
     autoUpdateCommission();
   }
+  // Update block completion badge
+  const dashIdx2 = inputId.indexOf('-');
+  if (dashIdx2 !== -1) updateBlockCompletion(inputId.slice(0, dashIdx2));
 }
 
 function commitCurrentValues() {
@@ -455,6 +458,7 @@ function populateForm(data) {
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
+  updateBlockCompletion(null); // пересчитать все блоки после загрузки
 }
 
 // ============================================================
@@ -477,6 +481,7 @@ function handleClearForm() {
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
+  updateBlockCompletion(null); // сбросить все бейджи после очистки
 }
 
 // ============================================================
@@ -704,6 +709,86 @@ function getOwnersCount() {
     if (isOwnerPresent('owner3')) return 3;
     if (isOwnerPresent('owner2')) return 2;
     return 1;
+  }
+}
+
+// ============================================================
+//  Block completion badges + glow animation
+// ============================================================
+const BLOCK_COMPLETE_LABELS = {
+  deal:     'Сделка заполнена',
+  property: 'Объект заполнен',
+  seller:   'Продавец заполнен',
+  owners:   'Собственники заполнены',
+  buyer:    'Покупатель заполнен',
+};
+
+/** true если el виден в layout (нет скрытого предка) */
+function isInputVisible(el) {
+  // Inputs в скрытых tab-pane (display:none) имеют offsetParent === null
+  if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+  // Поля, скрытые по типу объекта — display:none на .fr-строке
+  const row = el.closest('.fr');
+  if (row && row.style.display === 'none') return false;
+  return true;
+}
+
+/** true если все user-editable видимые поля блока заполнены */
+function isBlockFilled(prefix) {
+  const ids = Object.entries(FIELD_MAP)
+    .filter(([k]) => k.startsWith(prefix + '-'))
+    .map(([, id]) => id);
+  if (!ids.length) return false;
+  return ids.every(id => {
+    const el = document.getElementById(id);
+    if (!el)              return true; // нет в DOM — пропуск
+    if (el.readOnly)      return true; // computed/readonly — пропуск
+    if (!isInputVisible(el)) return true; // скрыт фильтром — пропуск
+    return !isFieldEmpty(el.value);
+  });
+}
+
+/** Обновляет badge и класс ws-block--complete для нужных блоков */
+function updateBlockCompletion(changedPrefix) {
+  const toCheck = new Set();
+  if (!changedPrefix) {
+    ['deal', 'property', 'seller', 'owners', 'buyer'].forEach(b => toCheck.add(b));
+  } else if (changedPrefix.startsWith('owner')) {
+    toCheck.add('owners');
+  } else {
+    toCheck.add(changedPrefix);
+  }
+
+  for (const blockId of toCheck) {
+    const section = document.getElementById(`ws-${blockId}`);
+    const badge   = document.getElementById(`blk-status-${blockId}`);
+    if (!section || !badge) continue;
+
+    let complete;
+    if (blockId === 'owners') {
+      const prefixes = ['owner1'];
+      if (isOwnerPresent('owner2')) prefixes.push('owner2');
+      if (isOwnerPresent('owner3')) prefixes.push('owner3');
+      complete = prefixes.every(p => isBlockFilled(p));
+    } else {
+      complete = isBlockFilled(blockId);
+    }
+
+    const wasComplete = section.classList.contains('ws-block--complete');
+
+    if (complete) {
+      section.classList.add('ws-block--complete');
+      badge.textContent = BLOCK_COMPLETE_LABELS[blockId] || '';
+      if (!wasComplete) {
+        // Перезапуск flash-анимации при переходе незаполнен → заполнен
+        section.classList.remove('ws-block--complete-flash');
+        void section.offsetWidth; // reflow
+        section.classList.add('ws-block--complete-flash');
+      }
+    } else {
+      section.classList.remove('ws-block--complete', 'ws-block--complete-flash');
+      badge.textContent = '';
+    }
   }
 }
 

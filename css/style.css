@@ -2383,6 +2383,35 @@ html, body {
   padding: 14px 16px 16px;
 }
 
+/* ── Block completion: glow flash + persistent badge ── */
+@keyframes blk-complete-flash {
+  0%   { box-shadow: var(--shadow-card); border-color: var(--border); }
+  25%  { box-shadow: var(--shadow-card), 0 0 0 2px #3DAA7B, 0 4px 20px rgba(21,89,69,.22); border-color: #3DAA7B; }
+  100% { box-shadow: var(--shadow-card), 0 0 0 1px rgba(21,89,69,.20); border-color: rgba(21,89,69,.22); }
+}
+@keyframes blk-badge-in {
+  from { opacity: 0; transform: translateX(-5px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.ws-block--complete {
+  border-color: rgba(21,89,69,.22);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(21,89,69,.20);
+  transition: border-color .35s ease, box-shadow .35s ease;
+}
+.ws-block--complete-flash {
+  animation: blk-complete-flash .65s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+.ws-block--complete .ws-block-hdr-status {
+  color: #2D8A5E;
+  font-weight: 600;
+  animation: blk-badge-in .22s ease both;
+}
+.ws-block--complete .ws-block-hdr-icon {
+  background: #D1F0E4;
+  border-color: #A7DFC8;
+}
+.ws-block--complete .ws-block-hdr-icon svg { color: #1E7A50; }
+
 /* Sub-headers inside accordion blocks */
 .ws-subhdr {
   display: flex;
