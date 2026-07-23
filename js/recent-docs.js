@@ -269,10 +269,6 @@
         </svg>
       </button>`;
 
-    // Тултип при наведении
-    item.addEventListener('mouseenter', () => showTooltip(item, entry));
-    item.addEventListener('mouseleave', hideTooltip);
-
     // Клик по карточке — открыть
     item.addEventListener('click', e => {
       if (e.target.closest('.recdocs-pin-btn')) return;
@@ -288,37 +284,9 @@
     return item;
   }
 
-  // ── Тултип ────────────────────────────────────────────────
-  let tooltipEl = null;
-
-  function showTooltip(anchor, entry) {
-    hideTooltip();
-    tooltipEl = document.createElement('div');
-    tooltipEl.className = 'recdocs-tooltip';
-    tooltipEl.innerHTML = `
-      <div class="recdocs-tt-name">${esc(entry.name)}</div>
-      <div class="recdocs-tt-row"><span>Тип:</span> ${entry.type === 'excel' ? 'Excel-файл сделки' : 'Word-документ'}</div>
-      <div class="recdocs-tt-row"><span>Открыт:</span> ${esc(fullDateStr(entry.openedAt))}</div>
-      <div class="recdocs-tt-row recdocs-tt-path-row"><span>Путь:</span> <span class="recdocs-tt-path">${esc(entry.path)}</span></div>`;
-    document.body.appendChild(tooltipEl);
-
-    const rect   = anchor.getBoundingClientRect();
-    const ttRect = tooltipEl.getBoundingClientRect();
-    let   left   = rect.right + 10;
-    if (left + ttRect.width > window.innerWidth - 12) left = rect.left - ttRect.width - 10;
-    let   top    = rect.top;
-    if (top + ttRect.height > window.innerHeight - 8) top = window.innerHeight - ttRect.height - 8;
-    tooltipEl.style.cssText += `left:${left}px;top:${top}px;`;
-  }
-
-  function hideTooltip() {
-    if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
-  }
-
   // ── Открыть документ ──────────────────────────────────────
   async function handleOpen(entry) {
     closePanel();
-    hideTooltip();
 
     if (entry.type === 'excel') {
       // Уже открыт тот же файл?
