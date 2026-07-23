@@ -1,5 +1,4 @@
 const fs = require("fs");
-const path = require("path");
 
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
@@ -22,36 +21,44 @@ function cleanProofErrors(zip) {
     });
 }
 
-async function generateWord(templatePath, outputPath, data) {
-
-    try {
-
-        const content = await fs.promises.readFile(templatePath, "binary");
-
-        const zip = new PizZip(content);
-
-        cleanProofErrors(zip);
-
-        // Парсер с поддержкой точечной нотации: {{seller.fullName}}, {{deal.number}} и т.д.
-        function dotParser(tag) {
-            return {
-                get(scope) {
-                    return tag.split('.').reduce((obj, key) => {
-                        if (obj == null) return '';
-                        return obj[key] !== undefined ? obj[key] : '';
-                    }, scope);
-                }
-            };
+// Парсер с поддержкой точечной нотации: {{seller.fullName}}, {{deal.number}} и т.д.
+function dotParser(tag) {
+    return {
+        get(scope) {
+            return tag.split('.').reduce((obj, key) => {
+                if (obj == null) return '';
+                return obj[key] !== undefined ? obj[key] : '';
+            }, scope);
         }
+    };
+}
 
-        const doc = new Docxtemplater(zip, {
-            paragraphLoop: true,
-            linebreaks: true,
-            delimiters: { start: '{{', end: '}}' },
-            parser: dotParser,
-        });
+/**
+ * Внутренняя функция: читает шаблон, заполняет данными, возвращает готовый doc.
+ * Используется и generateWord, и previewWord.
+ */
+async function _renderTemplate(templatePath, data) {
+    const content = await fs.promises.readFile(templatePath, "binary");
+    const zip = new PizZip(content);
+    cleanProofErrors(zip);
 
-        doc.render(data);
+    const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+        delimiters: { start: '{{', end: '}}' },
+        parser: dotParser,
+    });
+
+    doc.render(data);
+    return doc;
+}
+
+// ============================================================
+//  generateWord — заполняет шаблон и сохраняет .docx на диск
+// ============================================================
+async function generateWord(templatePath, outputPath, data) {
+    try {
+        const doc = await _renderTemplate(templatePath, data);
 
         const buffer = doc.getZip().generate({
             type: "nodebuffer",
@@ -60,28 +67,11 @@ async function generateWord(templatePath, outputPath, data) {
 
         await fs.promises.writeFile(outputPath, buffer);
 
-        return {
-            success: true,
-            path: outputPath
-        };
+        return { success: true, path: outputPath };
 
     } catch (error) {
-
-        // Docxtemplater wraps multiple issues in a "Multi error" — extract them
-        let message = error.message;
-        if (error.properties && error.properties.errors) {
-            message = error.properties.errors
-                .map((e) => e.message || String(e))
-                .join("; ");
-        }
-
-        return {
-            success: false,
-            error: message
-        };
-
+        return { success: false, error: _extractErrorMessage(error) };
     }
-
 }
 
 // ============================================================
@@ -90,48 +80,26 @@ async function generateWord(templatePath, outputPath, data) {
 // ============================================================
 async function previewWord(templatePath, data) {
     try {
-        const content = await fs.promises.readFile(templatePath, "binary");
-        const zip = new PizZip(content);
-        cleanProofErrors(zip);
+        const doc = await _renderTemplate(templatePath, data);
 
-        function dotParser(tag) {
-            return {
-                get(scope) {
-                    return tag.split('.').reduce((obj, key) => {
-                        if (obj == null) return '';
-                        return obj[key] !== undefined ? obj[key] : '';
-                    }, scope);
-                }
-            };
-        }
-
-        const doc = new Docxtemplater(zip, {
-            paragraphLoop: true,
-            linebreaks: true,
-            delimiters: { start: '{{', end: '}}' },
-            parser: dotParser,
-        });
-
-        doc.render(data);
-
-        // Генерируем Buffer из заполненного docx и передаём mammoth
         const buffer = doc.getZip().generate({ type: "nodebuffer" });
         const { value: html } = await mammoth.convertToHtml({ buffer });
 
         return { success: true, html };
 
     } catch (error) {
-        let message = error.message;
-        if (error.properties && error.properties.errors) {
-            message = error.properties.errors
-                .map((e) => e.message || String(e))
-                .join("; ");
-        }
-        return { success: false, error: message };
+        return { success: false, error: _extractErrorMessage(error) };
     }
 }
 
-module.exports = {
-    generateWord,
-    previewWord,
-};
+// Docxtemplater wraps multiple issues in a "Multi error" — extract them
+function _extractErrorMessage(error) {
+    if (error.properties && error.properties.errors) {
+        return error.properties.errors
+            .map((e) => e.message || String(e))
+            .join("; ");
+    }
+    return error.message;
+}
+
+module.exports = { generateWord, previewWord };
