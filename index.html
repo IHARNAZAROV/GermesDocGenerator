@@ -371,6 +371,21 @@
       ══════════════════════════════════════ -->
       <main class="work-area" id="work-area" role="main">
 
+        <!-- ── OBJECT PREVIEW BAR ── -->
+        <div id="obj-preview-bar" class="obj-preview-bar obj-preview-bar--empty" aria-live="polite" aria-label="Сводка по объекту">
+          <div class="obj-preview-icon" id="obj-preview-icon" aria-hidden="true"></div>
+          <div class="obj-preview-meta">
+            <div class="obj-preview-title" id="obj-preview-title">Объект не выбран</div>
+            <div class="obj-preview-address" id="obj-preview-address"></div>
+            <div class="obj-preview-details" id="obj-preview-details"></div>
+          </div>
+          <div class="obj-preview-price-block">
+            <div class="obj-preview-price-label">Стоимость</div>
+            <div class="obj-preview-price-byn" id="obj-preview-byn">—</div>
+            <div class="obj-preview-price-usd" id="obj-preview-usd"></div>
+          </div>
+        </div>
+
         <!-- All form inputs MUST stay inside #deal-body for event delegation -->
         <div id="deal-body">
 
