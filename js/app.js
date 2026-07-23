@@ -51,6 +51,34 @@ let dirtyInputIds   = new Set();
 let autoSaveTimer   = null;
 
 // ============================================================
+//  Persistent settings — папка и чекбоксы (localStorage)
+// ============================================================
+const LS_SETTINGS_KEY = 'germesSettings_v1';
+
+function saveAppSettings() {
+  try {
+    localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify({
+      saveFolder:  saveFolderInput ? saveFolderInput.value : '',
+      openAfter:   chkOpenAfter  ? chkOpenAfter.checked  : true,
+      addDate:     chkAddDate    ? chkAddDate.checked     : false,
+    }));
+  } catch (_) {}
+}
+
+function restoreAppSettings() {
+  try {
+    const raw = localStorage.getItem(LS_SETTINGS_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (saveFolderInput && typeof s.saveFolder === 'string' && s.saveFolder) {
+      saveFolderInput.value = s.saveFolder;
+    }
+    if (chkOpenAfter  && typeof s.openAfter === 'boolean') chkOpenAfter.checked  = s.openAfter;
+    if (chkAddDate    && typeof s.addDate   === 'boolean') chkAddDate.checked    = s.addDate;
+  } catch (_) {}
+}
+
+// ============================================================
 //  Universal helpers
 // ============================================================
 function isFieldEmpty(value) {
@@ -776,7 +804,11 @@ document.addEventListener('change', (e) => {
 });
 
 // React to manual edits / clear of the folder input
-saveFolderInput.addEventListener('input', updateSidebarStatus);
+saveFolderInput.addEventListener('input', () => { updateSidebarStatus(); saveAppSettings(); });
+
+// Persist settings checkboxes on change
+if (chkOpenAfter) chkOpenAfter.addEventListener('change', saveAppSettings);
+if (chkAddDate)   chkAddDate.addEventListener('change', saveAppSettings);
 
 // ============================================================
 //  Main flow — load Excel file (shared between dialog & drag-drop)
@@ -944,7 +976,7 @@ if (btnScanTemplate) {
 btnBrowse.addEventListener('click', async () => {
   const current = saveFolderInput.value.trim() || undefined;
   const chosen = await window.electronAPI.selectFolder(current);
-  if (chosen) { saveFolderInput.value = chosen; updateSidebarStatus(); }
+  if (chosen) { saveFolderInput.value = chosen; updateSidebarStatus(); saveAppSettings(); }
 });
 
 // ============================================================
@@ -1705,6 +1737,8 @@ btnPreview.addEventListener('click', () => {
 
   btnErrorClose?.addEventListener('click', closeModal);
 
+  // Restore persistent settings (папка, чекбоксы)
+  restoreAppSettings();
   // Initial sidebar state on app load
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)

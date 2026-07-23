@@ -503,6 +503,7 @@ document.querySelectorAll('.nav-item[data-target]').forEach(item => {
     toggle.setAttribute('aria-expanded', String(!isExpanded));
     body.classList.toggle('sp-block-body--collapsed', isExpanded);
     toggle.classList.toggle('sp-block-hdr--collapsed', isExpanded);
+    saveUIState();
   });
   toggle.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
@@ -532,10 +533,17 @@ if (tplSearch) {
 }
 
 // ── Состояние: сохранение / восстановление ───────────────────
+const SP_TOGGLES = ['sp-validation-toggle', 'sp-docs-toggle', 'sp-settings-toggle'];
+
 function saveUIState() {
   try {
     const openBlocks = BLOCKS.filter(id => document.getElementById(id)?.classList.contains('ws-block--open'));
-    localStorage.setItem(LS_KEY, JSON.stringify({ openBlocks }));
+    const spExpanded = {};
+    SP_TOGGLES.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) spExpanded[id] = el.getAttribute('aria-expanded') === 'true';
+    });
+    localStorage.setItem(LS_KEY, JSON.stringify({ openBlocks, spExpanded }));
   } catch (_) {}
 }
 
@@ -550,6 +558,20 @@ function restoreUIState() {
       // Re-open saved
       state.openBlocks.forEach(id => {
         if (BLOCKS.includes(id)) openBlock(id, false);
+      });
+    }
+    // Restore sp-panel toggle states
+    if (state.spExpanded && typeof state.spExpanded === 'object') {
+      SP_TOGGLES.forEach(id => {
+        if (!(id in state.spExpanded)) return;
+        const toggle = document.getElementById(id);
+        const bodyId = id.replace('-toggle', '-body');
+        const body   = document.getElementById(bodyId);
+        if (!toggle || !body) return;
+        const shouldBeExpanded = state.spExpanded[id];
+        toggle.setAttribute('aria-expanded', String(shouldBeExpanded));
+        body.classList.toggle('sp-block-body--collapsed', !shouldBeExpanded);
+        toggle.classList.toggle('sp-block-hdr--collapsed', !shouldBeExpanded);
       });
     }
   } catch (_) {}
