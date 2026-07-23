@@ -726,6 +726,29 @@ const BLOCK_COMPLETE_LABELS = {
   buyer:    'Покупатель заполнен',
 };
 
+function getRequiredIssueCountByBlock() {
+  if (typeof getIssues !== 'function') return null;
+  return getIssues().reduce((acc, issue) => {
+    acc[issue.block] = (acc[issue.block] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function hasBlockEditableData(blockId) {
+  const block = document.getElementById(blockId);
+  if (!block) return false;
+  return [...block.querySelectorAll('input[type="text"]')].some((el) => {
+    if (el.readOnly || !isInputVisible(el)) return false;
+    return !isFieldEmpty(el.value);
+  });
+}
+
+function isBuyerRequiredByDeposit() {
+  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
+  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
+  return depositBYN !== '' || depositUSD !== '';
+}
+
 /** true если el виден в layout (нет скрытого предка) */
 function isInputVisible(el) {
   // Inputs в скрытых tab-pane (display:none) имеют offsetParent === null.
@@ -768,8 +791,14 @@ function updateBlockCompletion(changedPrefix) {
     const badge   = document.getElementById(`blk-status-${blockId}`);
     if (!section || !badge) continue;
 
+    const issueCountByBlock = getRequiredIssueCountByBlock();
     let complete;
-    if (blockId === 'owners') {
+    if (issueCountByBlock) {
+      const hasRequiredIssues = (issueCountByBlock[`ws-${blockId}`] || 0) > 0;
+      const hasData = hasBlockEditableData(`ws-${blockId}`);
+      complete = !hasRequiredIssues && hasData;
+      if (blockId === 'buyer' && !isBuyerRequiredByDeposit()) complete = false;
+    } else if (blockId === 'owners') {
       const prefixes = ['owner1'];
       if (isOwnerPresent('owner2')) prefixes.push('owner2');
       if (isOwnerPresent('owner3')) prefixes.push('owner3');
