@@ -395,8 +395,88 @@ function updateExcelNavStatus(loaded, fileName) {
   }
 }
 
+// ── Краткая карточка объекта ──────────────────────────────────
+function readFieldValue(id) {
+  return (document.getElementById(id)?.value || '').trim();
+}
+
+function firstFilledValue(...ids) {
+  for (const id of ids) {
+    const value = readFieldValue(id);
+    if (value) return value;
+  }
+  return '';
+}
+
+function normalizeObjectType(value) {
+  const raw = (value || '').trim();
+  const low = raw.toLowerCase();
+  if (low.includes('коммер')) return 'Коммерческая недвижимость';
+  if (low.includes('кварт') || low.includes('апартамент') || low.includes('комнат')) return 'Квартира';
+  if (low.includes('дом')) return 'Дом';
+  return raw || '—';
+}
+
+function getObjectTypeIcon(type) {
+  const low = (type || '').toLowerCase();
+  if (low.includes('коммер')) {
+    return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="11" y="21" width="42" height="33" rx="4" fill="#E8F5EF" stroke="currentColor" stroke-width="3"/><path d="M20 21V13h24v8" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M19 31h8M36 31h8M19 40h8M36 40h8M31 54V43h8v11" stroke="#2F7A63" stroke-width="3" stroke-linecap="round"/></svg>`;
+  }
+  if (low.includes('кварт') || low.includes('апартамент') || low.includes('комнат')) {
+    return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="9" width="34" height="47" rx="4" fill="#EAF4FF" stroke="currentColor" stroke-width="3"/><path d="M24 19h5M35 19h5M24 29h5M35 29h5M24 39h5M35 39h5M29 56V46h6v10" stroke="#2F7A63" stroke-width="3" stroke-linecap="round"/></svg>`;
+  }
+  return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 30 32 12l23 18" fill="#DDF4E8"/><path d="M9 30 32 12l23 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28v26h32V28" fill="#F4FBF8"/><path d="M16 28v26h32V28" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M28 54V39h9v15M22 34h9" stroke="#2F7A63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function formatSummaryArea(value) {
+  if (!value) return '';
+  return `${value.replace(/\s*(м2|м²|кв\.?\s*м)\s*$/i, '')} м²`;
+}
+
+function updateObjectSummary() {
+  const card = document.getElementById('object-summary-card');
+  if (!card) return;
+
+  const type = normalizeObjectType(readFieldValue('property-Тип объекта'));
+  const title = document.getElementById('object-summary-title');
+  const address = document.getElementById('object-summary-address');
+  const meta = document.getElementById('object-summary-meta');
+  const priceByn = document.getElementById('object-summary-price-byn');
+  const priceUsd = document.getElementById('object-summary-price-usd');
+  const icon = document.getElementById('object-summary-icon');
+
+  if (title) title.textContent = `Объект: ${type}`;
+  if (icon) icon.innerHTML = getObjectTypeIcon(type);
+
+  const fullAddress = firstFilledValue('property-Адрес');
+  const city = readFieldValue('property-Город');
+  const street = readFieldValue('property-Улица');
+  const house = readFieldValue('property-Дом');
+  const flat = readFieldValue('property-Квартира');
+  const addressParts = fullAddress ? [fullAddress] : [city, street, house && `д. ${house}`, flat && `кв. ${flat}`].filter(Boolean);
+  if (address) address.textContent = addressParts.join(', ') || 'Адрес не указан';
+
+  const metaItems = [
+    formatSummaryArea(readFieldValue('property-Общая площадь')),
+    readFieldValue('property-Количество комнат') && `${readFieldValue('property-Количество комнат')} комнаты`,
+    readFieldValue('property-Материал стен'),
+    readFieldValue('property-Год постройки') && `${readFieldValue('property-Год постройки')} г.п.`,
+  ].filter(Boolean);
+  if (meta) {
+    meta.innerHTML = metaItems.length
+      ? metaItems.map((item) => `<span class="object-summary-meta-item">${escHtmlUI(item)}</span>`).join('<span class="object-summary-meta-sep" aria-hidden="true"></span>')
+      : '<span class="object-summary-meta-item">Характеристики не указаны</span>';
+  }
+
+  const byn = readFieldValue('deal-Стоимость BYN');
+  const usd = readFieldValue('deal-Стоимость USD');
+  if (priceByn) priceByn.textContent = byn ? `${byn} BYN` : '— BYN';
+  if (priceUsd) priceUsd.textContent = usd ? `≈ ${usd} USD` : '≈ — USD';
+}
+
 // ── Полное обновление Smart Panel ─────────────────────────────
 function refreshUI() {
+  updateObjectSummary();
   updateValidationPanel();
   if (typeof updateBlockCompletion === 'function') updateBlockCompletion(null);
   updateDocsNavStatus();
@@ -600,6 +680,7 @@ document.getElementById('deal-body')?.addEventListener('input', () => {
   // Debounce: обновлять не чаще 1 раза за 120ms
   clearTimeout(UIController._debounce);
   UIController._debounce = setTimeout(() => {
+    updateObjectSummary();
     updateValidationPanel();
   }, 120);
 });
