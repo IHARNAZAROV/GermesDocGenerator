@@ -143,6 +143,22 @@ function getIssues() {
 let _currentIssues = [];
 let _issueIndex = 0;
 
+function getBuyerRequiredByDeposit() {
+  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
+  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
+  return depositBYN !== '' || depositUSD !== '';
+}
+
+function hasRequiredBlockData(blockId) {
+  const block = document.getElementById(blockId);
+  if (!block) return false;
+  return [...block.querySelectorAll('input[type="text"]')].some(el => {
+    if (el.readOnly) return false;
+    if (typeof isInputVisible === 'function' && !isInputVisible(el)) return false;
+    return el.value.trim() !== '';
+  });
+}
+
 function updateValidationPanel() {
   const issues = getIssues();
   _currentIssues = issues;
@@ -303,9 +319,7 @@ function updateNavBadges(issues) {
   };
 
   // Нужен ли покупатель — определяем по наличию суммы задатка
-  const _depBYN  = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
-  const _depUSD  = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
-  const _hasBuyer = _depBYN !== '' || _depUSD !== '';
+  const _hasBuyer = getBuyerRequiredByDeposit();
 
   Object.entries(blockToNav).forEach(([blockId, navKey]) => {
     const badge  = document.getElementById('nav-badge-' + navKey);
@@ -331,8 +345,9 @@ function updateNavBadges(issues) {
     } else {
       badge.hidden = true;
       badge.className = 'nav-item-badge';
-      // Check if block has any filled fields
-      const hasData = hasBlockData(blockId);
+      // Синхронизировано с бейджем заголовка: статус «Заполнено»
+      // ставится только когда в блоке нет незаполненных обязательных полей.
+      const hasData = hasRequiredBlockData(blockId);
       if (hasData) {
         status.textContent = 'Заполнено';
         status.className = 'nav-item-sub nav-item-sub--ok';
@@ -383,6 +398,7 @@ function updateExcelNavStatus(loaded, fileName) {
 // ── Полное обновление Smart Panel ─────────────────────────────
 function refreshUI() {
   updateValidationPanel();
+  if (typeof updateBlockCompletion === 'function') updateBlockCompletion(null);
   updateDocsNavStatus();
   // Проверяем статус Excel по drop zone
   const dropSuccess = document.getElementById('drop-success');
