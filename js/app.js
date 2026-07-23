@@ -385,6 +385,15 @@ async function handleSaveAs() {
     commitCurrentValues();
     setStatus('Файл сохранён: ' + baseName);
     showToast('✔ Файл успешно сохранён');
+
+    // История последних документов
+    window.RecentDocs?.push({
+      name:  baseName,
+      type:  'excel',
+      icon:  'excel',
+      path:  targetPath,
+      label: baseName,
+    });
   } catch (err) {
     showToast('✖ Не удалось сохранить файл: ' + err.message, 'error');
   }
@@ -859,6 +868,15 @@ async function loadExcelFile(filePath) {
 
   populateForm(data);
   setStatus('Файл загружен: ' + baseName);
+
+  // История последних документов
+  window.RecentDocs?.push({
+    name:  baseName,
+    type:  'excel',
+    icon:  'excel',
+    path:  filePath,
+    label: baseName,
+  });
 }
 
 async function handleChooseFile() {
@@ -1518,6 +1536,14 @@ async function handleGenerate() {
       const result = await entry.generate(outputDir, options);
       if (result && result.success) {
         successCount++;
+        // История последних документов
+        window.RecentDocs?.push({
+          name:  result.path.split(/[/\\]/).pop(),
+          type:  'word',
+          icon:  key,
+          path:  result.path,
+          label: entry.label,
+        });
         if (chkOpenAfter && chkOpenAfter.checked) {
           window.electronAPI.openFile(result.path);
         }

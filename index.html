@@ -73,6 +73,65 @@
         </button>
       </div>
 
+      <div class="toolbar-sep"></div>
+
+      <!-- ── RECENT DOCS DROPDOWN ──────────────────────────── -->
+      <div class="toolbar-group">
+        <div class="recdocs-wrap" id="recdocs-wrap">
+          <button class="save-bar-btn toolbar-recent" id="btn-recent" type="button"
+                  aria-haspopup="true" aria-expanded="false"
+                  title="Последние открытые документы">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Последние
+            <svg class="recdocs-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <!-- Dropdown panel -->
+          <div class="recdocs-panel" id="recdocs-panel" hidden>
+
+            <!-- Заголовок -->
+            <div class="recdocs-header">
+              <span class="recdocs-header-title">
+                Последние документы
+                <span class="recdocs-count" id="recdocs-count"></span>
+              </span>
+              <button class="recdocs-show-all" id="recdocs-show-all" type="button">Показать все →</button>
+            </div>
+
+            <!-- Поиск (появляется при > 5 документов) -->
+            <div class="recdocs-search-wrap" id="recdocs-search-wrap" hidden>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input class="recdocs-search" id="recdocs-search" type="text" placeholder="Поиск документа…" autocomplete="off" />
+            </div>
+
+            <!-- Список документов -->
+            <div class="recdocs-list" id="recdocs-list"></div>
+
+            <!-- Подвал -->
+            <div class="recdocs-footer">
+              <button class="recdocs-footer-btn" id="recdocs-all-docs" type="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                Все документы
+              </button>
+              <button class="recdocs-footer-btn recdocs-footer-btn--danger" id="recdocs-clear" type="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+                Очистить историю
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="toolbar-spacer"></div>
 
       <!-- ── REALTOR DROPDOWN ─────────────────────────────── -->
@@ -776,5 +835,6 @@
   <script src="js/app.js"></script>
   <script src="js/ui-controller.js"></script>
   <script src="js/tips-carousel.js"></script>
+  <script src="js/recent-docs.js"></script>
 </body>
 </html>

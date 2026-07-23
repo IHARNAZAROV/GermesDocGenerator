@@ -3003,3 +3003,555 @@ html, body {
 }
 .nav-item--c-docs.nav-item--active .nav-item-icon  { background: #D1FAE5; border-color: #34D399; }
 .nav-item--c-docs.nav-item--active .nav-item-label { color: #065F46; }
+
+/* ============================================================
+   RECENT DOCS DROPDOWN
+   ============================================================ */
+
+/* ── Кнопка-триггер ────────────────────────────────────────── */
+.toolbar-recent {
+  gap: 5px;
+}
+.toolbar-recent svg:first-child { color: #7C5EAF; }
+.toolbar-recent:hover:not(:disabled) svg:first-child { color: #7C5EAF; }
+.toolbar-recent[aria-expanded="true"] {
+  background: var(--brand-xlight);
+  border-color: #A8D4C2;
+  color: var(--brand);
+}
+
+.recdocs-chevron {
+  color: var(--text-muted);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+.toolbar-recent[aria-expanded="true"] .recdocs-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Обёртка (position context) ───────────────────────────── */
+.recdocs-wrap {
+  position: relative;
+}
+
+/* ── Панель (дропдаун) ─────────────────────────────────────── */
+.recdocs-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 360px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raise);
+  z-index: 900;
+  overflow: hidden;
+  animation: recdocsIn 200ms cubic-bezier(.22,.68,0,1.2);
+  transform-origin: top left;
+}
+.recdocs-panel[hidden] { display: none; }
+
+@keyframes recdocsIn {
+  from { opacity: 0; transform: translateY(-8px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+.recdocs-panel--closing {
+  animation: recdocsOut 160ms ease forwards;
+}
+@keyframes recdocsOut {
+  from { opacity: 1; transform: translateY(0)    scale(1);   }
+  to   { opacity: 0; transform: translateY(-5px) scale(.97); }
+}
+
+/* ── Заголовок панели ──────────────────────────────────────── */
+.recdocs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 8px;
+}
+.recdocs-header-title {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.recdocs-count {
+  font-weight: 500;
+  color: var(--text-muted);
+  opacity: .7;
+}
+.recdocs-show-all {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--brand);
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+  flex-shrink: 0;
+}
+.recdocs-show-all:hover {
+  background: var(--brand-xlight);
+}
+
+/* ── Строка поиска ─────────────────────────────────────────── */
+.recdocs-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 10px;
+  padding: 0 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 32px;
+}
+.recdocs-search-wrap[hidden] { display: none; }
+.recdocs-search-wrap svg { color: var(--text-muted); flex-shrink: 0; }
+.recdocs-search {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  outline: none;
+  padding: 0;
+}
+.recdocs-search::placeholder { color: var(--text-muted); }
+
+/* ── Список документов ─────────────────────────────────────── */
+.recdocs-list {
+  max-height: calc(8 * 54px); /* 8 строк */
+  overflow-y: auto;
+  padding: 4px 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.recdocs-list::-webkit-scrollbar { width: 4px; }
+.recdocs-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Карточка документа ────────────────────────────────────── */
+.recdocs-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 7px 8px 7px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 130ms ease;
+  outline: none;
+}
+.recdocs-item:hover {
+  background: var(--brand-xlight);
+}
+.recdocs-item:hover .recdocs-item-accent {
+  opacity: 1;
+}
+.recdocs-item:hover .recdocs-pin-btn {
+  opacity: 1;
+}
+.recdocs-item--pinned {
+  background: #f8f4ff;
+}
+.recdocs-item--pinned:hover {
+  background: #f0eaff;
+}
+
+/* Цветная полоска слева при наведении */
+.recdocs-item-accent {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand);
+  opacity: 0;
+  transition: opacity 130ms ease;
+}
+.recdocs-item--pinned .recdocs-item-accent {
+  background: #7C5EAF;
+  opacity: .5;
+}
+.recdocs-item--pinned:hover .recdocs-item-accent {
+  opacity: 1;
+}
+
+.recdocs-item-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border-radius: 7px;
+  border: 1px solid var(--border-light);
+}
+.recdocs-item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.recdocs-item-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recdocs-item-meta {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.recdocs-pinbadge {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ── Кнопка звёздочка ──────────────────────────────────────── */
+.recdocs-pin-btn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity .12s, background .12s, color .12s;
+  padding: 0;
+}
+.recdocs-pin-btn:hover {
+  background: var(--brand-light);
+  color: #C9940A;
+}
+.recdocs-item--pinned .recdocs-pin-btn {
+  opacity: 1;
+  color: #C9940A;
+}
+
+/* ── Пустое состояние ──────────────────────────────────────── */
+.recdocs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px 24px;
+  text-align: center;
+}
+.recdocs-empty-icon {
+  color: var(--border);
+  margin-bottom: 4px;
+}
+.recdocs-empty-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.recdocs-empty-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Подвал дропдауна ──────────────────────────────────────── */
+.recdocs-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-2);
+}
+.recdocs-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+  white-space: nowrap;
+}
+.recdocs-footer-btn svg { flex-shrink: 0; color: var(--text-muted); }
+.recdocs-footer-btn:hover {
+  background: var(--brand-xlight);
+  border-color: #A8D4C2;
+  color: var(--brand);
+}
+.recdocs-footer-btn:hover svg { color: var(--brand); }
+.recdocs-footer-btn--danger:hover {
+  background: var(--error-bg);
+  border-color: var(--error-bdr);
+  color: var(--error-text);
+}
+.recdocs-footer-btn--danger:hover svg { color: var(--error-text); }
+
+/* ── Тултип ────────────────────────────────────────────────── */
+.recdocs-tooltip {
+  position: fixed;
+  z-index: 1100;
+  background: var(--text);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 13px;
+  max-width: 300px;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,.22);
+  animation: recdocsIn 140ms ease;
+}
+.recdocs-tt-name {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+.recdocs-tt-row {
+  font-size: var(--fs-xs);
+  color: rgba(255,255,255,.75);
+  line-height: 1.6;
+  display: flex;
+  gap: 5px;
+}
+.recdocs-tt-row span:first-child {
+  color: rgba(255,255,255,.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.recdocs-tt-path {
+  word-break: break-all;
+  opacity: .85;
+}
+
+/* ── Диалог подтверждения ──────────────────────────────────── */
+.recdocs-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 120ms ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.recdocs-confirm-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 26px 20px;
+  min-width: 300px;
+  max-width: 360px;
+  box-shadow: var(--shadow-raise);
+  animation: recdocsIn 180ms cubic-bezier(.22,.68,0,1.2);
+}
+.recdocs-confirm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.recdocs-confirm-msg {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+.recdocs-confirm-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.recdocs-btn-cancel {
+  height: 32px;
+  padding: 0 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .12s;
+}
+.recdocs-btn-cancel:hover { background: var(--border-light); }
+.recdocs-btn-yes {
+  height: 32px;
+  padding: 0 14px;
+  background: var(--error-text);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background .12s;
+}
+.recdocs-btn-yes:hover { background: #b91c1c; }
+
+/* ── Модальное окно «Все документы» ───────────────────────── */
+.recdocs-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 140ms ease;
+}
+.recdocs-modal {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  width: 560px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-raise);
+  overflow: hidden;
+  animation: recdocsIn 200ms cubic-bezier(.22,.68,0,1.2);
+}
+.recdocs-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.recdocs-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.recdocs-modal-close {
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--text-muted);
+  transition: background .12s, color .12s;
+  padding: 0;
+}
+.recdocs-modal-close:hover { background: var(--border-light); color: var(--text); }
+
+.recdocs-modal-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 16px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  height: 36px;
+  flex-shrink: 0;
+}
+.recdocs-modal-search-wrap svg { color: var(--text-muted); flex-shrink: 0; }
+.recdocs-modal-search {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  outline: none;
+}
+.recdocs-modal-search::placeholder { color: var(--text-muted); }
+
+.recdocs-modal-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 10px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.recdocs-modal-list::-webkit-scrollbar { width: 4px; }
+.recdocs-modal-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.recdocs-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.recdocs-modal-item:hover { background: var(--brand-xlight); }
+.recdocs-modal-item:hover .recdocs-pin-btn { opacity: 1; }
+
+.recdocs-modal-item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.recdocs-modal-item-path {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recdocs-modal-time {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recdocs-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
