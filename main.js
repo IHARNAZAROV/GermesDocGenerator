@@ -155,15 +155,11 @@ ipcMain.handle('excel:read', async (_event, filePath) => {
 ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) => {
   const fieldsConfig = require('./fields-config.json');
 
-  const BLOCK_HEADER_MAP = {
-    'deal':     'СДЕЛКА',
-    'property': 'ОБЪЕКТ',
-    'seller':   'ПРОДАВЕЦ',
-    'owner1':   'СОБСТВЕННИК №1',
-    'owner2':   'СОБСТВЕННИК №2',
-    'owner3':   'СОБСТВЕННИК №3',
-    'buyer':    'ПОКУПАТЕЛЬ',
-  };
+  // Инвертируем BLOCK_HEADERS из excel-reader: { deal: 'СДЕЛКА', ... }
+  const { BLOCK_HEADERS } = require('./excel/excel-reader');
+  const BLOCK_HEADER_MAP = Object.fromEntries(
+    Object.entries(BLOCK_HEADERS).map(([header, id]) => [id, header])
+  );
 
   const workbook  = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Сделка');

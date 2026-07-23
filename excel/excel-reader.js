@@ -85,4 +85,4 @@ async function readFile(filePath) {
   return { ...result, _rowMap: rowMap };
 }
 
-module.exports = { readFile };
+module.exports = { readFile, BLOCK_HEADERS };
