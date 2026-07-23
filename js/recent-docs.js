@@ -24,22 +24,54 @@
     word: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg>`,
   };
 
-  // Маппинг ключа шаблона → иконка и цвет
+  // Маппинг ключа шаблона → иконка, цвет SVG, фон иконки, цвет полоски
+  // color  — цвет SVG-иконки
+  // bg     — фон плашки иконки (светлый тинт)
+  // stripe — цвет левой полоски (всегда видна, не только при наведении)
   const ICON_MAP = {
-    'excel':              { icon: 'excel',       color: '#155945' },
-    'doverennost-pnd':   { icon: 'doverennost', color: '#7C3AED' },
-    'zapros-pnd':        { icon: 'zapros',       color: '#0369A1' },
-    'zapros-rsc':        { icon: 'zapros',       color: '#0369A1' },
-    'soglasie-obrabotka':{ icon: 'soglasie',     color: '#059669' },
-    'rastorzhenie':      { icon: 'rastorzhenie', color: '#DC2626' },
-    'raspiska-klyuchi':  { icon: 'raspiska',     color: '#B45309' },
-    'zadatok-standart':  { icon: 'zadatok',      color: '#D97706' },
-    'word':              { icon: 'word',          color: '#2B579A' },
+    // ── Excel-файл сделки ───────────────────────────────────
+    'excel':              { icon: 'excel',       color: '#155945', bg: '#D9ECE4', stripe: '#2F7A63' },
+
+    // 🟢 Договоры (зелёный)
+    'dkp-1-eksklyuziv':  { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-1-obshiy':      { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-2-eksklyuziv':  { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-2-obshiy':      { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-3-eksklyuziv':  { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-3-obshiy':      { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'dkp-fizlit-komstr': { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'reklama':            { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+    'konvertaciya':       { icon: 'dogovor',     color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' },
+
+    // 🟣 Доверенность (фиолетовый)
+    'doverennost-pnd':   { icon: 'doverennost', color: '#6D28D9', bg: '#EDE9FE', stripe: '#7C3AED' },
+
+    // 🟠 Соглашения / расторжение (оранжевый)
+    'soglasie-obrabotka':{ icon: 'soglasie',    color: '#C2410C', bg: '#FFF7ED', stripe: '#EA580C' },
+    'rastorzhenie':      { icon: 'rastorzhenie', color: '#C2410C', bg: '#FFF7ED', stripe: '#EA580C' },
+
+    // 🔵 Запросы (синий)
+    'zapros-pnd':        { icon: 'zapros',       color: '#1E40AF', bg: '#DBEAFE', stripe: '#3B82F6' },
+    'zapros-rsc':        { icon: 'zapros',       color: '#1E40AF', bg: '#DBEAFE', stripe: '#3B82F6' },
+
+    // 🟡 Задаток (жёлтый)
+    'zadatok-standart':  { icon: 'zadatok',      color: '#92400E', bg: '#FEF3C7', stripe: '#D97706' },
+
+    // 🟤 Расписка (тёмно-оранжевый)
+    'raspiska-klyuchi':  { icon: 'raspiska',     color: '#9A3412', bg: '#FFEDD5', stripe: '#EA580C' },
+
+    // Запасной вариант
+    'word':              { icon: 'word',          color: '#1E3A8A', bg: '#DBEAFE', stripe: '#3B82F6' },
   };
 
   function resolveIcon(iconKey) {
-    const entry = ICON_MAP[iconKey] || { icon: 'dogovor', color: '#2B579A' };
-    return { svg: ICONS[entry.icon] || ICONS.word, color: entry.color };
+    const entry = ICON_MAP[iconKey] || { icon: 'dogovor', color: '#166534', bg: '#DCFCE7', stripe: '#16A34A' };
+    return {
+      svg:    ICONS[entry.icon] || ICONS.word,
+      color:  entry.color,
+      bg:     entry.bg    || '#F3F4F6',
+      stripe: entry.stripe || entry.color,
+    };
   }
 
   // ── Storage ────────────────────────────────────────────────
@@ -245,17 +277,17 @@
   }
 
   function buildItem(entry) {
-    const { svg, color } = resolveIcon(entry.icon);
-    const time           = relTime(entry.openedAt);
-    const pinned         = entry.pinned;
+    const { svg, color, bg, stripe } = resolveIcon(entry.icon);
+    const time                        = relTime(entry.openedAt);
+    const pinned                      = entry.pinned;
 
     const item = document.createElement('div');
     item.className = 'recdocs-item' + (pinned ? ' recdocs-item--pinned' : '');
     item.dataset.id = entry.id;
 
     item.innerHTML = `
-      <div class="recdocs-item-accent"></div>
-      <div class="recdocs-item-icon" style="color:${color}">${svg}</div>
+      <div class="recdocs-item-accent" style="background:${stripe}"></div>
+      <div class="recdocs-item-icon" style="color:${color};background:${bg};border-color:${bg}">${svg}</div>
       <div class="recdocs-item-body">
         <span class="recdocs-item-name">${esc(trunc(entry.name, 40))}</span>
         <span class="recdocs-item-meta">
@@ -397,11 +429,11 @@
         return;
       }
       filtered.forEach(entry => {
-        const { svg, color } = resolveIcon(entry.icon);
+        const { svg, color, bg } = resolveIcon(entry.icon);
         const row = document.createElement('div');
         row.className = 'recdocs-modal-item';
         row.innerHTML = `
-          <div class="recdocs-item-icon" style="color:${color};flex-shrink:0">${svg}</div>
+          <div class="recdocs-item-icon" style="color:${color};background:${bg};border-color:${bg};flex-shrink:0">${svg}</div>
           <div class="recdocs-modal-item-body">
             <span class="recdocs-item-name">${esc(entry.name)}</span>
             <span class="recdocs-modal-item-path">${esc(entry.path)}</span>

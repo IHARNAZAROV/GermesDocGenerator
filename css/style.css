@@ -3170,7 +3170,7 @@ html, body {
   background: #f0eaff;
 }
 
-/* Цветная полоска слева при наведении */
+/* Цветная полоска слева — видна всегда, ярче при наведении */
 .recdocs-item-accent {
   position: absolute;
   left: 0;
@@ -3178,14 +3178,14 @@ html, body {
   bottom: 6px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: var(--brand);
-  opacity: 0;
+  background: var(--brand); /* переопределяется inline-стилем */
+  opacity: .3;
   transition: opacity 130ms ease;
 }
 .recdocs-item--pinned .recdocs-item-accent {
-  background: #7C5EAF;
   opacity: .5;
 }
+.recdocs-item:hover .recdocs-item-accent,
 .recdocs-item--pinned:hover .recdocs-item-accent {
   opacity: 1;
 }
