@@ -1449,120 +1449,30 @@ function buildPlaceholderData() {
 }
 
 // ============================================================
+// Вспомогательная функция: создаёт метод generate для заданного ключа шаблона
+function makeGenerate(key) {
+  return async function(outputDir, options) {
+    return window.electronAPI.generateDocument(key, buildPlaceholderData(), outputDir, options);
+  };
+}
+
 const TEMPLATE_REGISTRY = {
-
-  'doverennost-pnd': {
-    label: 'Доверенность ПНД',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDoverennost(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'raspiska-klyuchi': {
-    label: 'Расписка в получении ключей',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateRaspiska(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'reklama': {
-    label: 'Договор на оказание рекламных услуг',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateReklama(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'rastorzhenie': {
-    label: 'Соглашение о расторжении',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateRastorzhenie(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'zapros-pnd': {
-    label: 'Запрос на ПНД',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateZaprosPnd(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'zapros-rsc': {
-    label: 'Запрос в РСЦ',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateZaprosRsc(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'soglasie-obrabotka': {
-    label: 'Согласие на обработку данных',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateSoglasie(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-1-eksklyuziv': {
-    label: 'Договор оказания риэлтерских услуг (1 собственник, эксклюзив)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp1Eksklyuziv(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-2-eksklyuziv': {
-    label: 'Договор оказания риэлтерских услуг ЭКС (2 собственника, общий)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp2Eksklyuziv(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-2-obshiy': {
-    label: 'Договор оказания риэлтерских услуг (2 собственника, общий)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp2Obshiy(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-3-eksklyuziv': {
-    label: 'Договор оказания риэлтерских услуг (3 собственника, эксклюзив)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp3Eksklyuziv(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-3-obshiy': {
-    label: 'Договор оказания риэлтерских услуг (3 собственника, общий)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp3Obshiy(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-1-obshiy': {
-    label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkp1Obshiy(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'konvertaciya': {
-    label: 'Договор о конвертации валюты',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateKonvertaciya(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'zadatok-standart': {
-    label: 'Договор задатка (стандартный)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateZadatokStandart(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
-  'dkp-fizlit-komstr': {
-    label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)',
-    async generate(outputDir, options) {
-      return window.electronAPI.generateDkpFizlitKomstr(buildPlaceholderData(), outputDir, options);
-    },
-  },
-
+  'doverennost-pnd':    { label: 'Доверенность ПНД',                                                                    generate: makeGenerate('doverennost-pnd') },
+  'raspiska-klyuchi':   { label: 'Расписка в получении ключей',                                                          generate: makeGenerate('raspiska-klyuchi') },
+  'reklama':            { label: 'Договор на оказание рекламных услуг',                                                  generate: makeGenerate('reklama') },
+  'rastorzhenie':       { label: 'Соглашение о расторжении',                                                             generate: makeGenerate('rastorzhenie') },
+  'zapros-pnd':         { label: 'Запрос на ПНД',                                                                        generate: makeGenerate('zapros-pnd') },
+  'zapros-rsc':         { label: 'Запрос в РСЦ',                                                                         generate: makeGenerate('zapros-rsc') },
+  'soglasie-obrabotka': { label: 'Согласие на обработку данных',                                                         generate: makeGenerate('soglasie-obrabotka') },
+  'dkp-1-eksklyuziv':  { label: 'Договор оказания риэлтерских услуг (1 собственник, эксклюзив)',                         generate: makeGenerate('dkp-1-eksklyuziv') },
+  'dkp-2-eksklyuziv':  { label: 'Договор оказания риэлтерских услуг ЭКС (2 собственника, общий)',                        generate: makeGenerate('dkp-2-eksklyuziv') },
+  'dkp-2-obshiy':      { label: 'Договор оказания риэлтерских услуг (2 собственника, общий)',                            generate: makeGenerate('dkp-2-obshiy') },
+  'dkp-3-eksklyuziv':  { label: 'Договор оказания риэлтерских услуг (3 собственника, эксклюзив)',                        generate: makeGenerate('dkp-3-eksklyuziv') },
+  'dkp-3-obshiy':      { label: 'Договор оказания риэлтерских услуг (3 собственника, общий)',                            generate: makeGenerate('dkp-3-obshiy') },
+  'dkp-1-obshiy':      { label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',                             generate: makeGenerate('dkp-1-obshiy') },
+  'konvertaciya':      { label: 'Договор о конвертации валюты',                                                          generate: makeGenerate('konvertaciya') },
+  'zadatok-standart':  { label: 'Договор задатка (стандартный)',                                                         generate: makeGenerate('zadatok-standart') },
+  'dkp-fizlit-komstr': { label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)',         generate: makeGenerate('dkp-fizlit-komstr') },
 };
 
 // ============================================================

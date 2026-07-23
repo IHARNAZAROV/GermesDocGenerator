@@ -1,27 +1,28 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron');
 const path = require('path');
+const fs   = require('fs');
 const ExcelJS = require('exceljs');
 const { generateWord, previewWord } = require("./generator/word-generator");
 const { checkForUpdates } = require('./updater');
 
-// Map of template keys → filenames in templates/working/
+// Map of template keys → { tpl: filename in templates/working/, out: output filename }
 const TEMPLATE_FILES = {
-  'doverennost-pnd':    'Доверенность_ПНД.docx',
-  'raspiska-klyuchi':   'РАСПИСКА_в_получении_ключей.docx',
-  'reklama':            'Договор_реклама.docx',
-  'rastorzhenie':       'Соглашение_о_расторжении.docx',
-  'zapros-pnd':         'Запрос_на_ПНД.docx',
-  'zapros-rsc':         'Запрос_в_РСЦ.docx',
-  'soglasie-obrabotka': 'Согласие_на_обработку_данных.docx',
-  'dkp-1-eksklyuziv':  'Договор_ЭКС_1_собств.docx',
-  'dkp-1-obshiy':      'Договор_1_собств_общий.docx',
-  'konvertaciya':      'Договор_о_конвертации.docx',
-  'zadatok-standart':  'Договор_задатка.docx',
-  'dkp-2-obshiy':      'Договор_2_собств_общий.docx',
-  'dkp-2-eksklyuziv':  'Договор_ЭКС_2_собств.docx',
-  'dkp-3-obshiy':      'Договор_3_собств_общий.docx',
-  'dkp-3-eksklyuziv':  'Договор_ЭКС_3_собств.docx',
-  'dkp-fizlit-komstr': 'Договор_физ_лица_коммерция.docx',
+  'doverennost-pnd':    { tpl: 'Доверенность_ПНД.docx',                  out: 'Доверенность ПНД.docx' },
+  'raspiska-klyuchi':   { tpl: 'РАСПИСКА_в_получении_ключей.docx',        out: 'Расписка в получении ключей.docx' },
+  'reklama':            { tpl: 'Договор_реклама.docx',                    out: 'Договор реклама.docx' },
+  'rastorzhenie':       { tpl: 'Соглашение_о_расторжении.docx',           out: 'Соглашение о расторжении.docx' },
+  'zapros-pnd':         { tpl: 'Запрос_на_ПНД.docx',                      out: 'Запрос на ПНД.docx' },
+  'zapros-rsc':         { tpl: 'Запрос_в_РСЦ.docx',                       out: 'Запрос в РСЦ.docx' },
+  'soglasie-obrabotka': { tpl: 'Согласие_на_обработку_данных.docx',       out: 'Согласие на обработку данных.docx' },
+  'dkp-1-eksklyuziv':  { tpl: 'Договор_ЭКС_1_собств.docx',               out: 'Договор ЭКС 1 собств.docx' },
+  'dkp-1-obshiy':      { tpl: 'Договор_1_собств_общий.docx',              out: 'Договор 1 собств общий.docx' },
+  'konvertaciya':       { tpl: 'Договор_о_конвертации.docx',               out: 'Договор о конвертации.docx' },
+  'zadatok-standart':  { tpl: 'Договор_задатка.docx',                     out: 'Договор задатка.docx' },
+  'dkp-2-obshiy':      { tpl: 'Договор_2_собств_общий.docx',              out: 'Договор 2 собств общий.docx' },
+  'dkp-2-eksklyuziv':  { tpl: 'Договор_ЭКС_2_собств.docx',               out: 'Договор ЭКС 2 собств.docx' },
+  'dkp-3-obshiy':      { tpl: 'Договор_3_собств_общий.docx',              out: 'Договор 3 собств общий.docx' },
+  'dkp-3-eksklyuziv':  { tpl: 'Договор_ЭКС_3_собств.docx',               out: 'Договор ЭКС 3 собств.docx' },
+  'dkp-fizlit-komstr': { tpl: 'Договор_физ_лица_коммерция.docx',          out: 'Договор физ лица коммерция.docx' },
 };
 
 // ============================================================
@@ -265,9 +266,9 @@ ipcMain.handle('shell:openFile', async (_event, filePath) => {
 //  IPC — preview document (render template, return text lines)
 // ============================================================
 ipcMain.handle('word:preview', async (_event, templateKey, data) => {
-  const fileName = TEMPLATE_FILES[templateKey];
-  if (!fileName) return { success: false, error: `Шаблон не найден: ${templateKey}` };
-  const templatePath = path.join(__dirname, 'templates', 'working', fileName);
+  const entry = TEMPLATE_FILES[templateKey];
+  if (!entry) return { success: false, error: `Шаблон не найден: ${templateKey}` };
+  const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
   return previewWord(templatePath, data);
 });
 
@@ -296,198 +297,14 @@ ipcMain.handle('template:scan', async () => {
 });
 
 // ============================================================
-//  IPC — generate "Договор реклама" from current form data
+//  IPC — единый универсальный хендлер генерации Word-документов
 // ============================================================
-ipcMain.handle('word:generateReklama', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_реклама.docx');
+ipcMain.handle('word:generate', async (_event, templateKey, data, outputDir, options = {}) => {
+  const entry = TEMPLATE_FILES[templateKey];
+  if (!entry) return { success: false, error: `Неизвестный ключ шаблона: ${templateKey}` };
+  const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
   const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор_реклама.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Расписка в получении ключей"
-// ============================================================
-ipcMain.handle('word:generateRaspiska', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'РАСПИСКА_в_получении_ключей.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Расписка в получении ключей.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Соглашение о расторжении"
-// ============================================================
-ipcMain.handle('word:generateRastorzhenie', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Соглашение_о_расторжении.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Соглашение о расторжении.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Запрос на ПНД"
-// ============================================================
-ipcMain.handle('word:generateZaprosPnd', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_на_ПНД.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Запрос на ПНД.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Запрос в РСЦ"
-// ============================================================
-ipcMain.handle('word:generateZaprosRsc', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Запрос_в_РСЦ.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Запрос в РСЦ.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор ЭКС — 1 собственник, общий"
-// ============================================================
-ipcMain.handle('word:generateDkp1Eksklyuziv', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_ЭКС_1_собств.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор ЭКС 1 собств.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор 1 собственник (общий)"
-// ============================================================
-ipcMain.handle('word:generateDkp1Obshiy', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_1_собств_общий.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор 1 собств общий.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор о конвертации валюты"
-// ============================================================
-ipcMain.handle('word:generateKonvertaciya', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_о_конвертации.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор о конвертации.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор ЭКС (2 собственника, общий)"
-// ============================================================
-ipcMain.handle('word:generateDkp2Eksklyuziv', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_ЭКС_2_собств.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор ЭКС 2 собств.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор оказания риэлтерских услуг (2 собственника, общий)"
-// ============================================================
-ipcMain.handle('word:generateDkp2Obshiy', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_2_собств_общий.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор 2 собств общий.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор задатка (стандартный)"
-// ============================================================
-ipcMain.handle('word:generateZadatokStandart', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_задатка.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор задатка.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Согласие на обработку данных"
-// ============================================================
-ipcMain.handle('word:generateSoglasie', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Согласие_на_обработку_данных.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Согласие на обработку данных.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Доверенность ПНД" from current form data
-// ============================================================
-ipcMain.handle('word:generateDoverennost', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-
-  const templatePath  = path.join(__dirname, 'templates', 'working', 'Доверенность_ПНД.docx');
-  const resolvedDir   = outputDir || path.join(__dirname, 'output');
-  const outputPath    = buildOutputPath(resolvedDir, 'Доверенность ПНД.docx', options.addDate);
-
-  if (!fs.existsSync(resolvedDir)) {
-    fs.mkdirSync(resolvedDir, { recursive: true });
-  }
-
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор физическое лицо — коммерческая структура"
-// ============================================================
-ipcMain.handle('word:generateDkpFizlitKomstr', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_физ_лица_коммерция.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор физ лица коммерция.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор оказания риэлтерских услуг (3 собственника, эксклюзив)"
-// ============================================================
-ipcMain.handle('word:generateDkp3Eksklyuziv', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_ЭКС_3_собств.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор ЭКС 3 собств.docx', options.addDate);
-  if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
-});
-
-// ============================================================
-//  IPC — generate "Договор оказания риэлтерских услуг (3 собственника, общий)"
-// ============================================================
-ipcMain.handle('word:generateDkp3Obshiy', async (_event, data, outputDir, options = {}) => {
-  const fs = require('fs');
-  const templatePath = path.join(__dirname, 'templates', 'working', 'Договор_3_собств_общий.docx');
-  const resolvedDir  = outputDir || path.join(__dirname, 'output');
-  const outputPath   = buildOutputPath(resolvedDir, 'Договор 3 собств общий.docx', options.addDate);
+  const outputPath   = buildOutputPath(resolvedDir, entry.out, options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });
