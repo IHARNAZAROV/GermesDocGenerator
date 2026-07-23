@@ -26,7 +26,7 @@ async function generateWord(templatePath, outputPath, data) {
 
     try {
 
-        const content = fs.readFileSync(templatePath, "binary");
+        const content = await fs.promises.readFile(templatePath, "binary");
 
         const zip = new PizZip(content);
 
@@ -58,7 +58,7 @@ async function generateWord(templatePath, outputPath, data) {
             compression: "DEFLATE"
         });
 
-        fs.writeFileSync(outputPath, buffer);
+        await fs.promises.writeFile(outputPath, buffer);
 
         return {
             success: true,
@@ -90,7 +90,7 @@ async function generateWord(templatePath, outputPath, data) {
 // ============================================================
 async function previewWord(templatePath, data) {
     try {
-        const content = fs.readFileSync(templatePath, "binary");
+        const content = await fs.promises.readFile(templatePath, "binary");
         const zip = new PizZip(content);
         cleanProofErrors(zip);
 
