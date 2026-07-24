@@ -855,6 +855,14 @@
     "baseUnits": {
       "value": "",
       "description": "Стоимость объекта, выраженная в базовых величинах (= priceBYN / baseValue). Используется для определения тарифной строки. Плейсхолдер в Word: {{commission.baseUnits}}"
+    },
+    "baseUnitsRounded": {
+      "value": "",
+      "description": "Стоимость объекта недвижимости, делённая на базовую величину, округлённая по математическим правилам (= Math.round(priceBYN / baseValue)). Вычисляется только при генерации акта выполненных работ. Плейсхолдер в Word: {{commission.baseUnitsRounded}}"
+    },
+    "vatAmount": {
+      "value": "",
+      "description": "Сумма НДС от стоимости комиссии агентства в BYN по ставке 20% (= Math.round(amountBYNRaw * 20) / 100, до 2 знаков). Вычисляется только при генерации акта выполненных работ. Плейсхолдер в Word: {{commission.vatAmount}}"
     }
   },
 

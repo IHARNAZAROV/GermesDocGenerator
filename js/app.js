@@ -1608,14 +1608,27 @@ function buildPlaceholderData() {
     commissionCfg.baseValue,
     commissionCfg.brackets
   );
+  // baseUnitsRounded: Math.round(priceBYN / baseValue) — только для акта выполненных работ
+  const _baseUnitsRounded = commissionResult.baseUnits
+    ? Math.round(commissionResult.baseUnits)
+    : 0;
+  // vatAmount: НДС 20% от суммы комиссии — только для акта выполненных работ
+  const _vatAmountRaw = commissionResult.amountBYNRaw
+    ? Math.round(commissionResult.amountBYNRaw * 20) / 100
+    : 0;
+  const _vatAmount = _vatAmountRaw
+    ? (_vatAmountRaw % 1 === 0 ? String(_vatAmountRaw) : _vatAmountRaw.toFixed(2).replace(/\.?0+$/, ''))
+    : '';
   const commission = {
-    percent:     commissionResult.percent != null ? String(commissionResult.percent) : '',
-    amountBYN:   commissionResult.amountBYN  || '',
-    amountWords: commissionResult.amountWords || '',
-    baseValue:   String(window.COMMISSION_CONFIG.baseValue),
-    baseUnits:   commissionResult.baseUnits
-                   ? commissionResult.baseUnits.toFixed(2).replace(/\.?0+$/, '')
-                   : '',
+    percent:          commissionResult.percent != null ? String(commissionResult.percent) : '',
+    amountBYN:        commissionResult.amountBYN  || '',
+    amountWords:      commissionResult.amountWords || '',
+    baseValue:        String(window.COMMISSION_CONFIG.baseValue),
+    baseUnits:        commissionResult.baseUnits
+                        ? commissionResult.baseUnits.toFixed(2).replace(/\.?0+$/, '')
+                        : '',
+    baseUnitsRounded: _baseUnitsRounded ? String(_baseUnitsRounded) : '',
+    vatAmount:        _vatAmount,
   };
 
   // ── Задаток ─────────────────────────────────────────────────
@@ -1661,7 +1674,8 @@ const TEMPLATE_REGISTRY = {
   'dkp-1-obshiy':      { label: 'Договор оказания риэлтерских услуг (1 собственник, общий)',                             generate: makeGenerate('dkp-1-obshiy') },
   'konvertaciya':      { label: 'Договор о конвертации валюты',                                                          generate: makeGenerate('konvertaciya') },
   'zadatok-standart':  { label: 'Договор задатка (стандартный)',                                                         generate: makeGenerate('zadatok-standart') },
-  'dkp-fizlit-komstr': { label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)',         generate: makeGenerate('dkp-fizlit-komstr') },
+  'dkp-fizlit-komstr':       { label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)', generate: makeGenerate('dkp-fizlit-komstr') },
+  'akt-rielterskikh-uslug':  { label: 'Акт приёмки-сдачи оказанных риелтерских услуг',                                  generate: makeGenerate('akt-rielterskikh-uslug') },
 };
 
 // ============================================================
