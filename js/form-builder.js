@@ -190,8 +190,8 @@ function renderFieldsTwoCol(groupId, fields) {
   // Двухколоночная сетка
   if (col1Fields.length > 0 || col2Fields.length > 0) {
     html += '<div class="form-two-col">';
-    html += `<div class="form-col">${renderFields(groupId, col1Fields)}</div>`;
-    html += `<div class="form-col">${renderFields(groupId, col2Fields)}</div>`;
+    html += `<div class="form-col">${renderFields(groupId, col1Fields, byKey)}</div>`;
+    html += `<div class="form-col">${renderFields(groupId, col2Fields, byKey)}</div>`;
     html += '</div>';
   }
 
@@ -213,10 +213,12 @@ function renderFieldsTwoCol(groupId, fields) {
 
 // ── Рендер массива полей одной группы ────────────────────────
 
-function renderFields(groupId, fields) {
-  // Индекс по ключу для быстрого поиска пар
-  const byKey = {};
-  fields.forEach(f => { byKey[f.key] = f; });
+function renderFields(groupId, fields, byKey) {
+  // Индекс по ключу для быстрого поиска пар (переиспользуется если передан снаружи)
+  if (!byKey) {
+    byKey = {};
+    fields.forEach(f => { byKey[f.key] = f; });
+  }
 
   const rendered = new Set();
   let html = '';
