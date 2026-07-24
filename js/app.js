@@ -184,11 +184,11 @@ function updateDirtyState() {
   setStatus(hasDirty ? 'Есть несохранённые изменения' : (currentFilePath ? 'Файл загружен' : 'Готов к работе'));
 }
 
-function onInputChange(inputId, currentValue) {
+function onInputChange(el, currentValue) {
+  if (!el) return;
+  const inputId  = el.id;
   const original = originalValues[inputId] ?? '';
   const current  = currentValue.trim();
-  const el = document.getElementById(inputId);
-  if (!el) return;
   if (current !== original) {
     dirtyInputIds.add(inputId);
     el.classList.add('input-dirty');
@@ -240,7 +240,7 @@ document.getElementById('deal-body').addEventListener('input', (e) => {
   const id = e.target.id;
   if (!id || !FIELD_IDS.has(id)) return;
   if (e.target.dataset.numeric) applyNumericFormat(e.target);
-  onInputChange(id, e.target.value);
+  onInputChange(e.target, e.target.value);
 });
 
 // ============================================================
