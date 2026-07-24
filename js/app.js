@@ -1457,7 +1457,7 @@ function buildPlaceholderData() {
   const deal = {
     number:                    getField('deal-Номер договора')  || '',
     date:                      getField('deal-Дата договора')   || '',
-    dateText:                  '',
+    dateText:                  dateToLongRussian(getField('deal-Дата договора') || ''),
     endDate:                   _endDateRaw,
     endDateText:               dateToLongRussian(_endDateRaw),
     contractNumber:            getField('deal-Номер договора')  || '',
