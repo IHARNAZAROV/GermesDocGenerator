@@ -650,9 +650,12 @@ function autoUpdateCommission() {
   commissionInput.value = result.amountBYN ? `${result.amountBYN} (${result.percent}%)` : '';
 }
 
-if (bynInput) {
-  bynInput.addEventListener('input', autoUpdateCommission);
-}
+window.COMMISSION_CONFIG_READY.then(() => {
+  if (bynInput) {
+    bynInput.addEventListener('input', autoUpdateCommission);
+    autoUpdateCommission(); // пересчитать, если значение уже введено
+  }
+});
 
 // ============================================================
 //  Instrumental case converter for passport-issuing organizations
