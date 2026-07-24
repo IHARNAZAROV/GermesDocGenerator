@@ -1372,14 +1372,15 @@ function _declineLastNameGenitive(last, gender) {
   return t;
 }
 
-function buildNameGenitive(lastName, firstName, middleName) {
+function detectGender(middleName) {
   const p = (middleName || '').trim().toLowerCase();
-  let gender = null;
-  if (p.endsWith('иична') || p.endsWith('овна') || p.endsWith('евна') || p.endsWith('ична')) {
-    gender = 'f';
-  } else if (p.endsWith('ович') || p.endsWith('евич') || p.endsWith('ич')) {
-    gender = 'm';
-  }
+  if (p.endsWith('иична') || p.endsWith('овна') || p.endsWith('евна') || p.endsWith('ична')) return 'f';
+  if (p.endsWith('ович') || p.endsWith('евич') || p.endsWith('ич')) return 'm';
+  return null;
+}
+
+function buildNameGenitive(lastName, firstName, middleName) {
+  const gender = detectGender(middleName);
   const lg = _declineLastNameGenitive(lastName || '', gender);
   const fg = _declineFirstNameGenitive(firstName || '', gender);
   const mg = _declinePatronymicGenitive(middleName || '');
@@ -1392,13 +1393,7 @@ function buildNameGenitive(lastName, firstName, middleName) {
 }
 
 function buildNameDative(lastName, firstName, middleName) {
-  const p = (middleName || '').trim().toLowerCase();
-  let gender = null;
-  if (p.endsWith('иична') || p.endsWith('овна') || p.endsWith('евна') || p.endsWith('ична')) {
-    gender = 'f';
-  } else if (p.endsWith('ович') || p.endsWith('евич') || p.endsWith('ич')) {
-    gender = 'm';
-  }
+  const gender = detectGender(middleName);
   const ld = _declineLastNameDative(lastName || '', gender);
   const fd = _declineFirstNameDative(firstName || '', gender);
   const md = _declinePatronymicDative(middleName || '');
