@@ -626,10 +626,6 @@ function autoUpdatePropis() {
   propisInput.value = window.moneyToText(raw);
 }
 
-if (bynInput) {
-  bynInput.addEventListener('input', autoUpdatePropis);
-}
-
 // ============================================================
 //  Auto-compute commission from "Цена BYN"
 // ============================================================
@@ -650,9 +646,15 @@ function autoUpdateCommission() {
   commissionInput.value = result.amountBYN ? `${result.amountBYN} (${result.percent}%)` : '';
 }
 
+// Единый обработчик для bynInput: подписывается после загрузки тарифов,
+// чтобы гарантировать корректный расчёт комиссии с первого символа
 window.COMMISSION_CONFIG_READY.then(() => {
   if (bynInput) {
-    bynInput.addEventListener('input', autoUpdateCommission);
+    bynInput.addEventListener('input', () => {
+      autoUpdatePropis();
+      autoUpdateCommission();
+    });
+    autoUpdatePropis();
     autoUpdateCommission(); // пересчитать, если значение уже введено
   }
 });
