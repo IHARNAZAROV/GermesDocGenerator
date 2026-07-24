@@ -1405,7 +1405,22 @@ function buildNameDative(lastName, firstName, middleName) {
   };
 }
 
+// Поля, входящие в блок персоны (порядок важен для ключа кэша)
+const _PERSON_BLOCK_FIELDS = [
+  'Фамилия', 'Имя', 'Отчество', 'Дата рождения',
+  'Паспорт серия', 'Паспорт номер', 'Идентификационный номер',
+  'Кем выдан', 'Дата выдачи', 'Адрес регистрации', 'Телефон',
+];
+
+// Кэш результатов buildPersonBlock: ключ = значения полей, поэтому
+// естественно инвалидируется при любом изменении — явная очистка не нужна
+const _personBlockCache = new Map();
+
 function buildPersonBlock(prefix) {
+  // Ключ = prefix + все значения полей через \x00 (символ, не встречающийся в данных)
+  const cacheKey = prefix + _PERSON_BLOCK_FIELDS.map(f => getField(prefix + f)).join('\x00');
+  if (_personBlockCache.has(cacheKey)) return _personBlockCache.get(cacheKey);
+
   const lastName   = getField(prefix + 'Фамилия')   || '';
   const firstName  = getField(prefix + 'Имя')        || '';
   const middleName = getField(prefix + 'Отчество')   || '';
@@ -1417,7 +1432,7 @@ function buildPersonBlock(prefix) {
   const number  = getField(prefix + 'Паспорт номер') || '';
   const genitive = buildNameGenitive(lastName, firstName, middleName);
   const dative   = buildNameDative(lastName, firstName, middleName);
-  return {
+  const result = {
     lastName,
     firstName,
     middleName,
@@ -1437,6 +1452,8 @@ function buildPersonBlock(prefix) {
     phone:                        getField(prefix + 'Телефон')                || '',
     email:                        '',
   };
+  _personBlockCache.set(cacheKey, result);
+  return result;
 }
 
 function buildPlaceholderData() {
