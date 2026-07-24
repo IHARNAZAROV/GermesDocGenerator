@@ -839,10 +839,14 @@ function updateBlockCompletion(changedPrefix) {
       section.classList.add('ws-block--complete');
       badge.textContent = BLOCK_COMPLETE_LABELS[blockId] || '';
       if (!wasComplete) {
-        // Перезапуск flash-анимации при переходе незаполнен → заполнен
+        // Перезапуск flash-анимации без принудительного reflow:
+        // сбрасываем animationName на один кадр, затем возвращаем
         section.classList.remove('ws-block--complete-flash');
-        void section.offsetWidth; // reflow
-        section.classList.add('ws-block--complete-flash');
+        section.style.animationName = 'none';
+        requestAnimationFrame(() => {
+          section.style.animationName = '';
+          section.classList.add('ws-block--complete-flash');
+        });
       }
     } else {
       section.classList.remove('ws-block--complete', 'ws-block--complete-flash');
