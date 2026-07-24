@@ -839,10 +839,14 @@ const OWNERS_TOOLTIP = {
   3: 'Недоступно. В сделке участвуют три собственника.',
 };
 
+// Кэшируем NodeList один раз при старте — итерируем по массивам вместо повторных querySelectorAll
+const _tplOwnerItems  = [...document.querySelectorAll('.tpl-item[data-owners-required]')];
+const _objectTypeEls  = [...document.querySelectorAll('[data-object-type]')];
+
 function updateContractAvailability() {
   const count    = getOwnersCount();
   const tooltip  = OWNERS_TOOLTIP[count] || '';
-  document.querySelectorAll('.tpl-item[data-owners-required]').forEach((label) => {
+  _tplOwnerItems.forEach((label) => {
     const required   = label.dataset.ownersRequired;
     const cb         = label.querySelector('input[type="checkbox"]');
     const isDisabled = required !== 'any' && Number(required) !== count;
@@ -859,7 +863,7 @@ function updateContractAvailability() {
 }
 
 function resetContractAvailability() {
-  document.querySelectorAll('.tpl-item[data-owners-required]').forEach((label) => {
+  _tplOwnerItems.forEach((label) => {
     label.classList.remove('tpl-item-disabled');
     delete label.dataset.tooltip;
     const cb = label.querySelector('input[type="checkbox"]');
@@ -880,7 +884,7 @@ function applyObjectTypeVisibility() {
   const isCommercial = raw === 'коммерческая недвижимость';
   const isEmpty = raw === '';
 
-  document.querySelectorAll('[data-object-type]').forEach((el) => {
+  _objectTypeEls.forEach((el) => {
     const type = el.dataset.objectType;
     if (isEmpty) {
       el.style.display = 'none';
