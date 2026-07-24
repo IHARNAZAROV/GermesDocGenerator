@@ -320,6 +320,7 @@
 
   // ── Подстановка при ручном вводе ─────────────────────────────
   // Автовставка точек: 14 → 14. → 14.07 → 14.07. → 14.07.2026
+  let _renderTimer = null;
   document.addEventListener('input', function (e) {
     const inp = e.target;
     if (!inp.classList.contains('has-cal')) return;
@@ -332,14 +333,18 @@
 
     if (v !== inp.value) inp.value = v;
 
-    // Обновляем подсветку в открытом календаре
+    // Обновляем подсветку в открытом календаре — с дебаунсом,
+    // чтобы не перестраивать весь DOM попапа при каждом символе
     if (popup && popup.classList.contains('dp-open') && target === inp) {
-      const parsed = parseDDMMYYYY(v);
-      if (parsed) {
-        curYear  = parsed.getFullYear();
-        curMonth = parsed.getMonth();
-      }
-      render();
+      clearTimeout(_renderTimer);
+      _renderTimer = setTimeout(() => {
+        const parsed = parseDDMMYYYY(v);
+        if (parsed) {
+          curYear  = parsed.getFullYear();
+          curMonth = parsed.getMonth();
+        }
+        render();
+      }, 150);
     }
   }, true);
 
