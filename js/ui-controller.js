@@ -139,209 +139,6 @@ function getIssues() {
   return issues;
 }
 
-// ── Progress bar ──────────────────────────────────────────────
-
-/** Plural helper for Russian */
-function pluralRu(n, one, few, many) {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
-  return many;
-}
-
-/** Bar/text color based on completion percentage */
-function getProgressColor(pct) {
-  if (pct < 40) return '#C94040'; // muted red
-  if (pct < 75) return '#C87A30'; // muted orange
-  return '#2F7A63';               // corporate green
-}
-
-/** Animated number counter (ease-out-cubic, 300ms) */
-function animateNumber(el, from, to, duration) {
-  if (!el) return;
-  const startTime = performance.now();
-  const diff = to - from;
-  function step(now) {
-    const t = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.round(from + diff * eased) + '%';
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-/**
- * Compute filled/total required fields overall and per block.
- * Mirrors the same conditional logic as getIssues().
- */
-function calcProgress() {
-  const propTypeRaw = (document.getElementById('property-Тип объекта')?.value || '').trim().toLowerCase();
-  const isHouse      = propTypeRaw === 'дом' || propTypeRaw === 'жилой дом';
-  const isFlat       = propTypeRaw === 'квартира' || propTypeRaw === 'апартаменты' || propTypeRaw === 'комната';
-  const isCommercial = propTypeRaw === 'коммерческая недвижимость';
-
-  const extraPropertyFields = [];
-  if (isHouse) {
-    extraPropertyFields.push(
-      { id: 'property-Кадастровый номер',   label: 'Кадастровый №',       block: 'ws-property' },
-      { id: 'property-Площадь участка',     label: 'Площадь участка',     block: 'ws-property' },
-      { id: 'property-Форма собственности', label: 'Форма собственности', block: 'ws-property' },
-    );
-  } else if (isFlat) {
-    extraPropertyFields.push(
-      { id: 'property-Инвентарный номер', label: 'Инвентарный №', block: 'ws-property' },
-    );
-  } else if (isCommercial) {
-    extraPropertyFields.push(
-      { id: 'property-Вид коммерческой недвижимости',        label: 'Вид комм. недвижимости',        block: 'ws-property' },
-      { id: 'property-Назначение коммерческой недвижимости', label: 'Назначение комм. недвижимости', block: 'ws-property' },
-    );
-  }
-
-  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
-  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
-  const hasBuyer   = depositBYN !== '' || depositUSD !== '';
-
-  const baseFields  = hasBuyer ? REQUIRED_FIELDS : REQUIRED_FIELDS.filter(f => f.block !== 'ws-buyer');
-  const allRequired = [...baseFields, ...extraPropertyFields];
-
-  const sellerIsOwnerRaw = (document.getElementById('seller-Является собственником')?.value || '').trim().toLowerCase();
-  const sellerNotOwner   = sellerIsOwnerRaw === 'нет';
-  const owner1HasData    = OWNER1_FIELDS.some(f => {
-    const el = document.getElementById(f.id);
-    return el && el.value.trim() !== '';
-  });
-  if (sellerNotOwner || owner1HasData) allRequired.push(...OWNER1_FIELDS);
-
-  const BLOCK_ORDER  = ['ws-deal', 'ws-property', 'ws-seller', 'ws-owners', 'ws-buyer'];
-  const BLOCK_LABELS = {
-    'ws-deal':     'Сделка',
-    'ws-property': 'Объект',
-    'ws-seller':   'Продавец',
-    'ws-owners':   'Собственники',
-    'ws-buyer':    'Покупатель',
-  };
-
-  const byBlock = {};
-  for (const b of BLOCK_ORDER) byBlock[b] = { label: BLOCK_LABELS[b], total: 0, filled: 0, pct: 0 };
-
-  let total = 0, filled = 0;
-  for (const f of allRequired) {
-    if (!byBlock[f.block]) continue;
-    const el = document.getElementById(f.id);
-    if (!el) continue;
-    // Пропускаем поля, скрытые фильтром типа объекта (Этаж/Этажность/Площадь кухни для домов и т.д.)
-    if (typeof isInputVisible === 'function' && !isInputVisible(el)) continue;
-    const ok = el.value.trim() !== '';
-    byBlock[f.block].total++;
-    if (ok) byBlock[f.block].filled++;
-    total++;
-    if (ok) filled++;
-  }
-
-  for (const b of BLOCK_ORDER) {
-    byBlock[b].pct = byBlock[b].total > 0 ? Math.round(byBlock[b].filled / byBlock[b].total * 100) : 0;
-  }
-
-  const validBlocks = BLOCK_ORDER.filter(b => byBlock[b].total > 0);
-  const pct = total > 0 ? Math.round(filled / total * 100) : 0;
-
-  return { total, filled, pct, byBlock, blockOrder: validBlocks };
-}
-
-let _progLastPct = 0;
-
-function updateProgressPopover(prog) {
-  const rowsEl    = document.getElementById('sp-prog-pop-rows');
-  const totalPct  = document.getElementById('sp-prog-pop-total-pct');
-  if (!rowsEl) return;
-
-  // Determine currently active block
-  const activeBlock = (document.querySelector('.nav-item--active[data-target]')?.dataset.target) || null;
-
-  let html = '';
-  for (const blockId of prog.blockOrder) {
-    const b       = prog.byBlock[blockId];
-    const isActive = blockId === activeBlock;
-    const color   = getProgressColor(b.pct);
-    html += `<div class="sp-prog-pop-row${isActive ? ' sp-prog-pop-row--active' : ''}" data-block="${blockId}">
-      <span class="sp-prog-pop-row-label">${b.label}</span>
-      <div class="sp-prog-pop-row-bar"><div class="sp-prog-pop-row-fill" style="width:${b.pct}%;background:${color}"></div></div>
-      <span class="sp-prog-pop-row-pct" style="color:${color}">${b.pct}%</span>
-    </div>`;
-  }
-  rowsEl.innerHTML = html;
-  if (totalPct) { totalPct.textContent = prog.pct + '%'; totalPct.style.color = getProgressColor(prog.pct); }
-}
-
-function updateProgressBar() {
-  const pctEl      = document.getElementById('sp-prog-pct');
-  const barFill    = document.getElementById('sp-prog-bar-fill');
-  const barWrap    = document.getElementById('sp-prog-bar-wrap');
-  const textEl     = document.getElementById('sp-prog-text');
-  const detailsBtn = document.getElementById('sp-prog-details-btn');
-  const warnEl     = document.getElementById('sp-prog-warn');
-  const warnBtn    = document.getElementById('sp-prog-warn-btn');
-  if (!pctEl || !barFill || !textEl) return;
-
-  const prog = calcProgress();
-  const { total, filled, pct } = prog;
-
-  if (total === 0) {
-    pctEl.textContent = '—';
-    pctEl.style.color = '';
-    barFill.style.width = '0%';
-    textEl.innerHTML = 'Нет данных для анализа';
-    if (detailsBtn) detailsBtn.hidden = true;
-    if (warnEl) warnEl.hidden = true;
-    if (barWrap) barWrap.title = '';
-    _progLastPct = 0;
-    return;
-  }
-
-  const color = getProgressColor(pct);
-
-  // Animate percent number
-  if (pct !== _progLastPct) {
-    animateNumber(pctEl, _progLastPct, pct, 300);
-  } else {
-    pctEl.textContent = pct + '%';
-  }
-  _progLastPct = pct;
-  pctEl.style.color = color;
-
-  // Animate bar
-  barFill.style.width = pct + '%';
-  barFill.style.background = color;
-
-  // Tooltip
-  if (barWrap) barWrap.title = `Заполнено ${filled} из ${total} обязательных полей`;
-
-  // Text
-  const missing = total - filled;
-  if (pct === 100) {
-    textEl.innerHTML = '<span class="sp-prog-complete">✓ Сделка полностью заполнена</span>';
-  } else {
-    textEl.textContent = `${filled} из ${total} обязательных полей`;
-  }
-
-  // Details button
-  if (detailsBtn) detailsBtn.hidden = false;
-
-  // Warning
-  if (missing > 0 && warnEl && warnBtn) {
-    warnEl.hidden = false;
-    const noun = pluralRu(missing, 'обязательное поле', 'обязательных поля', 'обязательных полей');
-    warnBtn.textContent = `Требуют заполнения ${missing} ${noun}`;
-  } else if (warnEl) {
-    warnEl.hidden = true;
-  }
-
-  // Update popover if open
-  if (!document.getElementById('sp-prog-popover')?.hidden) {
-    updateProgressPopover(prog);
-  }
-}
 
 // ── Обновить Smart Panel: проверка данных ─────────────────────
 let _currentIssues = [];
@@ -682,7 +479,6 @@ function updateObjectSummary() {
 function refreshUI() {
   updateObjectSummary();
   updateValidationPanel();
-  updateProgressBar();
   if (typeof updateBlockCompletion === 'function') updateBlockCompletion(null);
   updateDocsNavStatus();
   // Проверяем статус Excel по drop zone
@@ -750,11 +546,6 @@ function setActiveNavItem(blockId) {
   document.querySelectorAll('.nav-item[data-target]').forEach(item => {
     item.classList.toggle('nav-item--active', item.dataset.target === blockId);
   });
-  // Refresh popover active-row highlight if popover is open
-  const popoverEl = document.getElementById('sp-prog-popover');
-  if (popoverEl && !popoverEl.hidden) {
-    updateProgressPopover(calcProgress());
-  }
 }
 
 // ── Обработчики кликов аккордеона ─────────────────────────────
@@ -838,31 +629,6 @@ if (tplSearch) {
   });
 }
 
-// ── Progress bar buttons ───────────────────────────────────────
-(function initProgressButtons() {
-  const detailsBtn = document.getElementById('sp-prog-details-btn');
-  const popoverEl  = document.getElementById('sp-prog-popover');
-  const warnBtn    = document.getElementById('sp-prog-warn-btn');
-
-  if (detailsBtn && popoverEl) {
-    detailsBtn.addEventListener('click', () => {
-      const isOpen = !popoverEl.hidden;
-      popoverEl.hidden = isOpen;
-      detailsBtn.textContent = isOpen ? 'Подробнее ▼' : 'Свернуть ▲';
-      if (!isOpen) {
-        // Refresh popover content when opening
-        updateProgressPopover(calcProgress());
-      }
-    });
-  }
-
-  if (warnBtn) {
-    warnBtn.addEventListener('click', () => {
-      const issues = typeof getIssues === 'function' ? getIssues() : [];
-      if (issues.length > 0) navigateToField(issues[0].id, issues[0].block);
-    });
-  }
-})();
 
 // ── Состояние: сохранение / восстановление ───────────────────
 const SP_TOGGLES = ['sp-validation-toggle', 'sp-docs-toggle', 'sp-settings-toggle'];
@@ -918,7 +684,6 @@ document.getElementById('deal-body')?.addEventListener('input', () => {
   UIController._debounce = setTimeout(() => {
     updateObjectSummary();
     updateValidationPanel();
-    updateProgressBar();
   }, 120);
 });
 
