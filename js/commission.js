@@ -70,12 +70,6 @@ window.COMMISSION_CONFIG_READY = (async () => {
 
 /**
  * Вычисляет комиссию агентства.
- * @param {number} priceBYN   — стоимость объекта в BYN
- * @param {number} [baseValue] — базовая величина (по умолчанию из COMMISSION_CONFIG)
- * @returns {{ percent: number, amountBYN: string, amountBYNRaw: number, amountWords: string, baseUnits: number }}
- */
-/**
- * Вычисляет комиссию агентства.
  * @param {number} priceBYN    — стоимость объекта в BYN
  * @param {number} [baseValue] — базовая величина (по умолчанию из COMMISSION_CONFIG)
  * @param {Array}  [brackets]  — тарифная таблица (по умолчанию из COMMISSION_CONFIG)
