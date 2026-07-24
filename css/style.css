@@ -2652,11 +2652,18 @@ html, body {
 .sp-tpl-search:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(21,89,69,.09); }
 .sp-tpl-search::placeholder { color: var(--text-muted); }
 
-/* ── Progress block ── */
-.sp-block--progress { overflow: visible; }
+/* ── Progress block (in main work area) ── */
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  flex-shrink: 0;
+}
 
 .sp-progress-inner {
-  padding: 12px 14px 10px;
+  padding: 11px 16px 10px;
 }
 
 .sp-prog-header {
