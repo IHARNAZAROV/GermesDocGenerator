@@ -130,6 +130,8 @@ function getIssues() {
   for (const f of allRequired) {
     const el = document.getElementById(f.id);
     if (!el) continue;
+    // Пропускаем поля, скрытые фильтром типа объекта
+    if (typeof isInputVisible === 'function' && !isInputVisible(el)) continue;
     if (el.value.trim() === '') {
       issues.push(f);
     }
@@ -227,7 +229,10 @@ function calcProgress() {
   for (const f of allRequired) {
     if (!byBlock[f.block]) continue;
     const el = document.getElementById(f.id);
-    const ok = el && el.value.trim() !== '';
+    if (!el) continue;
+    // Пропускаем поля, скрытые фильтром типа объекта (Этаж/Этажность/Площадь кухни для домов и т.д.)
+    if (typeof isInputVisible === 'function' && !isInputVisible(el)) continue;
+    const ok = el.value.trim() !== '';
     byBlock[f.block].total++;
     if (ok) byBlock[f.block].filled++;
     total++;

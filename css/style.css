@@ -3802,18 +3802,26 @@ html, body {
 
 /* ── Object Summary Card ───────────────────────────────────── */
 .object-summary-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  background: linear-gradient(180deg, #fff 0%, #fbfdfc 100%);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* ── Верхняя строка: иконка + инфо + цена ── */
+.object-summary-top {
   display: grid;
   grid-template-columns: 70px minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   min-height: 86px;
-  margin-bottom: 10px;
   padding: 12px 16px 12px 12px;
-  background: linear-gradient(180deg, #fff 0%, #fbfdfc 100%);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card);
 }
+
 .object-summary-icon {
   width: 70px;
   height: 62px;
@@ -3904,8 +3912,38 @@ html, body {
   line-height: 1.1;
   white-space: nowrap;
 }
+
+/* ── Нижняя строка: прогресс заполнения внутри карточки ── */
+.object-summary-progress-wrap {
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-2, #f8faf9);
+}
+.object-summary-progress-wrap .sp-progress-inner {
+  padding: 8px 16px 8px 12px;
+}
+.object-summary-progress-wrap .sp-prog-header {
+  margin-bottom: 5px;
+}
+.object-summary-progress-wrap .sp-prog-bar-track {
+  height: 5px;
+}
+.object-summary-progress-wrap .sp-prog-bar-wrap {
+  margin-bottom: 5px;
+}
+.object-summary-progress-wrap .sp-prog-pct {
+  font-size: 16px;
+}
+.object-summary-progress-wrap .sp-prog-warn {
+  margin-top: 4px;
+  padding: 3px 6px;
+}
+.object-summary-progress-wrap .sp-prog-popover {
+  background: var(--surface-2, #f8faf9);
+  border-top-color: var(--border-light);
+}
+
 @media (max-width: 820px) {
-  .object-summary-card { grid-template-columns: 58px minmax(0, 1fr); }
+  .object-summary-top { grid-template-columns: 58px minmax(0, 1fr); min-height: unset; }
   .object-summary-icon { width: 58px; height: 54px; }
   .object-summary-icon svg { width: 40px; height: 40px; }
   .object-summary-price { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border-light); padding: 10px 0 0; }
