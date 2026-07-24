@@ -1619,16 +1619,27 @@ function buildPlaceholderData() {
   const _vatAmount = _vatAmountRaw
     ? (_vatAmountRaw % 1 === 0 ? String(_vatAmountRaw) : _vatAmountRaw.toFixed(2).replace(/\.?0+$/, ''))
     : '';
+  // baseUnitsRoundedWords: целое число базовых величин прописью (ж.р. — «базовая величина»)
+  const _baseUnitsRoundedWords = (_baseUnitsRounded && typeof window.integerToWords === 'function')
+    ? window.integerToWords(_baseUnitsRounded, 'f')
+    : '';
+  // vatAmountWords: сумма НДС прописью в BYN
+  const _vatAmountWords = (_vatAmountRaw && typeof window.moneyToText === 'function')
+    ? window.moneyToText(String(_vatAmountRaw))
+    : '';
+
   const commission = {
-    percent:          commissionResult.percent != null ? String(commissionResult.percent) : '',
-    amountBYN:        commissionResult.amountBYN  || '',
-    amountWords:      commissionResult.amountWords || '',
-    baseValue:        String(window.COMMISSION_CONFIG.baseValue),
-    baseUnits:        commissionResult.baseUnits
-                        ? commissionResult.baseUnits.toFixed(2).replace(/\.?0+$/, '')
-                        : '',
-    baseUnitsRounded: _baseUnitsRounded ? String(_baseUnitsRounded) : '',
-    vatAmount:        _vatAmount,
+    percent:               commissionResult.percent != null ? String(commissionResult.percent) : '',
+    amountBYN:             commissionResult.amountBYN  || '',
+    amountWords:           commissionResult.amountWords || '',
+    baseValue:             String(window.COMMISSION_CONFIG.baseValue),
+    baseUnits:             commissionResult.baseUnits
+                             ? commissionResult.baseUnits.toFixed(2).replace(/\.?0+$/, '')
+                             : '',
+    baseUnitsRounded:      _baseUnitsRounded ? String(_baseUnitsRounded) : '',
+    baseUnitsRoundedWords: _baseUnitsRoundedWords,
+    vatAmount:             _vatAmount,
+    vatAmountWords:        _vatAmountWords,
   };
 
   // ── Задаток ─────────────────────────────────────────────────

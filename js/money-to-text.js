@@ -131,6 +131,46 @@
 
   window.moneyToText = moneyToText;
 
+  // ── Integer-to-words ────────────────────────────────────────
+  /**
+   * Converts a non-negative integer to Russian words (no currency label).
+   * @param {number|string} n       Integer ≥ 0
+   * @param {'m'|'f'}       gender  Grammatical gender for 1 and 2 in the last group
+   *                                (use 'f' for feminine nouns, e.g. "базовая величина")
+   * @returns {string}  e.g. integerToWords(150, 'f') → "Сто пятьдесят"
+   *                    Returns '' for invalid input.
+   */
+  function integerToWords(n, gender) {
+    gender = gender || 'm';
+    const num = parseInt(String(n), 10);
+    if (isNaN(num) || num < 0) return '';
+
+    const billions  = Math.floor(num / 1_000_000_000);
+    const millions  = Math.floor((num % 1_000_000_000) / 1_000_000);
+    const thousands = Math.floor((num % 1_000_000) / 1_000);
+    const remainder = num % 1_000;
+
+    const parts = [];
+    if (billions) {
+      parts.push(threeDigits(billions, 'm') + ' ' + pluralForm(billions, 'миллиард', 'миллиарда', 'миллиардов'));
+    }
+    if (millions) {
+      parts.push(threeDigits(millions, 'm') + ' ' + pluralForm(millions, 'миллион', 'миллиона', 'миллионов'));
+    }
+    if (thousands) {
+      parts.push(threeDigits(thousands, 'f') + ' ' + pluralForm(thousands, 'тысяча', 'тысячи', 'тысяч'));
+    }
+    if (remainder) {
+      parts.push(threeDigits(remainder, gender));
+    }
+    if (parts.length === 0) return 'ноль';
+
+    const raw = parts.join(' ');
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }
+
+  window.integerToWords = integerToWords;
+
   // ── USD variant ─────────────────────────────────────────────
   /**
    * Converts an amount to a Russian written form for USD.

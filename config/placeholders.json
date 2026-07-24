@@ -860,9 +860,17 @@
       "value": "",
       "description": "Стоимость объекта недвижимости, делённая на базовую величину, округлённая по математическим правилам (= Math.round(priceBYN / baseValue)). Вычисляется только при генерации акта выполненных работ. Плейсхолдер в Word: {{commission.baseUnitsRounded}}"
     },
+    "baseUnitsRoundedWords": {
+      "value": "",
+      "description": "Округлённое количество базовых величин прописью (женский род, например: «Сто пятьдесят»). Вычисляется автоматически из baseUnitsRounded. Плейсхолдер в Word: {{commission.baseUnitsRoundedWords}}"
+    },
     "vatAmount": {
       "value": "",
       "description": "Сумма НДС от стоимости комиссии агентства в BYN по ставке 20% (= Math.round(amountBYNRaw * 20) / 100, до 2 знаков). Вычисляется только при генерации акта выполненных работ. Плейсхолдер в Word: {{commission.vatAmount}}"
+    },
+    "vatAmountWords": {
+      "value": "",
+      "description": "Сумма НДС прописью в белорусских рублях (например: «Двести пятьдесят белорусских рублей 00 копеек»). Вычисляется автоматически из vatAmount. Плейсхолдер в Word: {{commission.vatAmountWords}}"
     }
   },
 
