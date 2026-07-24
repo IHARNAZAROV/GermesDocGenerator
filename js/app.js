@@ -216,9 +216,9 @@ function onInputChange(el, currentValue) {
     applyObjectTypeVisibility();
     autoUpdateCommission();
   }
-  // Update block completion badge
+  // Update block completion badge (дебаунс — не чаще раза в 200 мс)
   const dashIdx2 = inputId.indexOf('-');
-  if (dashIdx2 !== -1) updateBlockCompletion(inputId.slice(0, dashIdx2));
+  if (dashIdx2 !== -1) scheduleBlockCompletion(inputId.slice(0, dashIdx2));
 }
 
 function commitCurrentValues() {
@@ -778,6 +778,13 @@ function isBlockFilled(prefix) {
     if (!isInputVisible(el)) return true; // скрыт фильтром — пропуск
     return !isFieldEmpty(el.value);
   });
+}
+
+/** Дебаунс-обёртка: откладывает updateBlockCompletion на 200 мс после последнего вызова */
+let _blockCompletionTimer = null;
+function scheduleBlockCompletion(prefix) {
+  clearTimeout(_blockCompletionTimer);
+  _blockCompletionTimer = setTimeout(() => updateBlockCompletion(prefix), 200);
 }
 
 /** Обновляет badge и класс ws-block--complete для нужных блоков */
