@@ -1648,10 +1648,15 @@ async function handleGenerate() {
   let successCount = 0;
   const errors = [];
 
-  for (const key of toGenerate) {
+  const results = await Promise.allSettled(
+    toGenerate.map(key => TEMPLATE_REGISTRY[key].generate(outputDir, options))
+  );
+
+  results.forEach((r, i) => {
+    const key   = toGenerate[i];
     const entry = TEMPLATE_REGISTRY[key];
-    try {
-      const result = await entry.generate(outputDir, options);
+    if (r.status === 'fulfilled') {
+      const result = r.value;
       if (result && result.success) {
         successCount++;
         // История последних документов
@@ -1668,10 +1673,10 @@ async function handleGenerate() {
       } else {
         errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
       }
-    } catch (err) {
-      errors.push(`${entry.label}: ${err.message}`);
+    } else {
+      errors.push(`${entry.label}: ${r.reason?.message || 'неизвестная ошибка'}`);
     }
-  }
+  });
 
   if (successCount > 0) {
     showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
