@@ -1598,7 +1598,7 @@ function buildPlaceholderData() {
   // Для коммерческой недвижимости — отдельная тарифная таблица.
   // Для остальных объектов — стандартная.
   const priceBYNRaw = parseFloat(
-    (getField('deal-Стоимость BYN') || '0').replace(',', '.')
+    (getNumericField('deal-Стоимость BYN') || '0').replace(',', '.')
   );
   const commissionCfg = isCommercial
     ? window.COMMISSION_CONFIG_COMMERCIAL
