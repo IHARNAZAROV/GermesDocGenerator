@@ -236,6 +236,20 @@ function commitCurrentValues() {
 // FIELD_IDS — Set для O(1)-проверки принадлежности элемента к отслеживаемым полям.
 const FIELD_IDS = new Set(Object.values(FIELD_MAP));
 
+/**
+ * Снэпшот всех отслеживаемых полей за один проход по DOM.
+ * Используется внутри buildPlaceholderData чтобы заменить 40+ getElementById-вызовов
+ * одним проходом.
+ */
+function snapshotFields() {
+  const snap = {};
+  for (const id of FIELD_IDS) {
+    const el = document.getElementById(id);
+    if (el) snap[id] = el.value.trim();
+  }
+  return snap;
+}
+
 document.getElementById('deal-body').addEventListener('input', (e) => {
   const id = e.target.id;
   if (!id || !FIELD_IDS.has(id)) return;
@@ -1134,7 +1148,12 @@ btnBrowse.addEventListener('click', async () => {
 // ============================================================
 //  Template data helpers
 // ============================================================
+// Активный снэпшот полей (устанавливается на время buildPlaceholderData).
+// Позволяет getField читать из кэша вместо DOM при массовом обходе.
+let _currentSnap = null;
+
 function getField(id) {
+  if (_currentSnap) return _currentSnap[id] ?? '';
   return (document.getElementById(id)?.value || '').trim();
 }
 
@@ -1422,6 +1441,9 @@ function buildPersonBlock(prefix) {
 }
 
 function buildPlaceholderData() {
+  // Один проход по DOM — все последующие getField() читают из снэпшота
+  _currentSnap = snapshotFields();
+  try {
   const propertyTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
   const isHouse      = propertyTypeRaw === 'дом';
   const isApartment  = propertyTypeRaw === 'квартира';
@@ -1594,6 +1616,9 @@ function buildPlaceholderData() {
   property.remainderUSDWords = '';
 
   return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit };
+  } finally {
+    _currentSnap = null;
+  }
 }
 
 // ============================================================
