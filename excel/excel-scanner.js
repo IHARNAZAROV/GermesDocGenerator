@@ -8,25 +8,11 @@
 const path    = require('path');
 const fs      = require('fs');
 const ExcelJS = require('exceljs');
+const { cellToString } = require('./cell-utils');
 
 const ROOT        = path.resolve(__dirname, '..');
 const CONFIG_JSON = path.join(ROOT, 'fields-config.json');
 const CONFIG_JS   = path.join(ROOT, 'js', 'fields-config.js');
-
-// ── Утилиты ───────────────────────────────────────────────────
-function cellText(cell) {
-  if (!cell) return '';
-  const v = cell.value;
-  if (v === null || v === undefined) return '';
-  if (typeof v === 'object') {
-    if (v instanceof Date) return v.toLocaleDateString('ru-RU');
-    if (v.result   !== undefined) return String(v.result);
-    if (v.text     !== undefined) return String(v.text);
-    if (v.richText !== undefined) return v.richText.map(r => r.text || '').join('');
-    return String(v);
-  }
-  return String(v);
-}
 
 function inferType(key) {
   return key.toLowerCase().startsWith('дата') ? 'date' : 'text';
@@ -67,7 +53,7 @@ async function scanAndUpdate(excelPath) {
   wb.eachSheet((ws) => {
     let curGroupId = null;
     ws.eachRow((row) => {
-      const a = cellText(row.getCell(1)).trim();
+      const a = cellToString(row.getCell(1)).trim();
       if (!a) return;
       const gid = headerToGroupId[a];
       if (gid !== undefined) {
