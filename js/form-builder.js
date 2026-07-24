@@ -473,11 +473,14 @@ function _initObjTypeDropdowns() {
   });
 
   // Синхронизация меток при загрузке/очистке формы
-  function syncAll() {
-    document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel);
+  if (!_initObjTypeDropdowns._listenersAttached) {
+    function syncAll() {
+      document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel);
+    }
+    document.addEventListener('form:populated', syncAll);
+    document.addEventListener('form:cleared',   syncAll);
+    _initObjTypeDropdowns._listenersAttached = true;
   }
-  document.addEventListener('form:populated', syncAll);
-  document.addEventListener('form:cleared',   syncAll);
 }
 
 // ── Публичный API ─────────────────────────────────────────────
