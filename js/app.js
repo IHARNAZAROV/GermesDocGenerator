@@ -1664,9 +1664,15 @@ async function handleGenerate() {
   let successCount = 0;
   const errors = [];
 
-  const results = await Promise.allSettled(
-    toGenerate.map(key => TEMPLATE_REGISTRY[key].generate(outputDir, options))
-  );
+  showLoader();
+  let results;
+  try {
+    results = await Promise.allSettled(
+      toGenerate.map(key => TEMPLATE_REGISTRY[key].generate(outputDir, options))
+    );
+  } finally {
+    hideLoader();
+  }
 
   results.forEach((r, i) => {
     const key   = toGenerate[i];
