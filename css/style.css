@@ -2432,6 +2432,30 @@ html, body {
   overflow: hidden;
   min-height: 0;
 }
+/* ── Empty-state hint (visible before Excel is loaded) ── */
+.ws-empty-hint {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  user-select: none;
+}
+.ws-empty-hint svg {
+  flex-shrink: 0;
+  opacity: .55;
+}
+body.form-empty .ws-empty-hint {
+  display: flex;
+}
+
 .ws-block-inner {
   padding: 14px 16px 16px;
 }
@@ -3842,10 +3866,6 @@ html, body {
   border-color: var(--brand);
   background: var(--brand-xlight, #f0faf5);
 }
-/* Popular package — subtle pre-highlight even unselected */
-.reklama-option--popular {
-  border-color: #b3d9c8;
-}
 /* Selected state — ring shadow for extra visual weight without layout shift */
 .reklama-option:has(.reklama-radio:checked) {
   border-color: var(--brand);
@@ -3894,35 +3914,10 @@ html, body {
   gap: 8px;
 }
 
-/* Title + badge wrapper (used for popular package) */
-.reklama-title-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-
 .reklama-option-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-}
-
-/* Popular badge pill */
-.reklama-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 7px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .2px;
-  background: var(--brand);
-  color: #fff;
-  white-space: nowrap;
-  flex-shrink: 0;
-  line-height: 1.7;
 }
 
 .reklama-option-price {
