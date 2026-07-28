@@ -1116,6 +1116,98 @@ dropZone.addEventListener('drop', async e => {
 document.getElementById('btn-drop-browse').addEventListener('click', handleChooseFile);
 document.getElementById('btn-drop-change').addEventListener('click', handleChooseFile);
 
+
+// ============================================================
+//  Custom tooltips for toolbar buttons
+// ============================================================
+function initToolbarTooltips() {
+  const tooltip = document.createElement('div');
+  tooltip.className = 'app-tooltip';
+  tooltip.setAttribute('role', 'tooltip');
+  tooltip.hidden = true;
+  document.body.appendChild(tooltip);
+
+  let activeEl = null;
+  let showTimer = null;
+
+  function getTooltipTarget(target) {
+    return target?.closest?.('.save-bar [data-tooltip], .realtor-trigger[data-tooltip]') || null;
+  }
+
+  function clearShowTimer() {
+    if (showTimer) {
+      clearTimeout(showTimer);
+      showTimer = null;
+    }
+  }
+
+  function positionTooltip() {
+    if (!activeEl || tooltip.hidden) return;
+
+    const rect = activeEl.getBoundingClientRect();
+    const margin = 10;
+    const top = Math.max(margin, rect.top - tooltip.offsetHeight - 10);
+    const left = Math.min(
+      window.innerWidth - margin - tooltip.offsetWidth / 2,
+      Math.max(margin + tooltip.offsetWidth / 2, rect.left + rect.width / 2)
+    );
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function showTooltip(target) {
+    const text = target.dataset.tooltip;
+    if (!text) return;
+
+    activeEl = target;
+    tooltip.textContent = text;
+    tooltip.hidden = false;
+    tooltip.classList.remove('is-visible');
+    positionTooltip();
+
+    showTimer = setTimeout(() => {
+      positionTooltip();
+      tooltip.classList.add('is-visible');
+      showTimer = null;
+    }, 300);
+  }
+
+  function hideTooltip() {
+    clearShowTimer();
+    activeEl = null;
+    tooltip.classList.remove('is-visible');
+    tooltip.hidden = true;
+  }
+
+  document.addEventListener('mouseover', (event) => {
+    const target = getTooltipTarget(event.target);
+    if (!target || target === activeEl) return;
+    hideTooltip();
+    showTooltip(target);
+  });
+
+  document.addEventListener('mouseout', (event) => {
+    if (!activeEl) return;
+    const nextTarget = event.relatedTarget;
+    if (nextTarget && activeEl.contains(nextTarget)) return;
+    hideTooltip();
+  });
+
+  document.addEventListener('focusin', (event) => {
+    const target = getTooltipTarget(event.target);
+    if (!target) return;
+    hideTooltip();
+    showTooltip(target);
+  });
+
+  document.addEventListener('focusout', hideTooltip);
+  window.addEventListener('scroll', positionTooltip, true);
+  window.addEventListener('resize', positionTooltip);
+}
+
+initToolbarTooltips();
+
 // ============================================================
 //  Event listeners
 // ============================================================
