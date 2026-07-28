@@ -36,6 +36,17 @@
   --error-bdr:    #FECACA;
   --error-text:   #DC2626;
 
+  /* Semantic status tokens */
+  --success:      #16a34a;
+  --success-bg:   #f0fdf4;
+  --success-bdr:  #bbf7d0;
+  --warning:      #d97706;
+  --warning-bg:   #fffbeb;
+  --warning-bdr:  #fde68a;
+  --info:         #2563eb;
+  --info-bg:      #eff6ff;
+  --info-bdr:     #bfdbfe;
+
   /* Spacing — 8pt grid */
   --sp-1:  4px;
   --sp-2:  8px;
