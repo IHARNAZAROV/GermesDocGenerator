@@ -3828,6 +3828,7 @@ html, body {
 }
 
 .reklama-option {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -3835,12 +3836,38 @@ html, body {
   border: 1.5px solid var(--border);
   border-radius: var(--r-md);
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition: border-color .15s, background .15s, box-shadow .15s;
 }
-.reklama-option:hover { border-color: var(--brand); background: var(--brand-xlight, #f0faf5); }
+.reklama-option:hover {
+  border-color: var(--brand);
+  background: var(--brand-xlight, #f0faf5);
+}
+/* Popular package — subtle pre-highlight even unselected */
+.reklama-option--popular {
+  border-color: #b3d9c8;
+}
+/* Selected state — ring shadow for extra visual weight without layout shift */
 .reklama-option:has(.reklama-radio:checked) {
   border-color: var(--brand);
   background: var(--brand-xlight, #f0faf5);
+  box-shadow: 0 0 0 2px var(--brand), 0 2px 10px rgba(21,89,69,.10);
+}
+/* Checkmark badge — top-right corner of selected card */
+.reklama-option:has(.reklama-radio:checked)::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--brand);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .reklama-radio {
@@ -3862,9 +3889,18 @@ html, body {
 
 .reklama-option-top {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+/* Title + badge wrapper (used for popular package) */
+.reklama-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .reklama-option-title {
@@ -3873,9 +3909,25 @@ html, body {
   color: var(--text);
 }
 
-.reklama-option-price {
-  font-size: 12px;
+/* Popular badge pill */
+.reklama-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 10px;
   font-weight: 600;
+  letter-spacing: .2px;
+  background: var(--brand);
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.7;
+}
+
+.reklama-option-price {
+  font-size: 13px;
+  font-weight: 700;
   color: var(--brand);
   white-space: nowrap;
 }
