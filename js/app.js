@@ -166,10 +166,21 @@ function setInputValue(inputId, value) {
   el.value = isFieldEmpty(value) ? '' : String(value).trim();
   // Apply thousands formatting immediately on load for numeric fields
   if (el.dataset.numeric && el.value) applyNumericFormat(el);
+  // Clear valid indicator whenever value is wiped programmatically
+  if (!el.value) el.classList.remove('input-valid');
 }
 
 function clearAllInputs() {
   Object.values(FIELD_MAP).forEach((id) => setInputValue(id, ''));
+}
+
+/** Mark all non-empty, non-readonly tracked fields as visually valid. */
+function refreshValidStates() {
+  for (const id of FIELD_IDS) {
+    const el = document.getElementById(id);
+    if (!el || el.readOnly) continue;
+    el.classList.toggle('input-valid', el.value.trim() !== '');
+  }
 }
 
 // ============================================================
@@ -197,6 +208,8 @@ function onInputChange(el, currentValue) {
     el.classList.remove('input-dirty');
   }
   updateDirtyState();
+  // Remove valid indicator immediately when field is cleared while typing
+  if (!current) el.classList.remove('input-valid');
   // Автосохранение: запускаем/сбрасываем дебаунс только если файл уже открыт
   if (currentFilePath) {
     clearTimeout(autoSaveTimer);
@@ -255,6 +268,14 @@ document.getElementById('deal-body').addEventListener('input', (e) => {
   if (!id || !FIELD_IDS.has(id)) return;
   if (e.target.dataset.numeric) applyNumericFormat(e.target);
   onInputChange(e.target, e.target.value);
+});
+
+// Set/clear valid indicator when user leaves a field.
+// Using focusout (bubbles) for event delegation.
+document.getElementById('deal-body').addEventListener('focusout', (e) => {
+  const el = e.target;
+  if (!el.id || !FIELD_IDS.has(el.id) || el.readOnly) return;
+  el.classList.toggle('input-valid', el.value.trim() !== '');
 });
 
 // ============================================================
@@ -466,6 +487,7 @@ function populateForm(data) {
   autoUpdateCommission();
 
   commitCurrentValues();
+  refreshValidStates();
   btnSaveAs.disabled = false;
   switchTab('owner1');
   updateContractAvailability();
