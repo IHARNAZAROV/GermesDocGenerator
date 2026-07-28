@@ -1655,7 +1655,16 @@ function buildPlaceholderData() {
   property.remainderUSD      = '';
   property.remainderUSDWords = '';
 
-  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit };
+  // ── Рекламный пакет — прейскурант ──────────────────────────
+  // Устанавливается через модалку перед генерацией Договора_реклама.
+  // 0 означает «не выбран» — все галочки пустые.
+  const _pkg = window._reklamaPackage || 0;
+  const cb_1 = _pkg === 1 ? '☑' : '☐';
+  const cb_2 = _pkg === 2 ? '☑' : '☐';
+  const cb_3 = _pkg === 3 ? '☑' : '☐';
+  const cb_4 = _pkg === 4 ? '☑' : '☐';
+
+  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, cb_1, cb_2, cb_3, cb_4 };
   } finally {
     _currentSnap = null;
   }
@@ -1692,6 +1701,112 @@ const TEMPLATE_REGISTRY = {
 // ============================================================
 //  Generate documents
 // ============================================================
+// ============================================================
+//  Рекламный пакет — модальное окно выбора
+// ============================================================
+window._reklamaPackage = 0;
+
+(function () {
+  const overlay    = document.getElementById('reklama-overlay');
+  const radios     = () => overlay.querySelectorAll('.reklama-radio');
+  const btnConfirm = document.getElementById('reklama-confirm');
+  const btnCancel  = document.getElementById('reklama-cancel');
+  const btnClose   = document.getElementById('reklama-close');
+
+  let _resolveModal = null;
+
+  function openReklamaModal() {
+    // Reset selection
+    radios().forEach(r => { r.checked = false; });
+    btnConfirm.disabled = true;
+    overlay.hidden = false;
+
+    return new Promise((resolve) => {
+      _resolveModal = resolve;
+    });
+  }
+
+  function closeModal(confirmed) {
+    overlay.hidden = true;
+    if (_resolveModal) {
+      _resolveModal(confirmed);
+      _resolveModal = null;
+    }
+  }
+
+  // Radio selection enables the Confirm button
+  overlay.addEventListener('change', (e) => {
+    if (e.target.classList.contains('reklama-radio')) {
+      btnConfirm.disabled = false;
+    }
+  });
+
+  btnConfirm.addEventListener('click', () => {
+    const selected = overlay.querySelector('.reklama-radio:checked');
+    if (!selected) return;
+    window._reklamaPackage = parseInt(selected.value, 10);
+    closeModal(true);
+  });
+
+  btnCancel.addEventListener('click',  () => closeModal(false));
+  btnClose.addEventListener('click',   () => closeModal(false));
+  overlay.addEventListener('click',    (e) => { if (e.target === overlay) closeModal(false); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.hidden) closeModal(false);
+  });
+
+  // Expose for use in handleGenerate and btnPreview
+  window._openReklamaModal = openReklamaModal;
+}());
+
+// ============================================================
+//  Shared: execute generation for a list of template keys
+// ============================================================
+async function _executeGenerate(toGenerate, outputDir, options) {
+  let successCount = 0;
+  const errors = [];
+
+  showLoader();
+  let results;
+  try {
+    results = await Promise.allSettled(
+      toGenerate.map(key => TEMPLATE_REGISTRY[key].generate(outputDir, options))
+    );
+  } finally {
+    hideLoader();
+  }
+
+  results.forEach((r, i) => {
+    const key   = toGenerate[i];
+    const entry = TEMPLATE_REGISTRY[key];
+    if (r.status === 'fulfilled') {
+      const result = r.value;
+      if (result && result.success) {
+        successCount++;
+        window.RecentDocs?.push({
+          name:  result.path.split(/[/\\]/).pop(),
+          type:  'word',
+          icon:  key,
+          path:  result.path,
+          label: entry.label,
+        });
+        if (chkOpenAfter && chkOpenAfter.checked) {
+          window.electronAPI.openFile(result.path);
+        }
+      } else {
+        errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
+      }
+    } else {
+      errors.push(`${entry.label}: ${r.reason?.message || 'неизвестная ошибка'}`);
+    }
+  });
+
+  if (successCount > 0) {
+    showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
+  }
+  errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
+}
+
 btnGenerate.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
@@ -1727,49 +1842,13 @@ async function handleGenerate() {
     return;
   }
 
-  let successCount = 0;
-  const errors = [];
-
-  showLoader();
-  let results;
-  try {
-    results = await Promise.allSettled(
-      toGenerate.map(key => TEMPLATE_REGISTRY[key].generate(outputDir, options))
-    );
-  } finally {
-    hideLoader();
+  // If reklama is in the list → show package selection modal first
+  if (toGenerate.includes('reklama')) {
+    const confirmed = await window._openReklamaModal();
+    if (!confirmed) return; // user cancelled
   }
 
-  results.forEach((r, i) => {
-    const key   = toGenerate[i];
-    const entry = TEMPLATE_REGISTRY[key];
-    if (r.status === 'fulfilled') {
-      const result = r.value;
-      if (result && result.success) {
-        successCount++;
-        // История последних документов
-        window.RecentDocs?.push({
-          name:  result.path.split(/[/\\]/).pop(),
-          type:  'word',
-          icon:  key,
-          path:  result.path,
-          label: entry.label,
-        });
-        if (chkOpenAfter && chkOpenAfter.checked) {
-          window.electronAPI.openFile(result.path);
-        }
-      } else {
-        errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
-      }
-    } else {
-      errors.push(`${entry.label}: ${r.reason?.message || 'неизвестная ошибка'}`);
-    }
-  });
-
-  if (successCount > 0) {
-    showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
-  }
-  errors.forEach(msg => showToast(`✖ ${msg}`, 'error'));
+  await _executeGenerate(toGenerate, outputDir, options);
 }
 
 // ============================================================
@@ -1848,7 +1927,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !previewOverlay.hidden) closePreviewModal();
 });
 
-btnPreview.addEventListener('click', () => {
+btnPreview.addEventListener('click', async () => {
   const checked = [...document.querySelectorAll(
     '.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]:checked'
   )];
@@ -1860,6 +1939,12 @@ btnPreview.addEventListener('click', () => {
   if (toPreview.length === 0) {
     showToast('✖ Выберите хотя бы один реализованный шаблон', 'error');
     return;
+  }
+
+  // If reklama is in preview list → ask for package first
+  if (toPreview.includes('reklama')) {
+    const confirmed = await window._openReklamaModal();
+    if (!confirmed) return;
   }
 
   openPreviewModal(toPreview);

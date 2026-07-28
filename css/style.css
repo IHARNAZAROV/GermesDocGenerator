@@ -3706,3 +3706,164 @@ html, body {
   .object-summary-icon svg { width: 40px; height: 40px; }
   .object-summary-price { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border-light); padding: 10px 0 0; }
 }
+
+/* ============================================================
+   REKLAMA PACKAGE MODAL
+   ============================================================ */
+.reklama-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+}
+.reklama-overlay[hidden] { display: none; }
+
+.reklama-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg, 10px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .26);
+  padding: 22px 24px 20px;
+  width: 500px;
+  max-width: 94vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: var(--font);
+}
+
+.reklama-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 4px;
+  color: var(--brand);
+}
+
+.reklama-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.reklama-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-muted);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .13s, color .13s;
+}
+.reklama-close-btn:hover { background: var(--border-light); color: var(--text); }
+
+.reklama-subtitle {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.reklama-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.reklama-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.reklama-option:hover { border-color: var(--brand); background: var(--brand-xlight, #f0faf5); }
+.reklama-option:has(.reklama-radio:checked) {
+  border-color: var(--brand);
+  background: var(--brand-xlight, #f0faf5);
+}
+
+.reklama-radio {
+  margin-top: 2px;
+  accent-color: var(--brand);
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.reklama-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reklama-option-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reklama-option-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.reklama-option-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand);
+  white-space: nowrap;
+}
+
+.reklama-option-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.reklama-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.reklama-btn {
+  padding: 7px 18px;
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.reklama-btn--primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+.reklama-btn--primary:hover:not(:disabled) { background: #3a8a6a; border-color: #3a8a6a; }
+.reklama-btn--primary:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.reklama-btn--secondary {
+  background: var(--surface);
+  color: var(--text-2);
+}
+.reklama-btn--secondary:hover { background: var(--border-light); }

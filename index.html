@@ -705,6 +705,66 @@
 
   </div><!-- /app-wrapper -->
 
+  <!-- ===== REKLAMA PACKAGE MODAL ===== -->
+  <div class="reklama-overlay" id="reklama-overlay" hidden>
+    <div class="reklama-modal" role="dialog" aria-modal="true" aria-labelledby="reklama-title">
+      <div class="reklama-header">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        <h3 id="reklama-title" class="reklama-title">Прейскурант на рекламные услуги</h3>
+        <button class="reklama-close-btn" id="reklama-close" title="Закрыть">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="reklama-subtitle">Выберите один пакет рекламных услуг для договора:</p>
+      <div class="reklama-options" id="reklama-options">
+        <label class="reklama-option" data-value="1">
+          <input type="radio" name="reklama-pkg" value="1" class="reklama-radio">
+          <div class="reklama-option-body">
+            <div class="reklama-option-top">
+              <span class="reklama-option-title">Пакет 1 — Фотосъёмка</span>
+              <span class="reklama-option-price">300,00 руб.</span>
+            </div>
+            <span class="reklama-option-desc">Профессиональная фотосъёмка, обработка изображений, описание объекта. Размещение на Realt.by, Kufar.by</span>
+          </div>
+        </label>
+        <label class="reklama-option" data-value="2">
+          <input type="radio" name="reklama-pkg" value="2" class="reklama-radio">
+          <div class="reklama-option-body">
+            <div class="reklama-option-top">
+              <span class="reklama-option-title">Пакет 2 — Фото + видео</span>
+              <span class="reklama-option-price">1 000,00 руб.</span>
+            </div>
+            <span class="reklama-option-desc">Фотосъёмка, видео-обзор, видеопрезентация. Размещение на Realt.by, Kufar.by, Bizlida</span>
+          </div>
+        </label>
+        <label class="reklama-option" data-value="3">
+          <input type="radio" name="reklama-pkg" value="3" class="reklama-radio">
+          <div class="reklama-option-body">
+            <div class="reklama-option-top">
+              <span class="reklama-option-title">Пакет 3 — Фото + видео + контент</span>
+              <span class="reklama-option-price">2 000,00 руб.</span>
+            </div>
+            <span class="reklama-option-desc">Фото, видео, создание контента, расширенное размещение. Viber, Telegram, Instagram, TikTok и др.</span>
+          </div>
+        </label>
+        <label class="reklama-option" data-value="4">
+          <input type="radio" name="reklama-pkg" value="4" class="reklama-radio">
+          <div class="reklama-option-body">
+            <div class="reklama-option-top">
+              <span class="reklama-option-title">Пакет 4 — Расширенный</span>
+              <span class="reklama-option-price"></span>
+            </div>
+            <span class="reklama-option-desc">Максимальный пакет рекламных услуг с таргетированной рекламой по запросу</span>
+          </div>
+        </label>
+      </div>
+      <div class="reklama-actions">
+        <button class="reklama-btn reklama-btn--primary" id="reklama-confirm" disabled>Применить и сформировать</button>
+        <button class="reklama-btn reklama-btn--secondary" id="reklama-cancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== UPDATE MODAL ===== -->
   <div class="update-overlay" id="update-overlay" hidden>
     <div class="update-modal" role="dialog" aria-modal="true" aria-labelledby="update-title">
