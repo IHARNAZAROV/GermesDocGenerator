@@ -35,7 +35,7 @@
       </div>
 
       <div class="toolbar-group">
-        <button class="save-bar-btn toolbar-choose" id="btn-choose-file">
+        <button class="save-bar-btn toolbar-choose" id="btn-choose-file" data-tooltip="Выбрать Excel-файл сделки для заполнения формы">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
@@ -46,14 +46,14 @@
       <div class="toolbar-sep"></div>
 
       <div class="toolbar-group">
-        <button class="save-bar-btn save-primary" id="btn-save" disabled>
+        <button class="save-bar-btn save-primary" id="btn-save" disabled data-tooltip="Сохранить изменения в текущий открытый Excel-файл">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
           </svg>
           Сохранить
         </button>
-        <button class="save-bar-btn" id="btn-save-as" disabled>
+        <button class="save-bar-btn" id="btn-save-as" disabled data-tooltip="Создать копию: выбрать новое имя или папку, не меняя исходный файл">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
@@ -65,7 +65,7 @@
       <div class="toolbar-sep"></div>
 
       <div class="toolbar-group">
-        <button class="save-bar-btn toolbar-scan" id="btn-scan-template" title="Выбрать новый Excel-шаблон и обновить поля формы">
+        <button class="save-bar-btn toolbar-scan" id="btn-scan-template" data-tooltip="Выбрать новый Excel-шаблон и обновить поля формы">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
           </svg>
@@ -80,7 +80,7 @@
         <div class="recdocs-wrap" id="recdocs-wrap">
           <button class="save-bar-btn toolbar-recent" id="btn-recent" type="button"
                   aria-haspopup="true" aria-expanded="false"
-                  title="Последние открытые документы">
+                  data-tooltip="Открыть список последних документов">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
@@ -147,6 +147,7 @@
                   type="button"
                   aria-label="Текущий риэлтер — нажмите для выбора"
                   aria-controls="realtor-menu"
+                  data-tooltip="Выбрать риэлтера для реквизитов и подписи"
                   aria-expanded="false">
             <div id="realtor-avatar-slot"></div>
             <div class="realtor-info">
@@ -170,7 +171,7 @@
       <div class="toolbar-sep"></div>
 
       <div class="toolbar-group">
-        <button class="save-bar-btn toolbar-about" id="btn-about" title="О программе">
+        <button class="save-bar-btn toolbar-about" id="btn-about" data-tooltip="Открыть сведения о версии и разработчике">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="12" y1="12" x2="12" y2="16"/>
           </svg>
