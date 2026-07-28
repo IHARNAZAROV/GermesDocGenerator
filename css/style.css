@@ -274,6 +274,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .toolbar-sep {
@@ -1591,6 +1592,7 @@ html, body {
    ============================================================ */
 .realtor-dropdown {
   position: relative;
+  min-width: 0;
 }
 
 /* ── Trigger button ────────────────────────────────────────── */
@@ -1611,6 +1613,8 @@ html, body {
   outline: none;
   white-space: nowrap;
   user-select: none;
+  min-width: 0;
+  overflow: hidden;
 }
 .realtor-trigger:hover {
   background: var(--brand-light);
