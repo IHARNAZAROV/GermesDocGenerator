@@ -54,7 +54,7 @@
   --fs-xs:     11px;
   --fs-sm:     12px;
   --fs-base:   13px;
-  --fs-hdr:    13px;
+  --fs-hdr:    14px;
   --fs-title:  15px;
 
   /* Radius */
@@ -421,9 +421,9 @@ html, body {
   padding: 2px 0;
 }
 .fr label {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 500;
   text-align: right;
   white-space: normal;
   word-break: break-word;
@@ -2270,7 +2270,7 @@ html, body {
   text-overflow: ellipsis;
 }
 .nav-item-sub {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   line-height: 1.2;
   white-space: nowrap;
@@ -2351,7 +2351,12 @@ html, body {
 .ws-block--open .ws-block-hdr-icon { background: var(--brand-light); border-color: #B2D8C9; }
 .ws-block--open .ws-block-hdr-icon svg { color: var(--brand); }
 
-.ws-block-hdr-title { flex: 1; }
+.ws-block-hdr-title {
+  flex: 1;
+  font-size: var(--fs-hdr);
+  font-weight: 700;
+  letter-spacing: -.1px;
+}
 
 .ws-block-hdr-status {
   font-size: 11px;
