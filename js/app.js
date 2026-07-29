@@ -223,6 +223,8 @@ function onInputChange(el, currentValue) {
     inputId === 'seller-Является собственником'
   ) {
     updateContractAvailability();
+    updatePoaOwnerOptions();
+    applySellerPoaVisibility();
   }
   // Re-evaluate object-type-dependent field visibility
   if (inputId === 'property-Тип объекта') {
@@ -491,6 +493,8 @@ function populateForm(data) {
   btnSaveAs.disabled = false;
   switchTab('owner1');
   updateContractAvailability();
+  updatePoaOwnerOptions();
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
@@ -516,6 +520,8 @@ function handleClearForm() {
   setStatus('Готов к работе');
   switchTab('owner1');
   resetContractAvailability();
+  updatePoaOwnerOptions();
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
@@ -595,6 +601,9 @@ function handleCheckData() {
   // Собственник 1 — расширенный набор
   // (Smart Panel проверяет только 6 базовых полей из OWNER1_FIELDS)
   const isOwnerRaw = (getField('seller-Является собственником') || '').trim().toLowerCase();
+  if (isOwnerRaw === 'нет') {
+    chk('seller-Собственник по доверенности', 'Продавец → Интересы собственника');
+  }
   if (isOwnerPresent('owner1') || isOwnerRaw === 'нет') {
     [
       ['owner1-Отчество',           'Собственник 1 → Отчество'],
@@ -1394,15 +1403,22 @@ function _declineLastNameGenitive(last, gender) {
   return t;
 }
 
-function detectGender(middleName) {
+function detectGender(middleName, firstName = '', lastName = '') {
   const p = (middleName || '').trim().toLowerCase();
   if (p.endsWith('иична') || p.endsWith('овна') || p.endsWith('евна') || p.endsWith('ична')) return 'f';
   if (p.endsWith('ович') || p.endsWith('евич') || p.endsWith('ич')) return 'm';
+  const first = (firstName || '').trim().toLowerCase();
+  if (first.endsWith('а') || first.endsWith('я') || first.endsWith('ь')) return 'f';
+  if (first) return 'm';
+  const last = (lastName || '').trim().toLowerCase();
+  if (last.endsWith('ова') || last.endsWith('ева') || last.endsWith('ёва') ||
+      last.endsWith('ина') || last.endsWith('ына') || last.endsWith('ская') ||
+      last.endsWith('цкая') || last.endsWith('зская')) return 'f';
   return null;
 }
 
 function buildNameGenitive(lastName, firstName, middleName) {
-  const gender = detectGender(middleName);
+  const gender = detectGender(middleName, firstName, lastName);
   const lg = _declineLastNameGenitive(lastName || '', gender);
   const fg = _declineFirstNameGenitive(firstName || '', gender);
   const mg = _declinePatronymicGenitive(middleName || '');
@@ -1415,7 +1431,7 @@ function buildNameGenitive(lastName, firstName, middleName) {
 }
 
 function buildNameDative(lastName, firstName, middleName) {
-  const gender = detectGender(middleName);
+  const gender = detectGender(middleName, firstName, lastName);
   const ld = _declineLastNameDative(lastName || '', gender);
   const fd = _declineFirstNameDative(firstName || '', gender);
   const md = _declinePatronymicDative(middleName || '');
@@ -1425,6 +1441,38 @@ function buildNameDative(lastName, firstName, middleName) {
     middleNameDative: md,
     fullNameDative:   [ld, fd, md].filter(Boolean).join(' '),
   };
+}
+
+function getPoaOwnerOptions() {
+  return ['owner1', 'owner2', 'owner3']
+    .map((prefix, idx) => {
+      const person = buildPersonBlock(`${prefix}-`);
+      return person.fullName ? `${person.fullName} (собственник №${idx + 1})` : '';
+    })
+    .filter(Boolean);
+}
+
+function findPoaOwnerBySelectValue(value, ownerBlocks) {
+  const normalized = (value || '').trim();
+  if (!normalized) return null;
+  return ownerBlocks.find((owner, idx) => normalized === `${owner.fullName} (собственник №${idx + 1})`)
+      || ownerBlocks.find(owner => owner.fullName === normalized)
+      || null;
+}
+
+function updatePoaOwnerOptions() {
+  window.FormBuilder?.setObjSelectOptions?.('seller-Собственник по доверенности', getPoaOwnerOptions());
+}
+
+function sellerUsesPowerOfAttorney() {
+  const raw = (getField('seller-Является собственником') || '').trim().toLowerCase();
+  return raw === 'нет' || raw === 'no';
+}
+
+function applySellerPoaVisibility() {
+  const block = document.querySelector('.seller-poa-block');
+  if (!block) return;
+  block.hidden = !sellerUsesPowerOfAttorney();
 }
 
 // Поля, входящие в блок персоны (порядок важен для ключа кэша)
@@ -1547,6 +1595,7 @@ function buildPlaceholderData() {
   const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
   const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '' };
   const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '' };
+  const ownerBlocks = [owner1, owner2, owner3];
   const buyer  = buildPersonBlock('buyer-');
 
   // ── Логика продавца ────────────────────────────────────────
@@ -1556,12 +1605,23 @@ function buildPlaceholderData() {
   // Если «Нет» — продавец действует по доверенности; все собственники — из вкладок.
   const isOwnerRaw    = (getField('seller-Является собственником') || '').trim().toLowerCase();
   const sellerIsOwner = isOwnerRaw === 'да' || isOwnerRaw === 'yes';
+  const representedOwner = sellerIsOwner
+    ? null
+    : findPoaOwnerBySelectValue(getField('seller-Собственник по доверенности'), ownerBlocks);
+  const sellerGender = detectGender(
+    getField('seller-Отчество') || '',
+    getField('seller-Имя') || '',
+    getField('seller-Фамилия') || ''
+  );
 
   const seller = {
     ...buildPersonBlock('seller-'),
     isOwner:   sellerIsOwner,
     poaNumber: sellerIsOwner ? '' : (getField('seller-Номер доверенности') || ''),
     poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
+    poaOwner: representedOwner ? representedOwner.fullName : '',
+    poaOwnerGenitive: representedOwner ? representedOwner.fullNameGenitive : '',
+    poaAction: sellerGender === 'f' ? 'действующей' : 'действующего',
   };
 
   // ── Риэлтер — единый источник правды: RealtorService ──────
@@ -2086,5 +2146,6 @@ btnPreview.addEventListener('click', async () => {
   // Initial sidebar state on app load
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
 }());
