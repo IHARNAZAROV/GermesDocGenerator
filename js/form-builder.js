@@ -96,6 +96,14 @@ function htmlSelect(groupId, field) {
        + `</div></div>`;
 }
 
+function htmlPoaBlockStart(title) {
+  return `<div class="seller-poa-block"><div class="seller-poa-block__title">${escHtml(title || 'Данные по доверенности')}</div>`;
+}
+
+function htmlPoaBlockEnd() {
+  return '</div>';
+}
+
 /** Readonly инпут */
 function htmlReadonly(groupId, field, title) {
   const id = inputId(groupId, field.key);
@@ -222,6 +230,7 @@ function renderFields(groupId, fields, byKey) {
 
   const rendered = new Set();
   let html = '';
+  let poaBlockOpen = false;
 
   for (const field of fields) {
     if (rendered.has(field.key)) continue;
@@ -280,9 +289,18 @@ function renderFields(groupId, fields, byKey) {
       fieldHtml = fieldHtml.replace('<div class="fr ', `<div data-object-type="${field.objectType}" class="fr `);
     }
 
+    if (fieldHtml && field.poaBlock && !poaBlockOpen) {
+      html += htmlPoaBlockStart(field.poaBlockTitle);
+      poaBlockOpen = true;
+    } else if (fieldHtml && !field.poaBlock && poaBlockOpen) {
+      html += htmlPoaBlockEnd();
+      poaBlockOpen = false;
+    }
+
     html += fieldHtml;
   }
 
+  if (poaBlockOpen) html += htmlPoaBlockEnd();
   return html;
 }
 
@@ -387,6 +405,81 @@ function _syncObjSelLabel(wrapper) {
   }
 }
 
+function _setObjSelectOptions(inputId, options) {
+  const wrapper = document.getElementById(`osd-${inputId}`);
+  if (!wrapper) return;
+  const menu = wrapper.querySelector('.obj-sel-menu');
+  const inputEl = wrapper.querySelector('input[type="text"]');
+  if (!menu || !inputEl) return;
+
+  const current = (inputEl.value || '').trim();
+  const normalizedOptions = Array.from(new Set((options || []).map(String).map(v => v.trim()).filter(Boolean)));
+  if (current && !normalizedOptions.includes(current)) inputEl.value = '';
+
+  menu.innerHTML = normalizedOptions.map(opt =>
+    `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
+    + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
+    + `<span class="obj-sel-item__check" aria-hidden="true"></span>`
+    + `</li>`
+  ).join('');
+  _syncObjSelLabel(wrapper);
+  _bindObjSelectMenuItems(wrapper);
+}
+
+function _bindObjSelectMenuItems(wrapper) {
+  const inputEl = wrapper.querySelector('input[type="text"]');
+  const trigger = wrapper.querySelector('.obj-sel-trigger');
+  const menu    = wrapper.querySelector('.obj-sel-menu');
+  if (!trigger || !menu || !inputEl) return;
+
+  function closeMenu() {
+    menu.classList.add('obj-sel-menu--closing');
+    setTimeout(() => {
+      menu.hidden = true;
+      menu.classList.remove('obj-sel-menu--closing');
+    }, 160);
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.focus();
+  }
+
+  function selectValue(val) {
+    inputEl.value = val;
+    _syncObjSelLabel(wrapper);
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    closeMenu();
+  }
+
+  menu.querySelectorAll('.obj-sel-item').forEach(li => {
+    li.addEventListener('click', () => selectValue(li.dataset.value));
+    li.addEventListener('pointerenter', () => li.focus());
+    li.addEventListener('keydown', e => {
+      const items = Array.from(menu.querySelectorAll('.obj-sel-item'));
+      const idx   = items.indexOf(document.activeElement);
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          items[Math.min(idx + 1, items.length - 1)]?.focus();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (idx <= 0) { closeMenu(); return; }
+          items[Math.max(idx - 1, 0)]?.focus();
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          li.click();
+          break;
+        case 'Escape':
+        case 'Tab':
+          e.preventDefault();
+          closeMenu();
+          break;
+      }
+    });
+  });
+}
+
 function _initObjTypeDropdowns() {
   document.querySelectorAll('.obj-type-dropdown').forEach(wrapper => {
     const inputEl = wrapper.querySelector('input[type="text"]');
@@ -443,35 +536,7 @@ function _initObjTypeDropdowns() {
       }
     });
 
-    menu.querySelectorAll('.obj-sel-item').forEach(li => {
-      li.addEventListener('click', () => selectValue(li.dataset.value));
-      li.addEventListener('pointerenter', () => li.focus());
-      li.addEventListener('keydown', e => {
-        const items = Array.from(menu.querySelectorAll('.obj-sel-item'));
-        const idx   = items.indexOf(document.activeElement);
-        switch (e.key) {
-          case 'ArrowDown':
-            e.preventDefault();
-            items[Math.min(idx + 1, items.length - 1)]?.focus();
-            break;
-          case 'ArrowUp':
-            e.preventDefault();
-            if (idx <= 0) { closeMenu(); return; }
-            items[Math.max(idx - 1, 0)]?.focus();
-            break;
-          case 'Enter':
-          case ' ':
-            e.preventDefault();
-            li.click();
-            break;
-          case 'Escape':
-          case 'Tab':
-            e.preventDefault();
-            closeMenu();
-            break;
-        }
-      });
-    });
+    _bindObjSelectMenuItems(wrapper);
   });
 
   // Синхронизация меток при загрузке/очистке формы
@@ -486,4 +551,8 @@ function _initObjTypeDropdowns() {
 }
 
 // ── Публичный API ─────────────────────────────────────────────
-window.FormBuilder = { buildForm, syncObjTypeDropdowns: () => document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel) };
+window.FormBuilder = {
+  buildForm,
+  syncObjTypeDropdowns: () => document.querySelectorAll('.obj-type-dropdown').forEach(_syncObjSelLabel),
+  setObjSelectOptions: _setObjSelectOptions,
+};
