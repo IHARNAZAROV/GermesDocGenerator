@@ -2361,12 +2361,12 @@ html, body {
   box-shadow: var(--shadow-card);
   transition: box-shadow .15s;
 }
-.ws-block:focus-within,
-.ws-block:has(.obj-sel-trigger[aria-expanded="true"]),
-.ws-block:has(.recdocs-panel:not([hidden])) {
-  z-index: 1200;
-  overflow: visible;
+.ws-block:focus-within {
   box-shadow: var(--shadow-card), 0 0 0 2px rgba(21,89,69,.10);
+}
+/* Поднимаем блок по z-index только когда открыт dropdown — не overflow:visible */
+.ws-block:has(.obj-sel-trigger[aria-expanded="true"]) {
+  z-index: 10;
 }
 
 .ws-block-hdr {
@@ -2439,12 +2439,7 @@ html, body {
   overflow: hidden;
   min-height: 0;
 }
-.ws-block:focus-within .ws-block-body,
-.ws-block:focus-within .ws-block-body-outer,
-.ws-block:has(.obj-sel-trigger[aria-expanded="true"]) .ws-block-body,
-.ws-block:has(.obj-sel-trigger[aria-expanded="true"]) .ws-block-body-outer {
-  overflow: visible;
-}
+/* overflow:visible на body больше не используется — меню использует position:fixed */
 /* ── Empty-state hint (visible before Excel is loaded) ── */
 .ws-empty-hint {
   display: none;
@@ -2936,17 +2931,17 @@ body.form-empty .ws-empty-hint {
 
 /* ── Dropdown menu ────────────────────────────────────────── */
 .obj-sel-menu {
-  position: absolute;
-  top: calc(100% + 5px);
+  position: fixed; /* fixed escapes overflow:hidden parents */
+  top: 0;
   left: 0;
-  min-width: 100%;
+  min-width: 120px;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-raise);
   padding: 5px;
   list-style: none;
-  z-index: 800;
+  z-index: 9000;
   animation: objSelMenuIn 170ms ease;
   transform-origin: top left;
 }

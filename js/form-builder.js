@@ -492,16 +492,39 @@ function _initObjTypeDropdowns() {
 
     function isOpen() { return !menu.hidden; }
 
+    function _positionMenu() {
+      const rect = trigger.getBoundingClientRect();
+      const menuW = Math.max(rect.width, 160);
+      // Проверяем, помещается ли меню снизу
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const menuH = menu.offsetHeight || 200;
+      if (spaceBelow < menuH && rect.top > menuH) {
+        // Открываем вверх
+        menu.style.top  = (rect.top - menuH - 5) + 'px';
+      } else {
+        menu.style.top  = (rect.bottom + 5) + 'px';
+      }
+      menu.style.left     = rect.left + 'px';
+      menu.style.minWidth = menuW + 'px';
+    }
+
     function openMenu() {
       menu.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
+      _positionMenu();
       setTimeout(() => document.addEventListener('pointerdown', onOutside), 0);
+      // Закрываем при скролле родителя
+      const scrollParent = trigger.closest('.work-area') || window;
+      scrollParent.addEventListener('scroll', _onScroll, { passive: true });
       requestAnimationFrame(() => {
+        _positionMenu(); // уточняем после рендера
         const sel   = menu.querySelector('.obj-sel-item--selected');
         const first = menu.querySelector('.obj-sel-item');
         (sel || first)?.focus();
       });
     }
+
+    function _onScroll() { if (isOpen()) closeMenu(); }
 
     function closeMenu() {
       menu.classList.add('obj-sel-menu--closing');
@@ -511,6 +534,8 @@ function _initObjTypeDropdowns() {
       }, 160);
       trigger.setAttribute('aria-expanded', 'false');
       document.removeEventListener('pointerdown', onOutside);
+      const scrollParent = trigger.closest('.work-area') || window;
+      scrollParent.removeEventListener('scroll', _onScroll);
       trigger.focus();
     }
 
