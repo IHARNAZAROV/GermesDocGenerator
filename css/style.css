@@ -2361,7 +2361,9 @@ html, body {
   box-shadow: var(--shadow-card);
   transition: box-shadow .15s;
 }
-.ws-block:focus-within {
+.ws-block:focus-within,
+.ws-block:has(.obj-sel-trigger[aria-expanded="true"]),
+.ws-block:has(.recdocs-panel:not([hidden])) {
   z-index: 1200;
   overflow: visible;
   box-shadow: var(--shadow-card), 0 0 0 2px rgba(21,89,69,.10);
@@ -2438,7 +2440,9 @@ html, body {
   min-height: 0;
 }
 .ws-block:focus-within .ws-block-body,
-.ws-block:focus-within .ws-block-body-outer {
+.ws-block:focus-within .ws-block-body-outer,
+.ws-block:has(.obj-sel-trigger[aria-expanded="true"]) .ws-block-body,
+.ws-block:has(.obj-sel-trigger[aria-expanded="true"]) .ws-block-body-outer {
   overflow: visible;
 }
 /* ── Empty-state hint (visible before Excel is loaded) ── */
