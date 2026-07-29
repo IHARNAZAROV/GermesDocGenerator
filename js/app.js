@@ -224,6 +224,7 @@ function onInputChange(el, currentValue) {
   ) {
     updateContractAvailability();
     updatePoaOwnerOptions();
+    applySellerPoaVisibility();
   }
   // Re-evaluate object-type-dependent field visibility
   if (inputId === 'property-Тип объекта') {
@@ -493,6 +494,7 @@ function populateForm(data) {
   switchTab('owner1');
   updateContractAvailability();
   updatePoaOwnerOptions();
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
@@ -519,6 +521,7 @@ function handleClearForm() {
   switchTab('owner1');
   resetContractAvailability();
   updatePoaOwnerOptions();
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
@@ -1461,6 +1464,17 @@ function updatePoaOwnerOptions() {
   window.FormBuilder?.setObjSelectOptions?.('seller-Собственник по доверенности', getPoaOwnerOptions());
 }
 
+function sellerUsesPowerOfAttorney() {
+  const raw = (getField('seller-Является собственником') || '').trim().toLowerCase();
+  return raw === 'нет' || raw === 'no';
+}
+
+function applySellerPoaVisibility() {
+  const block = document.querySelector('.seller-poa-block');
+  if (!block) return;
+  block.hidden = !sellerUsesPowerOfAttorney();
+}
+
 // Поля, входящие в блок персоны (порядок важен для ключа кэша)
 const _PERSON_BLOCK_FIELDS = [
   'Фамилия', 'Имя', 'Отчество', 'Дата рождения',
@@ -2132,5 +2146,6 @@ btnPreview.addEventListener('click', async () => {
   // Initial sidebar state on app load
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
+  applySellerPoaVisibility();
   applyObjectTypeVisibility();
 }());

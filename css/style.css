@@ -2352,6 +2352,7 @@ html, body {
 
 /* ── Accordion Blocks ── */
 .ws-block {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
@@ -2360,7 +2361,11 @@ html, body {
   box-shadow: var(--shadow-card);
   transition: box-shadow .15s;
 }
-.ws-block:focus-within { box-shadow: var(--shadow-card), 0 0 0 2px rgba(21,89,69,.10); }
+.ws-block:focus-within {
+  z-index: 1200;
+  overflow: visible;
+  box-shadow: var(--shadow-card), 0 0 0 2px rgba(21,89,69,.10);
+}
 
 .ws-block-hdr {
   width: 100%;
@@ -2431,6 +2436,10 @@ html, body {
 .ws-block-body {
   overflow: hidden;
   min-height: 0;
+}
+.ws-block:focus-within .ws-block-body,
+.ws-block:focus-within .ws-block-body-outer {
+  overflow: visible;
 }
 /* ── Empty-state hint (visible before Excel is loaded) ── */
 .ws-empty-hint {
