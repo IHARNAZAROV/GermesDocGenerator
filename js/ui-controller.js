@@ -327,13 +327,17 @@ function updateNavBadges(issues) {
     const count  = countByBlock[blockId] || 0;
     if (!badge || !status) return;
 
-    // Покупатель: особый режим когда задаток не указан
+    // Покупатель: особый режим когда задаток не указан и данные не введены
     if (blockId === 'ws-buyer' && !_hasBuyer) {
-      badge.hidden = true;
-      badge.className = 'nav-item-badge';
-      status.textContent = 'Ещё не найден';
-      status.className = 'nav-item-sub';
-      return;
+      const hasData = hasRequiredBlockData(blockId);
+      if (!hasData) {
+        badge.hidden = true;
+        badge.className = 'nav-item-badge';
+        status.textContent = 'Ещё не найден';
+        status.className = 'nav-item-sub';
+        return;
+      }
+      // Данные введены — продолжаем обычную логику отображения статуса
     }
 
     if (count > 0) {

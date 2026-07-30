@@ -834,7 +834,7 @@ function updateBlockCompletion(changedPrefix) {
       const hasRequiredIssues = (issueCountByBlock[`ws-${blockId}`] || 0) > 0;
       const hasData = hasBlockEditableData(`ws-${blockId}`);
       complete = !hasRequiredIssues && hasData;
-      if (blockId === 'buyer' && !isBuyerRequiredByDeposit()) complete = false;
+      if (blockId === 'buyer' && !isBuyerRequiredByDeposit() && !hasBlockEditableData('ws-buyer')) complete = false;
     } else if (blockId === 'owners') {
       const prefixes = ['owner1'];
       if (isOwnerPresent('owner2')) prefixes.push('owner2');
