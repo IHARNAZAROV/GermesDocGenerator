@@ -2556,9 +2556,10 @@ body.form-empty .ws-empty-hint {
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
-  /* POA block: flex row becomes column */
+  /* POA block: flex row becomes column, children stretch to full width */
   .poa-two-col-row {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -2582,7 +2583,7 @@ body.form-empty .ws-empty-hint {
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
-  .poa-two-col-row { flex-direction: column; }
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
 }
 
 /* Shrink label column at very narrow widths */
@@ -3116,7 +3117,7 @@ body.form-empty .ws-empty-hint {
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
-  .poa-two-col-row { flex-direction: column; }
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
   .fr, .fr-wide, .fr-sm { grid-template-columns: 110px 1fr; }
 }
 @media (max-width: 680px) {
@@ -3146,7 +3147,7 @@ body.form-empty .ws-empty-hint {
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
-  .poa-two-col-row { flex-direction: column; }
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
   /* Shrink label column so inputs have more room */
   .fr, .fr-wide, .fr-sm { grid-template-columns: 90px 1fr; }
   .fr label { font-size: 11px; }
