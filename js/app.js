@@ -1478,6 +1478,46 @@ function sellerUsesPowerOfAttorney() {
   return raw === 'нет' || raw === 'no';
 }
 
+// ── Данные представителя собственника (для Word-шаблонов) ────
+function buildOwnerPoaBlock(ownerPrefix) {
+  const p  = ownerPrefix + '-';
+  const hasPoa = (getField(p + 'Есть представитель') || '').trim().toLowerCase() === 'да';
+
+  const lastName   = getField(p + 'Представитель фамилия')   || '';
+  const firstName  = getField(p + 'Представитель имя')        || '';
+  const middleName = getField(p + 'Представитель отчество')   || '';
+  const fullName   = [lastName, firstName, middleName].filter(Boolean).join(' ');
+  const initials   = lastName && firstName
+    ? lastName + ' ' + firstName[0] + '.' + (middleName ? middleName[0] + '.' : '')
+    : fullName;
+
+  const series = getField(p + 'Представитель паспорт серия') || '';
+  const number = getField(p + 'Представитель паспорт номер') || '';
+
+  const genitive = buildNameGenitive(lastName, firstName, middleName);
+  const dative   = buildNameDative(lastName, firstName, middleName);
+
+  return {
+    hasPoa,
+    lastName,
+    firstName,
+    middleName,
+    fullName,
+    initials,
+    ...genitive,
+    ...dative,
+    passportSeries:   series,
+    passportNumber:   number,
+    passport:         [series, number].filter(Boolean).join(' '),
+    id:               getField(p + 'Представитель идент. номер')  || '',
+    passportIssueDate: getField(p + 'Представитель дата выдачи')  || '',
+    passportIssuedBy:  getField(p + 'Представитель кем выдан')    || '',
+    address:           getField(p + 'Представитель адрес')         || '',
+    poaNumber:         getField(p + 'Номер доверенности')          || '',
+    poaDate:           getField(p + 'Дата доверенности')           || '',
+  };
+}
+
 function applySellerPoaVisibility() {
   const block = document.querySelector('.seller-poa-block');
   if (!block) return;
@@ -1616,9 +1656,9 @@ function buildPlaceholderData() {
     remainderUSDWords: '',   // заполняется ниже
   };
 
-  const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '' };
-  const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '' };
-  const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '' };
+  const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '', poa: buildOwnerPoaBlock('owner1') };
+  const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '', poa: buildOwnerPoaBlock('owner2') };
+  const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '', poa: buildOwnerPoaBlock('owner3') };
   const ownerBlocks = [owner1, owner2, owner3];
   const buyer  = buildPersonBlock('buyer-');
 

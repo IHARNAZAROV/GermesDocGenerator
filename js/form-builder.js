@@ -56,15 +56,17 @@ function inputId(groupId, key) {
 function htmlText(groupId, field) {
   const id = inputId(groupId, field.key);
   const numAttr = field.numeric ? ' data-numeric="true"' : '';
+  const phAttr  = field.placeholder ? ` placeholder="${escHtml(field.placeholder)}"` : '';
   return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
-       + `<div class="input-wrap"><input type="text" id="${id}"${numAttr} /></div></div>`;
+       + `<div class="input-wrap"><input type="text" id="${id}"${numAttr}${phAttr} /></div></div>`;
 }
 
 /** Инпут с кнопкой-календарём */
 function htmlDate(groupId, field) {
   const id = inputId(groupId, field.key);
+  const phAttr = field.placeholder ? ` placeholder="${escHtml(field.placeholder)}"` : '';
   return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
-       + `<div class="input-wrap"><input type="text" id="${id}" class="has-cal" />`
+       + `<div class="input-wrap"><input type="text" id="${id}" class="has-cal"${phAttr} />`
        + `<button class="cal-btn" tabindex="-1">${CAL_SVG}</button></div></div>`;
 }
 
@@ -151,6 +153,52 @@ function htmlFloorPair(groupId, mainField, pairField) {
        + `<span>из</span>`
        + `<input type="text" id="${pairId}" style="width:42px" />`
        + `</div></div></div>`;
+}
+
+// ── Рендер одного поля (для кастомных блоков) ────────────────
+
+function renderOneField(groupId, field) {
+  switch (field.type) {
+    case 'date':     return htmlDate(groupId, field);
+    case 'select':   return htmlSelect(groupId, field);
+    case 'readonly': return htmlReadonly(groupId, field);
+    default:         return htmlText(groupId, field);
+  }
+}
+
+// ── Двухколоночный рендер блока доверенности собственника ────
+// Перебирает поля по порядку:
+//   col:1 + следующий col:2  → строка из двух колонок
+//   col:1 (следующий не col:2) → строка с пустой правой колонкой
+//   col:"full"                → строка на всю ширину
+function renderOwnerPoaTwoCol(groupId, fields) {
+  let html = '';
+  let i = 0;
+  while (i < fields.length) {
+    const f = fields[i];
+    if (f.col === 'full') {
+      html += `<div class="poa-full-row">${renderOneField(groupId, f)}</div>`;
+      i++;
+    } else {
+      // col:1 (или без col) — смотрим, есть ли сразу col:2
+      const next = (i + 1 < fields.length) ? fields[i + 1] : null;
+      if (next && next.col === 2) {
+        html += `<div class="poa-two-col-row">`
+              + `<div class="poa-col">${renderOneField(groupId, f)}</div>`
+              + `<div class="poa-col">${renderOneField(groupId, next)}</div>`
+              + `</div>`;
+        i += 2;
+      } else {
+        // одиночный col:1 — правая колонка пустая
+        html += `<div class="poa-two-col-row">`
+              + `<div class="poa-col">${renderOneField(groupId, f)}</div>`
+              + `<div class="poa-col"></div>`
+              + `</div>`;
+        i++;
+      }
+    }
+  }
+  return html;
 }
 
 // ── Двухколоночный рендер (по свойству col поля) ─────────────
@@ -364,7 +412,7 @@ function buildForm(config) {
         poaWrap.innerHTML =
           `<div class="owner-poa-block" hidden>`
           + `<div class="owner-poa-block__title">${escHtml(title)}</div>`
-          + renderFields(groupId, poaFields)
+          + renderOwnerPoaTwoCol(groupId, poaFields)
           + `</div>`;
       }
       continue;

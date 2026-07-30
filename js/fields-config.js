@@ -372,52 +372,84 @@ window.FIELDS_CONFIG = {
           "options": ["Нет", "Да"]
         },
         {
-          "key": "Представитель",
-          "label": "Представитель (ФИО):",
+          "key": "Представитель фамилия",
+          "label": "Фамилия:",
+          "col": 1,
           "ownerPoaBlock": true,
-          "ownerPoaBlockTitle": "Данные представителя"
+          "ownerPoaBlockTitle": "Данные представителя",
+          "placeholder": "Иванов"
+        },
+        {
+          "key": "Представитель имя",
+          "label": "Имя:",
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Иван"
+        },
+        {
+          "key": "Представитель отчество",
+          "label": "Отчество:",
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "Иванович"
         },
         {
           "key": "Представитель паспорт серия",
           "label": "Паспорт серия:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "МС"
         },
         {
           "key": "Представитель паспорт номер",
           "label": "Паспорт номер:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "1234567"
         },
         {
           "key": "Представитель идент. номер",
           "label": "Идент. номер:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "1234567A890PB11"
         },
         {
           "key": "Представитель дата выдачи",
           "label": "Дата выдачи:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         },
         {
           "key": "Представитель кем выдан",
           "label": "Кем выдан:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Октябрьским РУВД г. Минска"
         },
         {
           "key": "Представитель адрес",
           "label": "Адрес регистр.:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "г. Минск, ул. Ленина, д. 1, кв. 1"
         },
         {
           "key": "Номер доверенности",
           "label": "Номер доверен.:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "1-1234"
         },
         {
           "key": "Дата доверенности",
           "label": "Дата доверен.:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         }
       ]
     },
@@ -483,52 +515,84 @@ window.FIELDS_CONFIG = {
           "options": ["Нет", "Да"]
         },
         {
-          "key": "Представитель",
-          "label": "Представитель (ФИО):",
+          "key": "Представитель фамилия",
+          "label": "Фамилия:",
+          "col": 1,
           "ownerPoaBlock": true,
-          "ownerPoaBlockTitle": "Данные представителя"
+          "ownerPoaBlockTitle": "Данные представителя",
+          "placeholder": "Иванов"
+        },
+        {
+          "key": "Представитель имя",
+          "label": "Имя:",
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Иван"
+        },
+        {
+          "key": "Представитель отчество",
+          "label": "Отчество:",
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "Иванович"
         },
         {
           "key": "Представитель паспорт серия",
           "label": "Паспорт серия:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "МС"
         },
         {
           "key": "Представитель паспорт номер",
           "label": "Паспорт номер:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "1234567"
         },
         {
           "key": "Представитель идент. номер",
           "label": "Идент. номер:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "1234567A890PB11"
         },
         {
           "key": "Представитель дата выдачи",
           "label": "Дата выдачи:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         },
         {
           "key": "Представитель кем выдан",
           "label": "Кем выдан:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Октябрьским РУВД г. Минска"
         },
         {
           "key": "Представитель адрес",
           "label": "Адрес регистр.:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "г. Минск, ул. Ленина, д. 1, кв. 1"
         },
         {
           "key": "Номер доверенности",
           "label": "Номер доверен.:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "1-1234"
         },
         {
           "key": "Дата доверенности",
           "label": "Дата доверен.:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         }
       ]
     },
@@ -594,52 +658,84 @@ window.FIELDS_CONFIG = {
           "options": ["Нет", "Да"]
         },
         {
-          "key": "Представитель",
-          "label": "Представитель (ФИО):",
+          "key": "Представитель фамилия",
+          "label": "Фамилия:",
+          "col": 1,
           "ownerPoaBlock": true,
-          "ownerPoaBlockTitle": "Данные представителя"
+          "ownerPoaBlockTitle": "Данные представителя",
+          "placeholder": "Иванов"
+        },
+        {
+          "key": "Представитель имя",
+          "label": "Имя:",
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Иван"
+        },
+        {
+          "key": "Представитель отчество",
+          "label": "Отчество:",
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "Иванович"
         },
         {
           "key": "Представитель паспорт серия",
           "label": "Паспорт серия:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "МС"
         },
         {
           "key": "Представитель паспорт номер",
           "label": "Паспорт номер:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "1234567"
         },
         {
           "key": "Представитель идент. номер",
           "label": "Идент. номер:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "1234567A890PB11"
         },
         {
           "key": "Представитель дата выдачи",
           "label": "Дата выдачи:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         },
         {
           "key": "Представитель кем выдан",
           "label": "Кем выдан:",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "Октябрьским РУВД г. Минска"
         },
         {
           "key": "Представитель адрес",
           "label": "Адрес регистр.:",
-          "ownerPoaBlock": true
+          "col": "full",
+          "ownerPoaBlock": true,
+          "placeholder": "г. Минск, ул. Ленина, д. 1, кв. 1"
         },
         {
           "key": "Номер доверенности",
           "label": "Номер доверен.:",
-          "ownerPoaBlock": true
+          "col": 1,
+          "ownerPoaBlock": true,
+          "placeholder": "1-1234"
         },
         {
           "key": "Дата доверенности",
           "label": "Дата доверен.:",
           "type": "date",
-          "ownerPoaBlock": true
+          "col": 2,
+          "ownerPoaBlock": true,
+          "placeholder": "дд.мм.гггг"
         }
       ]
     },

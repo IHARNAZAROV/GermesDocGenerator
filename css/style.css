@@ -4012,6 +4012,21 @@ body.form-empty .ws-empty-hint {
 
 .owner-poa-block[hidden] { display: none; }
 
+.poa-two-col-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.poa-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.poa-full-row {
+  width: 100%;
+}
+
 .owner-poa-block__title {
   margin: 0 0 10px;
   font-size: 12px;
