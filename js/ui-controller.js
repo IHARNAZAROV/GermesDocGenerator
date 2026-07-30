@@ -155,6 +155,7 @@ function hasRequiredBlockData(blockId) {
   if (!block) return false;
   return [...block.querySelectorAll('input[type="text"]')].some(el => {
     if (el.readOnly) return false;
+    if (el.getAttribute('aria-hidden') === 'true') return false; // skip hidden select proxies
     if (typeof isInputVisible === 'function' && !isInputVisible(el)) return false;
     return el.value.trim() !== '';
   });

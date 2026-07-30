@@ -768,6 +768,7 @@ function hasBlockEditableData(blockId) {
   if (!block) return false;
   return [...block.querySelectorAll('input[type="text"]')].some((el) => {
     if (el.readOnly || !isInputVisible(el)) return false;
+    if (el.getAttribute('aria-hidden') === 'true') return false; // skip hidden select proxies
     return !isFieldEmpty(el.value);
   });
 }
