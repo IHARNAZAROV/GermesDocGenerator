@@ -334,7 +334,7 @@ function buildForm(config) {
     const container = document.getElementById(containerId);
     if (!container) continue;
 
-    // Для секций собственников: рендерим в две колонки
+    // Для секций собственников: рендерим в две колонки + блок доверенности
     if (OWNER_SECTIONS.has(sectionId)) {
       const inner = container.querySelector('.tab-inner-grid');
       if (!inner) continue;
@@ -342,12 +342,31 @@ function buildForm(config) {
       const cols = inner.querySelectorAll(':scope > div');
       if (cols.length < 2) continue;
 
-      const groupId = entries[0]?.groupId;
-      const fields  = entries.map(e => e.field);
-      const mid     = Math.ceil(fields.length / 2);
+      const groupId     = entries[0]?.groupId;
+      const allFields   = entries.map(e => e.field);
+      const regularFields = allFields.filter(f => !f.ownerPoaBlock);
+      const poaFields     = allFields.filter(f =>  f.ownerPoaBlock);
+      const mid = Math.ceil(regularFields.length / 2);
 
-      cols[0].innerHTML = renderFields(groupId, fields.slice(0, mid));
-      cols[1].innerHTML = renderFields(groupId, fields.slice(mid));
+      cols[0].innerHTML = renderFields(groupId, regularFields.slice(0, mid));
+      cols[1].innerHTML = renderFields(groupId, regularFields.slice(mid));
+
+      // Блок данных представителя (скрыт по умолчанию)
+      let poaWrap = container.querySelector('.owner-poa-wrap');
+      if (!poaWrap) {
+        poaWrap = document.createElement('div');
+        poaWrap.className = 'owner-poa-wrap';
+        inner.insertAdjacentElement('afterend', poaWrap);
+      }
+      if (poaFields.length > 0) {
+        const title = poaFields.find(f => f.ownerPoaBlockTitle)?.ownerPoaBlockTitle
+          || 'Данные представителя';
+        poaWrap.innerHTML =
+          `<div class="owner-poa-block" hidden>`
+          + `<div class="owner-poa-block__title">${escHtml(title)}</div>`
+          + renderFields(groupId, poaFields)
+          + `</div>`;
+      }
       continue;
     }
 

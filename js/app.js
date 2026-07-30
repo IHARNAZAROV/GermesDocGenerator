@@ -226,6 +226,13 @@ function onInputChange(el, currentValue) {
     updatePoaOwnerOptions();
     applySellerPoaVisibility();
   }
+  // Показываем/скрываем блок доверенности собственника
+  if (inputId === 'owner1-Есть представитель' ||
+      inputId === 'owner2-Есть представитель' ||
+      inputId === 'owner3-Есть представитель') {
+    const prefix = inputId.replace('-Есть представитель', '');
+    applyOwnerPoaVisibility(prefix);
+  }
   // Re-evaluate object-type-dependent field visibility
   if (inputId === 'property-Тип объекта') {
     applyObjectTypeVisibility();
@@ -495,6 +502,7 @@ function populateForm(data) {
   updateContractAvailability();
   updatePoaOwnerOptions();
   applySellerPoaVisibility();
+  applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
@@ -522,6 +530,7 @@ function handleClearForm() {
   resetContractAvailability();
   updatePoaOwnerOptions();
   applySellerPoaVisibility();
+  applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
@@ -1475,6 +1484,21 @@ function applySellerPoaVisibility() {
   block.hidden = !sellerUsesPowerOfAttorney();
 }
 
+function applyOwnerPoaVisibility(ownerPrefix) {
+  const val = (getField(ownerPrefix + '-Есть представитель') || '').trim().toLowerCase();
+  const hasPoa = val === 'да';
+  const tabPane = document.getElementById('tab-pane-' + ownerPrefix);
+  if (!tabPane) return;
+  const block = tabPane.querySelector('.owner-poa-block');
+  if (block) block.hidden = !hasPoa;
+}
+
+function applyAllOwnerPoaVisibility() {
+  applyOwnerPoaVisibility('owner1');
+  applyOwnerPoaVisibility('owner2');
+  applyOwnerPoaVisibility('owner3');
+}
+
 // Поля, входящие в блок персоны (порядок важен для ключа кэша)
 const _PERSON_BLOCK_FIELDS = [
   'Фамилия', 'Имя', 'Отчество', 'Дата рождения',
@@ -2147,5 +2171,6 @@ btnPreview.addEventListener('click', async () => {
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
   applySellerPoaVisibility();
+  applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
 }());

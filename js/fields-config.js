@@ -364,6 +364,29 @@ window.FIELDS_CONFIG = {
         {
           "key": "Доля собственности",
           "label": "Доля собств.:"
+        },
+        {
+          "key": "Есть представитель",
+          "label": "Есть представитель:",
+          "type": "select",
+          "options": ["Нет", "Да"]
+        },
+        {
+          "key": "Представитель",
+          "label": "Представитель:",
+          "ownerPoaBlock": true,
+          "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Номер доверенности",
+          "label": "Номер доверен.:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Дата доверенности",
+          "label": "Дата доверен.:",
+          "type": "date",
+          "ownerPoaBlock": true
         }
       ]
     },
@@ -421,6 +444,29 @@ window.FIELDS_CONFIG = {
         {
           "key": "Доля собственности",
           "label": "Доля собств.:"
+        },
+        {
+          "key": "Есть представитель",
+          "label": "Есть представитель:",
+          "type": "select",
+          "options": ["Нет", "Да"]
+        },
+        {
+          "key": "Представитель",
+          "label": "Представитель:",
+          "ownerPoaBlock": true,
+          "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Номер доверенности",
+          "label": "Номер доверен.:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Дата доверенности",
+          "label": "Дата доверен.:",
+          "type": "date",
+          "ownerPoaBlock": true
         }
       ]
     },
@@ -478,6 +524,29 @@ window.FIELDS_CONFIG = {
         {
           "key": "Доля собственности",
           "label": "Доля собств.:"
+        },
+        {
+          "key": "Есть представитель",
+          "label": "Есть представитель:",
+          "type": "select",
+          "options": ["Нет", "Да"]
+        },
+        {
+          "key": "Представитель",
+          "label": "Представитель:",
+          "ownerPoaBlock": true,
+          "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Номер доверенности",
+          "label": "Номер доверен.:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Дата доверенности",
+          "label": "Дата доверен.:",
+          "type": "date",
+          "ownerPoaBlock": true
         }
       ]
     },

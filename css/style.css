@@ -3991,3 +3991,32 @@ body.form-empty .ws-empty-hint {
   color: #1d4ed8;
   text-transform: uppercase;
 }
+
+/* ── Блок доверенности собственника ─────────────────────────── */
+.owner-poa-wrap {
+  margin-top: 8px;
+}
+
+.owner-poa-block {
+  padding: 12px;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.06), rgba(22, 163, 74, 0.025));
+  animation: ownerPoaIn 180ms ease;
+}
+
+@keyframes ownerPoaIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.owner-poa-block[hidden] { display: none; }
+
+.owner-poa-block__title {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #15803d;
+  text-transform: uppercase;
+}
