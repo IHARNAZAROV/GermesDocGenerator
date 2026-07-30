@@ -704,11 +704,9 @@ document.addEventListener('change', e => {
 
 // Обновление при заполнении формы из Excel (custom event от app.js)
 document.addEventListener('form:populated', () => {
-  document.body.classList.remove('form-empty');
   setTimeout(refreshUI, 80);
 });
 document.addEventListener('form:cleared', () => {
-  document.body.classList.add('form-empty');
   setTimeout(refreshUI, 80);
   updateExcelNavStatus(false, '');
 });
@@ -770,20 +768,4 @@ window.UIController = {
   restoreUIState();
   refreshUI();
 
-  // Inject empty-state hints into each data section and show them until Excel loads
-  const EMPTY_HINT_HTML = `<div class="ws-empty-hint" aria-hidden="true">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="17 8 12 3 7 8"/>
-      <line x1="12" y1="3" x2="12" y2="15"/>
-    </svg>
-    <span>Данные появятся после загрузки Excel</span>
-  </div>`;
-
-  ['ws-deal', 'ws-property', 'ws-owners', 'ws-buyer'].forEach(id => {
-    const inner = document.querySelector(`#${id} .ws-block-inner`);
-    if (inner) inner.insertAdjacentHTML('afterbegin', EMPTY_HINT_HTML);
-  });
-
-  document.body.classList.add('form-empty');
 })();

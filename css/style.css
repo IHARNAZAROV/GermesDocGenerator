@@ -2441,29 +2441,6 @@ html, body {
   container-name: block-body;
 }
 /* overflow:visible на body больше не используется — меню использует position:fixed */
-/* ── Empty-state hint (visible before Excel is loaded) ── */
-.ws-empty-hint {
-  display: none;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 12px;
-  margin-bottom: 10px;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
-  border: 1px dashed var(--border);
-  color: var(--text-muted);
-  font-size: 12px;
-  line-height: 1.4;
-  pointer-events: none;
-  user-select: none;
-}
-.ws-empty-hint svg {
-  flex-shrink: 0;
-  opacity: .55;
-}
-body.form-empty .ws-empty-hint {
-  display: flex;
-}
 
 .ws-block-inner {
   padding: 14px 16px 16px;
