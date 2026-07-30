@@ -2333,6 +2333,7 @@ html, body {
 /* ── Work Area (center) ── */
 .work-area {
   overflow-y: auto;
+  min-width: 0;          /* allow grid cell to shrink below content min-size */
   background: var(--bg);
   padding: 10px 12px 16px;
   display: flex;
@@ -2528,8 +2529,11 @@ body.form-empty .ws-empty-hint {
   gap: 0 20px;
 }
 
-/* ── Responsive: collapse 2-col layouts when block is narrow ── */
-@container block-inner (max-width: 540px) {
+/* ── Responsive: collapse 2-col layouts when block is narrow ──
+   Threshold raised to 620px so that centre panels around 580-600px
+   (common at typical Windows display-scaling with minimum Electron window)
+   are reliably caught. */
+@container block-inner (max-width: 620px) {
   /* All 2-column grids collapse to single column */
   .ws-fields-grid--2col,
   .form-two-col,
@@ -2559,7 +2563,7 @@ body.form-empty .ws-empty-hint {
 }
 
 /* Also collapse via block-body container (covers any element outside block-inner) */
-@container block-body (max-width: 560px) {
+@container block-body (max-width: 640px) {
   .ws-fields-grid--2col,
   .form-two-col,
   .tab-inner-grid,
@@ -2582,7 +2586,7 @@ body.form-empty .ws-empty-hint {
 }
 
 /* Shrink label column at very narrow widths */
-@container block-inner (max-width: 360px) {
+@container block-inner (max-width: 400px) {
   .fr {
     grid-template-columns: 90px 1fr;
   }
@@ -3086,6 +3090,34 @@ body.form-empty .ws-empty-hint {
 @media (max-width: 900px) {
   .win-body { grid-template-columns: 0 1fr 280px; }
   .nav-panel { display: none; }
+}
+
+/* ── Collapse 2-col form grids in the 3-panel layout at narrow window widths ──
+   At 901–1200px the centre panel is ≤680px wide (1200-220-300=680). Container
+   queries handle it when min-width:0 is respected, but this media query is a
+   guaranteed fallback for environments where container queries may not fire
+   (e.g. Electron with non-100% OS display scaling). */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .ws-fields-grid--2col,
+  .form-two-col,
+  .tab-inner-grid,
+  .add-data-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-col + .form-col {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .data-two-col { grid-template-columns: 1fr; }
+  .data-col + .data-col {
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+  .poa-two-col-row { flex-direction: column; }
+  .fr, .fr-wide, .fr-sm { grid-template-columns: 110px 1fr; }
 }
 @media (max-width: 680px) {
   .win-body { grid-template-columns: 1fr; }
