@@ -4128,6 +4128,22 @@ body.form-empty .ws-empty-hint {
   width: 100%;
 }
 
+/* ── Responsive: collapse poa two-col row to single column ──
+   These rules MUST come after the base .poa-two-col-row definition above,
+   otherwise the base style (defined later in the file) wins the cascade. */
+@container block-inner (max-width: 620px) {
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
+}
+@container block-body (max-width: 640px) {
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 1200px) and (min-width: 901px) {
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 680px) {
+  .poa-two-col-row { flex-direction: column; align-items: stretch; }
+}
+
 .owner-poa-block__title {
   margin: 0 0 10px;
   font-size: 12px;
