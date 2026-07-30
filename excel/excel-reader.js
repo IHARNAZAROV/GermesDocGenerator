@@ -4,7 +4,6 @@ const { cellToString } = require('./cell-utils');
 const BLOCK_HEADERS = {
   'СДЕЛКА': 'deal',
   'ОБЪЕКТ': 'property',
-  'ПРОДАВЕЦ': 'seller',
   'СОБСТВЕННИК №1': 'owner1',
   'СОБСТВЕННИК №2': 'owner2',
   'СОБСТВЕННИК №3': 'owner3',
@@ -24,7 +23,6 @@ async function readFile(filePath) {
   const result = {
     deal: {},
     property: {},
-    seller: {},
     owner1: {},
     owner2: {},
     owner3: {},

@@ -817,15 +817,6 @@ html, body {
 }
 
 /* ============================================================
-   SELLER / BUYER — TWO-COLUMN GRID
-   ============================================================ */
-.seller-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 20px;
-}
-
-/* ============================================================
    TABS
    ============================================================ */
 .tabs-wrapper {
@@ -2777,10 +2768,6 @@ body.form-empty .ws-empty-hint {
 .sp-quick-btn--check { background: var(--brand-xlight); border-color: #B2D8C9; color: var(--brand); }
 .sp-quick-btn--check svg { color: var(--brand); }
 
-/* ── Seller-grid inside accordion ── */
-/* The #form-section-seller and #form-section-buyer get class ws-fields-grid--2col
-   which already applies 2-col grid */
-
 /* ============================================================
    TIPS CAROUSEL
    ============================================================ */
@@ -3055,22 +3042,6 @@ body.form-empty .ws-empty-hint {
 }
 .nav-item--c-property.nav-item--active .nav-item-icon  { background: #DCFCE7; border-color: #4ADE80; }
 .nav-item--c-property.nav-item--active .nav-item-label { color: #15803D; }
-
-/* ── Продавец — синий ── */
-.nav-item--c-seller {
-  background: linear-gradient(90deg, #EFF6FF 0%, transparent 72%);
-}
-.nav-item--c-seller:hover {
-  background: linear-gradient(90deg, #DBEAFE 0%, #F5F9FF 72%);
-}
-.nav-item--c-seller:hover .nav-item-icon { background: #D8EAFE; border-color: #7DB8FA; }
-.nav-item--c-seller .nav-item-icon       { background: #EFF6FF; border-color: #93C5FD; }
-.nav-item--c-seller .nav-item-icon svg   { color: #2563EB; }
-.nav-item--c-seller.nav-item--active {
-  background: linear-gradient(90deg, #BFDBFE 0%, #EFF6FF 72%);
-}
-.nav-item--c-seller.nav-item--active .nav-item-icon  { background: #DBEAFE; border-color: #60A5FA; }
-.nav-item--c-seller.nav-item--active .nav-item-label { color: #1D4ED8; }
 
 /* ── Собственники — индиго ── */
 .nav-item--c-owners {
@@ -3972,25 +3943,6 @@ body.form-empty .ws-empty-hint {
   color: var(--text-2);
 }
 .reklama-btn--secondary:hover { background: var(--border-light); }
-
-/* ── Логический блок доверенности продавца ─────────────────── */
-.seller-poa-block {
-  grid-column: 1 / -1;
-  margin-top: 6px;
-  padding: 12px;
-  border: 1px solid rgba(37, 99, 235, 0.18);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.06), rgba(59, 130, 246, 0.025));
-}
-
-.seller-poa-block__title {
-  margin: 0 0 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #1d4ed8;
-  text-transform: uppercase;
-}
 
 /* ── Блок доверенности собственника ─────────────────────────── */
 .owner-poa-wrap {

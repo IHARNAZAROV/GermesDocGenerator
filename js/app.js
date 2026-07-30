@@ -215,16 +215,13 @@ function onInputChange(el, currentValue) {
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(autoSave, 30000);
   }
-  // Re-evaluate contract availability whenever owner fields or seller-ownership flag changes
+  // Re-evaluate contract availability whenever owner fields change
   if (
     inputId.startsWith('owner1-') ||
     inputId.startsWith('owner2-') ||
-    inputId.startsWith('owner3-') ||
-    inputId === 'seller-Является собственником'
+    inputId.startsWith('owner3-')
   ) {
     updateContractAvailability();
-    updatePoaOwnerOptions();
-    applySellerPoaVisibility();
   }
   // Показываем/скрываем блок доверенности собственника
   if (inputId === 'owner1-Есть представитель' ||
@@ -308,7 +305,7 @@ function buildUpdates() {
 //  Returns { deal: {fieldKey: value}, property: {...}, ... }
 // ============================================================
 function buildFieldGroups() {
-  const groups = { deal: {}, property: {}, seller: {}, owner1: {}, owner2: {}, owner3: {}, buyer: {} };
+  const groups = { deal: {}, property: {}, owner1: {}, owner2: {}, owner3: {}, buyer: {} };
   for (const [mapKey, inputId] of Object.entries(FIELD_MAP)) {
     const dashIdx = mapKey.indexOf('-');
     if (dashIdx === -1) continue;
@@ -479,7 +476,7 @@ function populateForm(data) {
 
   rowMap = data._rowMap || {};
 
-  const blockKeys = ['deal', 'property', 'seller', 'owner1', 'owner2', 'owner3', 'buyer'];
+  const blockKeys = ['deal', 'property', 'owner1', 'owner2', 'owner3', 'buyer'];
   blockKeys.forEach((block) => {
     const blockData = data[block];
     if (!blockData) return;
@@ -500,8 +497,6 @@ function populateForm(data) {
   btnSaveAs.disabled = false;
   switchTab('owner1');
   updateContractAvailability();
-  updatePoaOwnerOptions();
-  applySellerPoaVisibility();
   applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
@@ -528,8 +523,6 @@ function handleClearForm() {
   setStatus('Готов к работе');
   switchTab('owner1');
   resetContractAvailability();
-  updatePoaOwnerOptions();
-  applySellerPoaVisibility();
   applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
@@ -609,11 +602,7 @@ function handleCheckData() {
 
   // Собственник 1 — расширенный набор
   // (Smart Panel проверяет только 6 базовых полей из OWNER1_FIELDS)
-  const isOwnerRaw = (getField('seller-Является собственником') || '').trim().toLowerCase();
-  if (isOwnerRaw === 'нет') {
-    chk('seller-Собственник по доверенности', 'Продавец → Интересы собственника');
-  }
-  if (isOwnerPresent('owner1') || isOwnerRaw === 'нет') {
+  if (isOwnerPresent('owner1')) {
     [
       ['owner1-Отчество',           'Собственник 1 → Отчество'],
       ['owner1-Дата рождения',      'Собственник 1 → Дата рождения'],
@@ -751,27 +740,9 @@ function isOwnerPresent(ownerPrefix) {
   });
 }
 
-function getSellerIsOwner() {
-  const el = document.getElementById('seller-Является собственником');
-  if (!el) return false;
-  const raw = el.value.trim().toLowerCase();
-  return raw === 'да' || raw === 'yes';
-}
-
 function getOwnersCount() {
-  if (getSellerIsOwner()) {
-    // Продавец — собственник №1; дополнительные совладельцы — во вкладках собственников
-    const coOwners = (isOwnerPresent('owner1') ? 1 : 0)
-                   + (isOwnerPresent('owner2') ? 1 : 0)
-                   + (isOwnerPresent('owner3') ? 1 : 0);
-    return 1 + coOwners;
-  } else {
-    // Продавец действует по доверенности; собственники — только из вкладок.
-    // Считаем реально заполненных, а не цепочкой if-else
-    // (чтобы owner1+owner3 без owner2 не давали счёт 3).
-    const count = ['owner1', 'owner2', 'owner3'].filter(p => isOwnerPresent(p)).length;
-    return count > 0 ? count : 1;
-  }
+  const count = ['owner1', 'owner2', 'owner3'].filter(p => isOwnerPresent(p)).length;
+  return count > 0 ? count : 1;
 }
 
 // ============================================================
@@ -780,7 +751,6 @@ function getOwnersCount() {
 const BLOCK_COMPLETE_LABELS = {
   deal:     'Сделка заполнена',
   property: 'Объект заполнен',
-  seller:   'Продавец заполнен',
   owners:   'Собственники заполнены',
   buyer:    'Покупатель заполнен',
 };
@@ -845,7 +815,7 @@ function scheduleBlockCompletion(prefix) {
 function updateBlockCompletion(changedPrefix) {
   const toCheck = new Set();
   if (!changedPrefix) {
-    ['deal', 'property', 'seller', 'owners', 'buyer'].forEach(b => toCheck.add(b));
+    ['deal', 'property', 'owners', 'buyer'].forEach(b => toCheck.add(b));
   } else if (changedPrefix.startsWith('owner')) {
     toCheck.add('owners');
   } else {
@@ -1219,7 +1189,7 @@ function getNumericField(id) {
 // ============================================================
 //  buildPlaceholderData() — единый источник данных для всех
 //  Word-шаблонов. Структура соответствует config/placeholders.json.
-//  Плейсхолдеры в .docx: {{deal.number}}, {{seller.fullName}} и т.д.
+//  Плейсхолдеры в .docx: {{deal.number}}, {{owner1.fullName}} и т.д.
 // ============================================================
 // ============================================================
 //  Date → "16 июля 2027" (long Russian format)
@@ -1452,30 +1422,12 @@ function buildNameDative(lastName, firstName, middleName) {
   };
 }
 
-function getPoaOwnerOptions() {
-  return ['owner1', 'owner2', 'owner3']
-    .map((prefix, idx) => {
-      const person = buildPersonBlock(`${prefix}-`);
-      return person.fullName ? `${person.fullName} (собственник №${idx + 1})` : '';
-    })
-    .filter(Boolean);
-}
-
 function findPoaOwnerBySelectValue(value, ownerBlocks) {
   const normalized = (value || '').trim();
   if (!normalized) return null;
   return ownerBlocks.find((owner, idx) => normalized === `${owner.fullName} (собственник №${idx + 1})`)
       || ownerBlocks.find(owner => owner.fullName === normalized)
       || null;
-}
-
-function updatePoaOwnerOptions() {
-  window.FormBuilder?.setObjSelectOptions?.('seller-Собственник по доверенности', getPoaOwnerOptions());
-}
-
-function sellerUsesPowerOfAttorney() {
-  const raw = (getField('seller-Является собственником') || '').trim().toLowerCase();
-  return raw === 'нет' || raw === 'no';
 }
 
 // ── Данные представителя собственника (для Word-шаблонов) ────
@@ -1519,12 +1471,6 @@ function buildOwnerPoaBlock(ownerPrefix) {
     // «действующего» / «действующей» — определяется по отчеству/имени представителя
     poaAction: gender === 'f' ? 'действующей' : 'действующего',
   };
-}
-
-function applySellerPoaVisibility() {
-  const block = document.querySelector('.seller-poa-block');
-  if (!block) return;
-  block.hidden = !sellerUsesPowerOfAttorney();
 }
 
 function applyOwnerPoaVisibility(ownerPrefix) {
@@ -1665,32 +1611,6 @@ function buildPlaceholderData() {
   const ownerBlocks = [owner1, owner2, owner3];
   const buyer  = buildPersonBlock('buyer-');
 
-  // ── Логика продавца ────────────────────────────────────────
-  // Продавец всегда заполняется из блока ПРОДАВЕЦ в Excel.
-  // Если «Является собственником» = «Да» — продавец является собственником №1,
-  // дополнительные совладельцы — во вкладках Собственник 1/2/3.
-  // Если «Нет» — продавец действует по доверенности; все собственники — из вкладок.
-  const isOwnerRaw    = (getField('seller-Является собственником') || '').trim().toLowerCase();
-  const sellerIsOwner = isOwnerRaw === 'да' || isOwnerRaw === 'yes';
-  const representedOwner = sellerIsOwner
-    ? null
-    : findPoaOwnerBySelectValue(getField('seller-Собственник по доверенности'), ownerBlocks);
-  const sellerGender = detectGender(
-    getField('seller-Отчество') || '',
-    getField('seller-Имя') || '',
-    getField('seller-Фамилия') || ''
-  );
-
-  const seller = {
-    ...buildPersonBlock('seller-'),
-    isOwner:   sellerIsOwner,
-    poaNumber: sellerIsOwner ? '' : (getField('seller-Номер доверенности') || ''),
-    poaDate:   sellerIsOwner ? '' : (getField('seller-Дата доверенности')  || ''),
-    poaOwner: representedOwner ? representedOwner.fullName : '',
-    poaOwnerGenitive: representedOwner ? representedOwner.fullNameGenitive : '',
-    poaAction: sellerGender === 'f' ? 'действующей' : 'действующего',
-  };
-
   // ── Риэлтер — единый источник правды: RealtorService ──────
   // RealtorService является основным источником текущего риэлтера.
   // Поле «Ответственный риэлтер» из Excel используется только как
@@ -1813,7 +1733,7 @@ function buildPlaceholderData() {
   const cb_3 = _pkg === 3 ? '☑' : '☐';
   const cb_4 = _pkg === 4 ? '☑' : '☐';
 
-  return { deal, property, seller, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, cb_1, cb_2, cb_3, cb_4 };
+  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, cb_1, cb_2, cb_3, cb_4 };
   } finally {
     _currentSnap = null;
   }
@@ -2213,7 +2133,6 @@ btnPreview.addEventListener('click', async () => {
   // Initial sidebar state on app load
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
-  applySellerPoaVisibility();
   applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
 }());

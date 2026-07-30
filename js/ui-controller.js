@@ -10,7 +10,7 @@
 const LS_KEY = 'germesUI_v2';
 
 // ── Секции аккордеона ─────────────────────────────────────────
-const BLOCKS = ['ws-excel', 'ws-deal', 'ws-property', 'ws-seller', 'ws-owners', 'ws-buyer'];
+const BLOCKS = ['ws-excel', 'ws-deal', 'ws-property', 'ws-owners', 'ws-buyer'];
 
 // ── Проверяемые поля: { id, label, block } ────────────────────
 // Соответствует логике handleCheckData в app.js
@@ -32,18 +32,6 @@ const REQUIRED_FIELDS = [
   { id: 'property-Общая площадь',  label: 'Общая площадь',    block: 'ws-property' },
   { id: 'property-Жилая площадь',  label: 'Жилая площадь',   block: 'ws-property' },
   { id: 'property-Площадь кухни',  label: 'Площадь кухни',   block: 'ws-property' },
-  // Продавец
-  { id: 'seller-Фамилия',                 label: 'Продавец: Фамилия',      block: 'ws-seller' },
-  { id: 'seller-Имя',                     label: 'Продавец: Имя',           block: 'ws-seller' },
-  { id: 'seller-Отчество',                label: 'Продавец: Отчество',      block: 'ws-seller' },
-  { id: 'seller-Дата рождения',           label: 'Продавец: Дата рождения', block: 'ws-seller' },
-  { id: 'seller-Паспорт серия',           label: 'Продавец: Паспорт серия', block: 'ws-seller' },
-  { id: 'seller-Паспорт номер',           label: 'Продавец: Паспорт номер', block: 'ws-seller' },
-  { id: 'seller-Идентификационный номер', label: 'Продавец: Идент. номер',  block: 'ws-seller' },
-  { id: 'seller-Кем выдан',              label: 'Продавец: Кем выдан',     block: 'ws-seller' },
-  { id: 'seller-Дата выдачи',            label: 'Продавец: Дата выдачи',   block: 'ws-seller' },
-  { id: 'seller-Адрес регистрации',       label: 'Продавец: Адрес регистр.', block: 'ws-seller' },
-  { id: 'seller-Является собственником',  label: 'Продавец: Собственник?', block: 'ws-seller' },
   // Покупатель
   { id: 'buyer-Фамилия',                 label: 'Покупатель: Фамилия',      block: 'ws-buyer' },
   { id: 'buyer-Имя',                     label: 'Покупатель: Имя',           block: 'ws-buyer' },
@@ -116,16 +104,28 @@ function getIssues() {
   const baseFields  = hasBuyer ? REQUIRED_FIELDS : REQUIRED_FIELDS.filter(f => f.block !== 'ws-buyer');
   const allRequired = [...baseFields, ...extraPropertyFields];
 
-  // Check owner1 if seller is not owner or owner1 has some data
-  const sellerIsOwnerRaw = (document.getElementById('seller-Является собственником')?.value || '').trim().toLowerCase();
-  const sellerNotOwner = sellerIsOwnerRaw === 'нет';
+  // Check owner1 if it has any data filled
   const owner1HasData = OWNER1_FIELDS.some(f => {
     const el = document.getElementById(f.id);
     return el && el.value.trim() !== '';
   });
-  if (sellerNotOwner || owner1HasData) {
+  if (owner1HasData) {
     allRequired.push(...OWNER1_FIELDS);
   }
+
+  // Check representative fields for each owner that has "Есть представитель" = "Да"
+  ['owner1', 'owner2', 'owner3'].forEach(prefix => {
+    const hasRepEl = document.getElementById(`${prefix}-Есть представитель`);
+    if (!hasRepEl || (hasRepEl.value || '').trim().toLowerCase() !== 'да') return;
+    const n = prefix.slice(-1);
+    [
+      { id: `${prefix}-Представитель фамилия`,      label: `Собств.${n}: Представитель фамилия`,   block: 'ws-owners' },
+      { id: `${prefix}-Представитель имя`,           label: `Собств.${n}: Представитель имя`,        block: 'ws-owners' },
+      { id: `${prefix}-Представитель паспорт серия`, label: `Собств.${n}: Представ. паспорт серия`,  block: 'ws-owners' },
+      { id: `${prefix}-Представитель паспорт номер`, label: `Собств.${n}: Представ. паспорт номер`,  block: 'ws-owners' },
+      { id: `${prefix}-Номер доверенности`,          label: `Собств.${n}: Номер доверен.`,           block: 'ws-owners' },
+    ].forEach(f => allRequired.push(f));
+  });
 
   for (const f of allRequired) {
     const el = document.getElementById(f.id);
@@ -200,7 +200,6 @@ function updateValidationPanel() {
     const blockLabels = {
       'ws-deal':     'Сделка',
       'ws-property': 'Объект',
-      'ws-seller':   'Продавец',
       'ws-owners':   'Собственники',
       'ws-buyer':    'Покупатель',
     };
@@ -314,7 +313,6 @@ function updateNavBadges(issues) {
   const blockToNav = {
     'ws-deal':     'deal',
     'ws-property': 'property',
-    'ws-seller':   'seller',
     'ws-owners':   'owners',
     'ws-buyer':    'buyer',
   };
@@ -772,7 +770,7 @@ window.UIController = {
     <span>Данные появятся после загрузки Excel</span>
   </div>`;
 
-  ['ws-deal', 'ws-property', 'ws-seller', 'ws-owners', 'ws-buyer'].forEach(id => {
+  ['ws-deal', 'ws-property', 'ws-owners', 'ws-buyer'].forEach(id => {
     const inner = document.querySelector(`#${id} .ws-block-inner`);
     if (inner) inner.insertAdjacentHTML('afterbegin', EMPTY_HINT_HTML);
   });

@@ -55,7 +55,7 @@ Each field in a group supports:
 
 ## Excel structure
 
-One sheet ("Сделка"). Blocks: `СДЕЛКА`, `ОБЪЕКТ`, `ПРОДАВЕЦ`, `СОБСТВЕННИК №1`, `СОБСТВЕННИК №2`, `СОБСТВЕННИК №3`, `ПОКУПАТЕЛЬ`. Column A = field name, Column B = value.
+One sheet ("Сделка"). Blocks: `СДЕЛКА`, `ОБЪЕКТ`, `СОБСТВЕННИК №1`, `СОБСТВЕННИК №2`, `СОБСТВЕННИК №3`, `ПОКУПАТЕЛЬ`. Column A = field name, Column B = value. The `ПРОДАВЕЦ` block has been removed — old Excel files that still contain it will load fine (the block is silently ignored).
 
 ## Рекламный договор — выбор пакета (Прейскурант)
 

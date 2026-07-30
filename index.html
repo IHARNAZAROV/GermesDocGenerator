@@ -224,17 +224,6 @@
             <span class="nav-item-badge" id="nav-badge-property" hidden></span>
           </li>
 
-          <li class="nav-item nav-item--c-seller" data-target="ws-seller" tabindex="0" role="listitem" title="Данные продавца">
-            <span class="nav-item-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </span>
-            <div class="nav-item-text">
-              <span class="nav-item-label">Продавец</span>
-              <span class="nav-item-sub" id="nav-status-seller"></span>
-            </div>
-            <span class="nav-item-badge" id="nav-badge-seller" hidden></span>
-          </li>
-
           <li class="nav-item nav-item--c-owners" data-target="ws-owners" tabindex="0" role="listitem" title="Данные собственников">
             <span class="nav-item-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -338,7 +327,7 @@
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>
                   </div>
                   <div class="tips-slide-title">Порядок заполнения</div>
-                  <div class="tips-slide-desc">Пройдите разделы по порядку: Сделка → Объект → Продавец → Собственники → Покупатель. Значок у каждого раздела покажет статус.</div>
+                  <div class="tips-slide-desc">Пройдите разделы по порядку: Сделка → Объект → Собственники → Покупатель. Значок у каждого раздела покажет статус.</div>
                 </div>
 
                 <!-- Слайд 5: Проверка перед генерацией -->
@@ -485,28 +474,7 @@
             </div>
           </section>
 
-          <!-- ── BLOCK 4: Продавец ── -->
-          <section class="ws-block" id="ws-seller" data-block="seller" aria-label="Продавец">
-            <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-seller-body">
-              <span class="ws-block-hdr-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </span>
-              <span class="ws-block-hdr-title">Продавец</span>
-              <span class="ws-block-hdr-status" id="blk-status-seller"></span>
-              <span class="ws-block-hdr-chevron" aria-hidden="true">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </span>
-            </button>
-            <div class="ws-block-body-outer" id="ws-seller-body">
-              <div class="ws-block-body">
-                <div class="ws-block-inner">
-                  <div id="form-section-seller" class="ws-fields-grid ws-fields-grid--2col"></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- ── BLOCK 5: Собственники ── -->
+          <!-- ── BLOCK 4: Собственники ── -->
           <section class="ws-block" id="ws-owners" data-block="owners" aria-label="Собственники">
             <button class="ws-block-hdr" type="button" aria-expanded="false" aria-controls="ws-owners-body">
               <span class="ws-block-hdr-icon">

@@ -24,7 +24,6 @@ const CAL_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" str
 const SECTION_CONTAINERS = {
   'property':    'form-section-property',
   'deal-prices': 'form-section-deal-prices',
-  'seller':      'form-section-seller',
   'buyer':       'form-section-buyer',
   'owner1':      'tab-pane-owner1',
   'owner2':      'tab-pane-owner2',
@@ -99,7 +98,7 @@ function htmlSelect(groupId, field) {
 }
 
 function htmlPoaBlockStart(title) {
-  return `<div class="seller-poa-block"><div class="seller-poa-block__title">${escHtml(title || 'Данные по доверенности')}</div>`;
+  return `<div class="poa-block"><div class="poa-block__title">${escHtml(title || 'Данные по доверенности')}</div>`;
 }
 
 function htmlPoaBlockEnd() {
