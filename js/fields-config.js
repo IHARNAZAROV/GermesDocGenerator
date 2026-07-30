@@ -373,9 +373,40 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Представитель",
-          "label": "Представитель:",
+          "label": "Представитель (ФИО):",
           "ownerPoaBlock": true,
           "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Представитель паспорт серия",
+          "label": "Паспорт серия:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель паспорт номер",
+          "label": "Паспорт номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель идент. номер",
+          "label": "Идент. номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель дата выдачи",
+          "label": "Дата выдачи:",
+          "type": "date",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель кем выдан",
+          "label": "Кем выдан:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель адрес",
+          "label": "Адрес регистр.:",
+          "ownerPoaBlock": true
         },
         {
           "key": "Номер доверенности",
@@ -453,9 +484,40 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Представитель",
-          "label": "Представитель:",
+          "label": "Представитель (ФИО):",
           "ownerPoaBlock": true,
           "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Представитель паспорт серия",
+          "label": "Паспорт серия:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель паспорт номер",
+          "label": "Паспорт номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель идент. номер",
+          "label": "Идент. номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель дата выдачи",
+          "label": "Дата выдачи:",
+          "type": "date",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель кем выдан",
+          "label": "Кем выдан:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель адрес",
+          "label": "Адрес регистр.:",
+          "ownerPoaBlock": true
         },
         {
           "key": "Номер доверенности",
@@ -533,9 +595,40 @@ window.FIELDS_CONFIG = {
         },
         {
           "key": "Представитель",
-          "label": "Представитель:",
+          "label": "Представитель (ФИО):",
           "ownerPoaBlock": true,
           "ownerPoaBlockTitle": "Данные представителя"
+        },
+        {
+          "key": "Представитель паспорт серия",
+          "label": "Паспорт серия:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель паспорт номер",
+          "label": "Паспорт номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель идент. номер",
+          "label": "Идент. номер:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель дата выдачи",
+          "label": "Дата выдачи:",
+          "type": "date",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель кем выдан",
+          "label": "Кем выдан:",
+          "ownerPoaBlock": true
+        },
+        {
+          "key": "Представитель адрес",
+          "label": "Адрес регистр.:",
+          "ownerPoaBlock": true
         },
         {
           "key": "Номер доверенности",
