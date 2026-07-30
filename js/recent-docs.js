@@ -53,6 +53,7 @@
     // 🔵 Запросы (синий)
     'zapros-pnd':        { icon: 'zapros',       color: '#1E40AF', bg: '#DBEAFE', stripe: '#3B82F6' },
     'zapros-rsc':        { icon: 'zapros',       color: '#1E40AF', bg: '#DBEAFE', stripe: '#3B82F6' },
+     'zapros-rsc-privat': { icon: 'zapros',       color: '#1E40AF', bg: '#DBEAFE', stripe: '#3B82F6' },
 
     // 🟡 Задаток (жёлтый)
     'zadatok-standart':  { icon: 'zadatok',      color: '#92400E', bg: '#FEF3C7', stripe: '#D97706' },
