@@ -2436,6 +2436,8 @@ html, body {
 .ws-block-body {
   overflow: hidden;
   min-height: 0;
+  container-type: inline-size;
+  container-name: block-body;
 }
 /* overflow:visible на body больше не используется — меню использует position:fixed */
 /* ── Empty-state hint (visible before Excel is loaded) ── */
@@ -2527,13 +2529,15 @@ body.form-empty .ws-empty-hint {
 }
 
 /* ── Responsive: collapse 2-col layouts when block is narrow ── */
-@container block-inner (max-width: 480px) {
-  .ws-fields-grid--2col {
+@container block-inner (max-width: 540px) {
+  /* All 2-column grids collapse to single column */
+  .ws-fields-grid--2col,
+  .form-two-col,
+  .tab-inner-grid,
+  .add-data-grid {
     grid-template-columns: 1fr;
   }
-  .form-two-col {
-    grid-template-columns: 1fr;
-  }
+  /* Restore column-separator to top-border */
   .form-col + .form-col {
     padding-left: 0;
     border-left: none;
@@ -2548,18 +2552,52 @@ body.form-empty .ws-empty-hint {
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
+  /* POA block: flex row becomes column */
+  .poa-two-col-row {
+    flex-direction: column;
+  }
 }
 
-@container block-inner (max-width: 340px) {
-  .fr {
-    grid-template-columns: 100px 1fr;
+/* Also collapse via block-body container (covers any element outside block-inner) */
+@container block-body (max-width: 560px) {
+  .ws-fields-grid--2col,
+  .form-two-col,
+  .tab-inner-grid,
+  .add-data-grid {
+    grid-template-columns: 1fr;
   }
-  .fr-wide {
-    grid-template-columns: 100px 1fr;
+  .form-col + .form-col {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .data-two-col { grid-template-columns: 1fr; }
+  .data-col + .data-col {
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+  .poa-two-col-row { flex-direction: column; }
+}
+
+/* Shrink label column at very narrow widths */
+@container block-inner (max-width: 360px) {
+  .fr {
+    grid-template-columns: 90px 1fr;
+  }
+  .fr-wide,
+  .fr-sm {
+    grid-template-columns: 90px 1fr;
   }
   .fr label {
     font-size: 11px;
   }
+}
+
+/* Keep poa-col content overflow within its column boundary */
+.poa-col {
+  overflow-x: hidden;
 }
 
 /* Field highlight animation (for error navigation) */
