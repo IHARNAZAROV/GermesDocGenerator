@@ -1772,6 +1772,7 @@ const TEMPLATE_REGISTRY = {
   'zadatok-standart':  { label: 'Договор задатка (стандартный)',                                                         generate: makeGenerate('zadatok-standart') },
   'dkp-fizlit-komstr':       { label: 'Договор оказания риэлтерских услуг (физическое лицо — коммерческая структура)', generate: makeGenerate('dkp-fizlit-komstr') },
   'akt-rielterskikh-uslug':  { label: 'Акт приёмки-сдачи оказанных риелтерских услуг',                                  generate: makeGenerate('akt-rielterskikh-uslug') },
+  'akt-reklamnykh-uslug':    { label: 'Акт приёмки-сдачи рекламных услуг',                                               generate: makeGenerate('akt-reklamnykh-uslug') },
 };
 
 // ============================================================
