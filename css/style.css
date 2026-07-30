@@ -2482,6 +2482,11 @@ body.form-empty .ws-empty-hint {
   font-weight: 600;
   animation: blk-badge-in .22s ease both;
 }
+.ws-block--complete .ws-block-hdr-status--warn {
+  color: #D97706;
+  font-weight: 600;
+  animation: blk-badge-in .22s ease both;
+}
 .ws-block--complete .ws-block-hdr-icon {
   background: #D1F0E4;
   border-color: #A7DFC8;

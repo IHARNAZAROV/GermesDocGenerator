@@ -848,7 +848,10 @@ function updateBlockCompletion(changedPrefix) {
 
     if (complete) {
       section.classList.add('ws-block--complete');
-      badge.textContent = BLOCK_COMPLETE_LABELS[blockId] || '';
+      // Покупатель заполнен, но задаток не указан — предупреждение в заголовке блока
+      const buyerWarnNoDeposit = blockId === 'buyer' && !isBuyerRequiredByDeposit();
+      badge.textContent = buyerWarnNoDeposit ? 'Укажите сумму задатка' : (BLOCK_COMPLETE_LABELS[blockId] || '');
+      badge.className   = buyerWarnNoDeposit ? 'ws-block-hdr-status ws-block-hdr-status--warn' : 'ws-block-hdr-status';
       if (!wasComplete) {
         // Перезапуск flash-анимации без принудительного reflow:
         // сбрасываем animationName на один кадр, затем возвращаем
@@ -862,6 +865,7 @@ function updateBlockCompletion(changedPrefix) {
     } else {
       section.classList.remove('ws-block--complete', 'ws-block--complete-flash');
       badge.textContent = '';
+      badge.className   = 'ws-block-hdr-status';
     }
   }
 }

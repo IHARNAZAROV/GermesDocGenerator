@@ -327,7 +327,7 @@ function updateNavBadges(issues) {
     const count  = countByBlock[blockId] || 0;
     if (!badge || !status) return;
 
-    // Покупатель: особый режим когда задаток не указан и данные не введены
+    // Покупатель: особый режим когда задаток не указан
     if (blockId === 'ws-buyer' && !_hasBuyer) {
       const hasData = hasRequiredBlockData(blockId);
       if (!hasData) {
@@ -337,7 +337,12 @@ function updateNavBadges(issues) {
         status.className = 'nav-item-sub';
         return;
       }
-      // Данные введены — продолжаем обычную логику отображения статуса
+      // Данные введены, но задаток не указан — показываем предупреждение
+      badge.hidden = true;
+      badge.className = 'nav-item-badge';
+      status.textContent = 'Нет суммы задатка';
+      status.className = 'nav-item-sub nav-item-sub--warn';
+      return;
     }
 
     if (count > 0) {
