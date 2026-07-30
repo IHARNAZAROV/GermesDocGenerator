@@ -1496,6 +1496,7 @@ function buildOwnerPoaBlock(ownerPrefix) {
 
   const genitive = buildNameGenitive(lastName, firstName, middleName);
   const dative   = buildNameDative(lastName, firstName, middleName);
+  const gender   = detectGender(middleName, firstName, lastName);
 
   return {
     hasPoa,
@@ -1515,6 +1516,8 @@ function buildOwnerPoaBlock(ownerPrefix) {
     address:           getField(p + 'Представитель адрес')         || '',
     poaNumber:         getField(p + 'Номер доверенности')          || '',
     poaDate:           getField(p + 'Дата доверенности')           || '',
+    // «действующего» / «действующей» — определяется по отчеству/имени представителя
+    poaAction: gender === 'f' ? 'действующей' : 'действующего',
   };
 }
 
