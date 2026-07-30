@@ -1466,6 +1466,7 @@ function buildOwnerPoaBlock(ownerPrefix) {
     id:               getField(p + 'Представитель идент. номер')  || '',
     passportIssueDate: getField(p + 'Представитель дата выдачи')  || '',
     passportIssuedBy:  getField(p + 'Представитель кем выдан')    || '',
+    passportIssuedByInstrumental: toInstrumental(getField(p + 'Представитель кем выдан') || ''),
     address:           getField(p + 'Представитель адрес')         || '',
     poaNumber:         getField(p + 'Номер доверенности')          || '',
     poaDate:           getField(p + 'Дата доверенности')           || '',
