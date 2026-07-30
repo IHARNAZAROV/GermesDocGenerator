@@ -1,92 +1,35 @@
-# DocGenerator — Генератор договоров ГермесГарант
+# DocGenerator — ГермесГарант
 
-## Project overview
+Генератор договоров для риэлторской компании ГермесГарант. Статическое веб-приложение (HTML + CSS + JS), не требует сборки и серверного бэкенда.
 
-An **Electron desktop application** that reads a structured `.xlsx` file and generates Word contracts from templates. The form is **driven entirely by the Excel template** — adding or removing fields in Excel auto-updates the UI without any code changes.
-
-**Stack:** Electron 38, ExcelJS 4, plain HTML/CSS/JS (no frontend framework, no bundler).
-
-## How to run
+## Запуск
 
 ```
-npm install
-npm start
+python3 -m http.server 5000
 ```
 
-Requires Node.js with Electron installed (`npm install` handles it via devDependencies).
+Приложение доступно на порту 5000.
 
-## How to add / remove fields
+## Стек
 
-1. Edit the Excel template (add or remove rows in column A under a block header).
-2. Run the scanner: `node scripts/scan-excel.js <путь/к/шаблону.xlsx>`
-3. The scanner updates `fields-config.json` and `js/fields-config.js` automatically.
-4. Restart the app — the form reflects the new fields instantly. No other code changes needed.
+- Чистый HTML/CSS/JS (без фреймворков)
+- Чтение Excel-файлов сделок через `excel/` (xlsx)
+- Генерация Word-документов через `generator/`
+- Конфиги агентов и комиссий в `config/`
 
-## Architecture
+## Структура
 
-| File | Role |
-|---|---|
-| `main.js` | Electron main process — window, IPC handlers |
-| `updater.js` | Portable auto-updater — GitHub API check, download, bat/sh replacement script |
-| `preload.js` | Context bridge — exposes `window.electronAPI` |
-| `index.html` | Renderer HTML — structural skeleton (no hard-coded fields) |
-| `js/fields-config.js` | **Auto-generated** — `window.FIELDS_CONFIG` (browser-loadable) |
-| `js/form-builder.js` | Builds form HTML dynamically from FIELDS_CONFIG; returns FIELD_MAP |
-| `js/app.js` | Renderer logic — uses dynamic FIELD_MAP from form-builder |
-| `js/realtor-service.js` | RealtorService — loads `data/realtors.json`, persists selected realtor in localStorage, drives the header dropdown UI |
-| `js/money-to-text.js` | BYN → written-out price converter |
-| `css/style.css` | All styles — compact CRM theme |
-| `excel/excel-reader.js` | Parses `.xlsx` using ExcelJS |
-| `generator/word-generator.js` | Fills Word templates via docxtemplater |
-| `fields-config.json` | **Single source of truth** — all field definitions, labels, types |
-| `scripts/scan-excel.js` | CLI scanner — reads Excel, updates fields-config.json + js/fields-config.js |
-
-## Field config format (`fields-config.json`)
-
-Each field in a group supports:
-- `key` — Excel column A value (the field name in the spreadsheet)
-- `label` — display label in the UI
-- `type` — `"text"` (default), `"date"` (adds calendar button), `"byn"` (price validation), `"computed-propis"` (auto-computed, readonly), `"readonly"`
-- `section` — UI section override (e.g. `"deal-prices"` puts deal fields in the property column)
-- `pairWith` — renders two inputs in one row (e.g. Корпус/Квартира)
-- `pairStyle` — `"slash"` (A / B) or `"floor"` (A из B)
-- `pairedUnder` — marks this as the secondary field of a pair
-- `computed: true` — field is not read from or written to Excel; preserved through rescans
-
-## Excel structure
-
-One sheet ("Сделка"). Blocks: `СДЕЛКА`, `ОБЪЕКТ`, `СОБСТВЕННИК №1`, `СОБСТВЕННИК №2`, `СОБСТВЕННИК №3`, `ПОКУПАТЕЛЬ`. Column A = field name, Column B = value. The `ПРОДАВЕЦ` block has been removed — old Excel files that still contain it will load fine (the block is silently ignored).
-
-## Рекламный договор — выбор пакета (Прейскурант)
-
-Шаблон `templates/working/Договор_реклама.docx` содержит 4 плейсхолдера `{{cb_1}}`–`{{cb_4}}` в таблице прейскуранта. При генерации/предпросмотре этого договора (одиночно или в пакете) автоматически открывается модальное окно выбора пакета.
-
-**Как это работает:**
-- Пользователь выбирает один пакет (radio-кнопки) → нажимает «Применить и сформировать»
-- В `buildPlaceholderData()` (`js/app.js`) заполняется `window._reklamaPackage` (1–4)
-- Выбранный `{{cb_N}}` получает значение `☑`, остальные — `☐`
-
-**Пакеты:**
-| Плейсхолдер | Название | Цена |
-|---|---|---|
-| `{{cb_1}}` | Фотосъёмка | 300,00 руб. |
-| `{{cb_2}}` | Фото + видео | 1 000,00 руб. |
-| `{{cb_3}}` | Фото + видео + контент | 2 000,00 руб. |
-| `{{cb_4}}` | Расширенный | по запросу |
-
-**Шаблон:** исходный файл с нативными Word-чекбоксами заменён на `{{cb_N}}` плейсхолдеры. При импорте нового шаблона — заменить нативные чекбоксы (SDT-элементы) на `{{cb_1}}`…`{{cb_4}}` в соответствующих строках таблицы.
-
-## Replit notes
-
-- **No run workflow** — Electron requires a local desktop environment and cannot run in Replit's browser preview. No workflow is configured intentionally.
-- Edit code here; download or clone the repo, then run locally with `npm install && npm start`.
-- Dependencies are pre-installed in the Replit environment (`npm install` confirmed clean on import).
-- To build a distributable Windows installer: `npm run dist` (requires running locally, not on Replit).
-- The renderer layer (`index.html`, `js/`, `css/`) can be edited freely here; changes take effect on the next local `npm start`.
-- **Do not** attempt to run `npm start` or `electron .` in the Replit shell — it will fail without a display server.
+```
+index.html          — единственная страница приложения
+css/style.css       — все стили
+js/                 — логика: app.js, form-builder.js, commission.js и др.
+excel/              — чтение и парсинг xlsx-файлов
+generator/          — генерация docx-документов
+config/             — JSON-конфиги (агенты, комиссии, плейсхолдеры)
+assets/             — фото агентов, иконка
+fields-config.json  — описание полей формы
+```
 
 ## User preferences
 
-- Do not change `main.js`, `preload.js`, or `excel/excel-reader.js` — these are stable backend/IPC files.
-- Only modify the renderer layer: `index.html`, `js/app.js`, `js/form-builder.js`, `css/style.css`, `fields-config.json`.
-- Keep the project's existing Electron architecture — do not migrate to a web server unless the user explicitly requests it.
+<!-- Add user preferences here -->

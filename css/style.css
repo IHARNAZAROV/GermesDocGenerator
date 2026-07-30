@@ -3090,6 +3090,34 @@ body.form-empty .ws-empty-hint {
 @media (max-width: 680px) {
   .win-body { grid-template-columns: 1fr; }
   .smart-panel { display: none; }
+
+  /* ── Collapse all two-column form grids when window is narrow ──
+     Container queries rely on the container width, but when the smart-panel
+     hides at this breakpoint the center pane gets full window width — pushing
+     the container back above the 540px container-query threshold. Force
+     single-column here via a plain media query to cover that gap. */
+  .ws-fields-grid--2col,
+  .form-two-col,
+  .tab-inner-grid,
+  .add-data-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-col + .form-col {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .data-two-col { grid-template-columns: 1fr; }
+  .data-col + .data-col {
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+  .poa-two-col-row { flex-direction: column; }
+  /* Shrink label column so inputs have more room */
+  .fr, .fr-wide, .fr-sm { grid-template-columns: 90px 1fr; }
+  .fr label { font-size: 11px; }
 }
 
 /* ── Section colour-coding (nav items) ──────────────────────────────────────
