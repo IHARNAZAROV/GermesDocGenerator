@@ -1614,6 +1614,33 @@ function buildPlaceholderData() {
   const owner1 = { ...buildPersonBlock('owner1-'), share: getField('owner1-Доля собственности') || '', poa: buildOwnerPoaBlock('owner1') };
   const owner2 = { ...buildPersonBlock('owner2-'), share: getField('owner2-Доля собственности') || '', poa: buildOwnerPoaBlock('owner2') };
   const owner3 = { ...buildPersonBlock('owner3-'), share: getField('owner3-Доля собственности') || '', poa: buildOwnerPoaBlock('owner3') };
+
+  // ── Вычисляемые поля подписанта: представитель если есть, иначе собственник ──
+  // Используйте в шаблонах: {{owner1.signatoryInitials}}, {{owner1.signatoryFullName}} и т.д.
+  function addSignatoryFields(owner) {
+    const src = owner.poa.hasPoa ? owner.poa : owner;
+    owner.signatoryInitials           = src.initials;
+    owner.signatoryFullName           = src.fullName;
+    owner.signatoryLastName           = src.lastName;
+    owner.signatoryFirstName          = src.firstName;
+    owner.signatoryMiddleName         = src.middleName;
+    owner.signatoryPassport           = src.passport;
+    owner.signatoryPassportSeries     = src.passportSeries;
+    owner.signatoryPassportNumber     = src.passportNumber;
+    owner.signatoryPassportIssueDate  = src.passportIssueDate;
+    owner.signatoryPassportIssuedBy   = src.passportIssuedBy;
+    owner.signatoryId                 = src.id;
+    owner.signatoryAddress            = src.address;
+    // Склонения
+    owner.signatoryFullNameGenitive   = src.fullNameGenitive   || src.fullName;
+    owner.signatoryFullNameDative     = src.fullNameDative     || src.fullName;
+    owner.signatoryLastNameGenitive   = src.lastNameGenitive   || src.lastName;
+    owner.signatoryLastNameDative     = src.lastNameDative     || src.lastName;
+  }
+  addSignatoryFields(owner1);
+  addSignatoryFields(owner2);
+  addSignatoryFields(owner3);
+
   const ownerBlocks = [owner1, owner2, owner3];
   const buyer  = buildPersonBlock('buyer-');
 
