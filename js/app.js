@@ -1851,8 +1851,20 @@ const TEMPLATE_REGISTRY = {
             `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
         }
 
+        // signatoryLabel — строка для строки подписи:
+        //   Без представителя: «Козловский Андрей Николаевич»
+        //   С представителем:  «Ковалёва Ирина Сергеевна (доверенность № 1-2345 от 10.01.2026)»
+        let signatoryLabel = owner.fullName || '';
+        if (owner.poa && owner.poa.hasPoa) {
+          const poa = owner.poa;
+          const poaNumPart  = poa.poaNumber ? `№ ${poa.poaNumber}` : '';
+          const poaDatePart = poa.poaDate   ? `от ${poa.poaDate}`  : '';
+          const poaRef      = [poaNumPart, poaDatePart].filter(Boolean).join(' ');
+          signatoryLabel    = poa.fullName + (poaRef ? ` (доверенность ${poaRef})` : '');
+        }
+
         // person — данные конкретного собственника для шаблона {{person.*}}
-        const person = { ...owner, poaSuffix };
+        const person = { ...owner, poaSuffix, signatoryLabel };
         const data   = { ...baseData, person };
 
         // Имя файла всегда берётся из фамилии самого собственника (не представителя)
