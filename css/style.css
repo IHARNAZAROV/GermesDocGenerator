@@ -974,12 +974,12 @@ html, body {
   transform: rotate(-90deg);
 }
 
-/* Collapsible body — grid trick for smooth height animation */
+/* Collapsible body — grid trick needs exactly ONE direct child */
 .tpl-section-body {
   display: grid;
   grid-template-rows: 1fr;
   overflow: hidden;
-  transition: grid-template-rows .22s cubic-bezier(.4,0,.2,1),
+  transition: grid-template-rows .24s cubic-bezier(.4,0,.2,1),
               opacity .2s ease;
   opacity: 1;
 }
@@ -987,9 +987,13 @@ html, body {
   grid-template-rows: 0fr;
   opacity: 0;
 }
-.tpl-section-body > * { min-height: 0; }
+/* The single inner wrapper — must have min-height:0 for grid trick */
+.tpl-section-inner {
+  min-height: 0;
+  overflow: hidden;
+}
 
-/* Collapsed section: remove bottom padding & border */
+/* Collapsed section: remove bottom padding & separator */
 .tpl-section--collapsed {
   padding-bottom: 0;
 }
