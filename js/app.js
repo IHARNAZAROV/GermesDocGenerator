@@ -1854,13 +1854,13 @@ const TEMPLATE_REGISTRY = {
         // signatoryLabel — строка для строки подписи:
         //   Без представителя: «Козловский Андрей Николаевич»
         //   С представителем:  «Ковалёва Ирина Сергеевна (доверенность № 1-2345 от 10.01.2026)»
-        let signatoryLabel = owner.fullName || '';
+        let signatoryLabel = owner.initials || owner.fullName || '';
         if (owner.poa && owner.poa.hasPoa) {
           const poa = owner.poa;
           const poaNumPart  = poa.poaNumber ? `№ ${poa.poaNumber}` : '';
           const poaDatePart = poa.poaDate   ? `от ${poa.poaDate}`  : '';
           const poaRef      = [poaNumPart, poaDatePart].filter(Boolean).join(' ');
-          signatoryLabel    = poa.fullName + (poaRef ? ` (доверенность ${poaRef})` : '');
+          signatoryLabel    = (poa.initials || poa.fullName) + (poaRef ? ` (доверенность ${poaRef})` : '');
         }
 
         // person — данные конкретного собственника для шаблона {{person.*}}
