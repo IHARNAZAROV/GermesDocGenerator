@@ -1664,10 +1664,14 @@ function buildPlaceholderData() {
       const poaNameGen  = poa.fullNameGenitive || poa.fullName;
       const poaNumPart  = poa.poaNumber ? ` № ${poa.poaNumber}` : '';
       const poaDatePart = poa.poaDate   ? ` от ${poa.poaDate}`  : '';
-      owner.poaSuffix =
-        `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+      owner.poaSuffix      = `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+      const poaNumRef      = poa.poaNumber ? `№ ${poa.poaNumber}` : '';
+      const poaDateRef     = poa.poaDate   ? `от ${poa.poaDate}`  : '';
+      const poaRef         = [poaNumRef, poaDateRef].filter(Boolean).join(' ');
+      owner.signatoryLabel = (poa.initials || poa.fullName) + (poaRef ? ` (доверенность ${poaRef})` : '');
     } else {
-      owner.poaSuffix = '';
+      owner.poaSuffix      = '';
+      owner.signatoryLabel = owner.initials || owner.fullName || '';
     }
   }
   addPoaSuffix(owner1);
