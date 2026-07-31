@@ -1811,8 +1811,25 @@ const TEMPLATE_REGISTRY = {
       const results = [];
       for (const ownerKey of ownerKeys) {
         const owner = baseData[ownerKey];
+
+        // nameForConsent:
+        //   Без представителя: «Иванов Иван Иванович»
+        //   С представителем:  «Иванов Иван Иванович в лице Петрова Петра Петровича,
+        //                        действующего согласно доверенности № 12 от 01.01.2024»
+        let nameForConsent = owner.fullName || '';
+        if (owner.poa && owner.poa.hasPoa) {
+          const poa = owner.poa;
+          const poaNumPart  = poa.poaNumber ? ` № ${poa.poaNumber}` : '';
+          const poaDatePart = poa.poaDate   ? ` от ${poa.poaDate}`  : '';
+          nameForConsent =
+            `${owner.fullName} в лице ${poa.fullName}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+        }
+
         // person — данные конкретного собственника для шаблона {{person.*}}
-        const data = { ...baseData, person: owner };
+        const person = { ...owner, nameForConsent };
+        const data   = { ...baseData, person };
+
+        // Имя файла всегда берётся из фамилии самого собственника (не представителя)
         const lastName = owner.lastName || owner.fullName || ownerKey;
         const outName  = `Согласие на обработку данных — ${lastName}.docx`;
         const result = await window.electronAPI.generateDocument(
