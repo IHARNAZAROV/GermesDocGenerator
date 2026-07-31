@@ -319,7 +319,9 @@ ipcMain.handle('word:generate', async (_event, templateKey, data, outputDir, opt
   if (!entry) return { success: false, error: `Неизвестный ключ шаблона: ${templateKey}` };
   const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
   const resolvedDir  = outputDir || path.join(app.getPath('userData'), 'output');
-  const outputPath   = buildOutputPath(resolvedDir, entry.out, options.addDate);
+  // outOverride allows the caller to specify a custom output filename (e.g. per-owner consent docs)
+  const baseName     = options.outOverride || entry.out;
+  const outputPath   = buildOutputPath(resolvedDir, baseName, options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
   return generateWord(templatePath, outputPath, data);
 });

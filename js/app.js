@@ -976,7 +976,21 @@ function updateSidebarStatus() {
 
 // React to individual template checkbox changes
 document.addEventListener('change', (e) => {
-  if (e.target.matches('.tpl-item input[type="checkbox"]')) updateSidebarStatus();
+  if (!e.target.matches('.tpl-item input[type="checkbox"]')) return;
+  updateSidebarStatus();
+
+  // Тост при выборе «Согласие на обработку данных»: сообщаем сколько файлов будет создано
+  const tplItem = e.target.closest('.tpl-item[data-template="soglasie-obrabotka"]');
+  if (tplItem && e.target.checked) {
+    const filledOwners = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+    const n = filledOwners.length;
+    const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
+    showToast(
+      `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
+      'info',
+      4500
+    );
+  }
 });
 
 // React to manual edits / clear of the folder input
@@ -1788,7 +1802,27 @@ const TEMPLATE_REGISTRY = {
   'zapros-pnd':         { label: 'Запрос на ПНД',                                                                        generate: makeGenerate('zapros-pnd') },
   'zapros-rsc':         { label: 'Запрос в РСЦ (Справка)',                                                              generate: makeGenerate('zapros-rsc') },
   'zapros-rsc-privat':  { label: 'Запрос в РСЦ (Приватизация)',                                                          generate: makeGenerate('zapros-rsc-privat') },
-  'soglasie-obrabotka': { label: 'Согласие на обработку данных',                                                         generate: makeGenerate('soglasie-obrabotka') },
+  'soglasie-obrabotka': {
+    label: 'Согласие на обработку данных',
+    // Генерируем отдельный файл на каждого заполненного собственника
+    generate: async function(outputDir, options) {
+      const baseData = buildPlaceholderData();
+      const ownerKeys = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+      const results = [];
+      for (const ownerKey of ownerKeys) {
+        const owner = baseData[ownerKey];
+        // person — данные конкретного собственника для шаблона {{person.*}}
+        const data = { ...baseData, person: owner };
+        const lastName = owner.lastName || owner.fullName || ownerKey;
+        const outName  = `Согласие на обработку данных — ${lastName}.docx`;
+        const result = await window.electronAPI.generateDocument(
+          'soglasie-obrabotka', data, outputDir, { ...options, outOverride: outName }
+        );
+        results.push({ result, outName, label: `Согласие — ${owner.initials || lastName}` });
+      }
+      return { _multiFile: true, results };
+    },
+  },
   'dkp-1-eksklyuziv':  { label: 'Договор оказания риэлтерских услуг (1 собственник, эксклюзив)',                         generate: makeGenerate('dkp-1-eksklyuziv') },
   'dkp-2-eksklyuziv':  { label: 'Договор оказания риэлтерских услуг ЭКС (2 собственника, общий)',                        generate: makeGenerate('dkp-2-eksklyuziv') },
   'dkp-2-obshiy':      { label: 'Договор оказания риэлтерских услуг (2 собственника, общий)',                            generate: makeGenerate('dkp-2-obshiy') },
@@ -1885,6 +1919,29 @@ async function _executeGenerate(toGenerate, outputDir, options) {
     const entry = TEMPLATE_REGISTRY[key];
     if (r.status === 'fulfilled') {
       const result = r.value;
+
+      // ── Мульти-файловый результат (напр. Согласие на обработку данных) ──
+      if (result && result._multiFile) {
+        result.results.forEach(({ result: sub, label }) => {
+          if (sub && sub.success) {
+            successCount++;
+            window.RecentDocs?.push({
+              name:  sub.path.split(/[/\\]/).pop(),
+              type:  'word',
+              icon:  key,
+              path:  sub.path,
+              label,
+            });
+            if (chkOpenAfter && chkOpenAfter.checked) {
+              window.electronAPI.openFile(sub.path);
+            }
+          } else {
+            errors.push(`${label}: ${sub?.error || 'неизвестная ошибка'}`);
+          }
+        });
+        return;
+      }
+
       if (result && result.success) {
         successCount++;
         window.RecentDocs?.push({

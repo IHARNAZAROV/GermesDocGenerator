@@ -130,6 +130,11 @@ html, body {
   color: var(--error-text);
   border: 1px solid var(--error-bdr);
 }
+.toast.toast-info {
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info-bdr);
+}
 
 /* ============================================================
    ERROR BANNER
