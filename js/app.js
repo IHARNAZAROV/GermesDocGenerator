@@ -1812,21 +1812,28 @@ const TEMPLATE_REGISTRY = {
       for (const ownerKey of ownerKeys) {
         const owner = baseData[ownerKey];
 
-        // nameForConsent:
-        //   Без представителя: «Иванов Иван Иванович»
-        //   С представителем:  «Иванов Иван Иванович в лице Петрова Петра Петровича,
-        //                        действующего согласно доверенности № 12 от 01.01.2024»
-        let nameForConsent = owner.fullName || '';
+        // poaSuffix:
+        //   Без представителя: '' (пустая строка)
+        //   С представителем:  ', в лице Ковалёвой Ирины Сергеевны, действующей
+        //                        согласно доверенности № 12 от 01.01.2024'
+        //
+        // Шаблон в Word:
+        //   Я, {{person.fullName}}, дата рождения: {{person.birthDate}},
+        //   идентификационный номер паспорта {{person.id}}{{person.poaSuffix}}
+        //   в соответствии со статьёй ...
+        let poaSuffix = '';
         if (owner.poa && owner.poa.hasPoa) {
           const poa = owner.poa;
+          // Имя представителя в родительном падеже («Ковалёвой Ирины Сергеевны»)
+          const poaNameGen  = poa.fullNameGenitive || poa.fullName;
           const poaNumPart  = poa.poaNumber ? ` № ${poa.poaNumber}` : '';
           const poaDatePart = poa.poaDate   ? ` от ${poa.poaDate}`  : '';
-          nameForConsent =
-            `${owner.fullName} в лице ${poa.fullName}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+          poaSuffix =
+            `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
         }
 
         // person — данные конкретного собственника для шаблона {{person.*}}
-        const person = { ...owner, nameForConsent };
+        const person = { ...owner, poaSuffix };
         const data   = { ...baseData, person };
 
         // Имя файла всегда берётся из фамилии самого собственника (не представителя)
