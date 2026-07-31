@@ -935,15 +935,71 @@ html, body {
 /* ============================================================
    RIGHT PANEL — TEMPLATES
    ============================================================ */
+/* ── Template sections — visual grouping blocks ── */
+.tpl-section {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 6px 6px 4px;
+  margin-bottom: 6px;
+}
+.tpl-section:last-child { margin-bottom: 0; }
+
 .tpl-group-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: var(--fs-2xs);
   font-weight: 700;
   color: var(--text-muted);
-  margin: 12px 0 6px;
+  margin: 0 0 4px;
+  padding: 3px 4px 5px;
   text-transform: uppercase;
   letter-spacing: .6px;
+  border-bottom: 1px solid var(--border-light);
 }
-.tpl-group-hdr:first-child { margin-top: 0; }
+.tpl-group-hdr svg { flex-shrink: 0; opacity: .75; }
+
+/* Per-group accent colours */
+.tpl-group-hdr--contracts {
+  color: #155945;
+  border-left: 3px solid #155945;
+  padding-left: 7px;
+  border-bottom-color: #D9ECE4;
+}
+.tpl-group-hdr--contracts svg { opacity: 1; color: #155945; }
+
+.tpl-group-hdr--agreements {
+  color: #1558D4;
+  border-left: 3px solid #1558D4;
+  padding-left: 7px;
+  border-bottom-color: #DBEAFE;
+}
+.tpl-group-hdr--agreements svg { opacity: 1; color: #1558D4; }
+
+.tpl-group-hdr--acts {
+  color: #B45309;
+  border-left: 3px solid #D97706;
+  padding-left: 7px;
+  border-bottom-color: #FDE68A;
+}
+.tpl-group-hdr--acts svg { opacity: 1; color: #D97706; }
+
+.tpl-group-hdr--requests {
+  color: #6D28D9;
+  border-left: 3px solid #7C3AED;
+  padding-left: 7px;
+  border-bottom-color: #EDE9FE;
+}
+.tpl-group-hdr--requests svg { opacity: 1; color: #7C3AED; }
+
+.tpl-group-hdr--other {
+  color: #4B5563;
+  border-left: 3px solid #9CA3AF;
+  padding-left: 7px;
+  border-bottom-color: #E5E7EB;
+}
+.tpl-group-hdr--other svg { opacity: 1; color: #9CA3AF; }
 
 .tpl-item {
   display: flex;
