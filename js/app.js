@@ -2143,4 +2143,46 @@ btnPreview.addEventListener('click', async () => {
   // Скрываем условные поля при старте (тип объекта не выбран)
   applyAllOwnerPoaVisibility();
   applyObjectTypeVisibility();
+
+  // ── Collapsible template groups ───────────────────────────
+  (function initTplGroups() {
+    const STORAGE_KEY = 'tplGroupsCollapsed';
+
+    // Load saved collapsed state: { groupId: true/false }
+    let collapsed = {};
+    try { collapsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch {}
+
+    function setGroupState(section, isCollapsed, animate) {
+      const hdr = section.querySelector('.tpl-group-hdr');
+      if (!animate) section.style.transition = 'none';
+      section.classList.toggle('tpl-section--collapsed', isCollapsed);
+      if (hdr) hdr.setAttribute('aria-expanded', String(!isCollapsed));
+      if (!animate) {
+        // force reflow then re-enable transitions
+        section.offsetHeight; // eslint-disable-line no-unused-expressions
+        section.style.transition = '';
+      }
+    }
+
+    document.querySelectorAll('.tpl-section[data-group]').forEach(section => {
+      const groupId = section.dataset.group;
+      const hdr = section.querySelector('.tpl-group-hdr');
+      if (!hdr) return;
+
+      // Restore saved state without animation on first paint
+      if (collapsed[groupId]) setGroupState(section, true, false);
+
+      hdr.addEventListener('click', () => {
+        const nowCollapsed = !section.classList.contains('tpl-section--collapsed');
+        setGroupState(section, nowCollapsed, true);
+        collapsed[groupId] = nowCollapsed;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collapsed)); } catch {}
+      });
+
+      // Keyboard: Space / Enter
+      hdr.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); hdr.click(); }
+      });
+    });
+  })();
 }());

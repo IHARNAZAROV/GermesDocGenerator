@@ -957,8 +957,47 @@ html, body {
   text-transform: uppercase;
   letter-spacing: .6px;
   border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  user-select: none;
 }
+.tpl-group-hdr:hover { opacity: .85; }
 .tpl-group-hdr svg { flex-shrink: 0; opacity: .75; }
+
+/* Chevron — sits at right edge */
+.tpl-chevron {
+  margin-left: auto;
+  opacity: .5;
+  transition: transform .22s cubic-bezier(.4,0,.2,1);
+  flex-shrink: 0;
+}
+.tpl-group-hdr[aria-expanded="false"] .tpl-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Collapsible body — grid trick for smooth height animation */
+.tpl-section-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows .22s cubic-bezier(.4,0,.2,1),
+              opacity .2s ease;
+  opacity: 1;
+}
+.tpl-section--collapsed .tpl-section-body {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.tpl-section-body > * { min-height: 0; }
+
+/* Collapsed section: remove bottom padding & border */
+.tpl-section--collapsed {
+  padding-bottom: 0;
+}
+.tpl-section--collapsed .tpl-group-hdr {
+  border-bottom-color: transparent;
+  margin-bottom: 0;
+  padding-bottom: 3px;
+}
 
 /* Per-group accent colours */
 .tpl-group-hdr--contracts {
