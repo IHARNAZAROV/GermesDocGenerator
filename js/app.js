@@ -1655,6 +1655,25 @@ function buildPlaceholderData() {
   addSignatoryFields(owner2);
   addSignatoryFields(owner3);
 
+  // ── poaSuffix: готовая строка «, в лице ФИО, действующего согласно доверенности № X от Y» ──
+  // Пустая строка если представителя нет.
+  // Используйте в шаблонах: {{owner1.poaSuffix}}, {{owner2.poaSuffix}}, {{owner3.poaSuffix}}
+  function addPoaSuffix(owner) {
+    if (owner.poa && owner.poa.hasPoa) {
+      const poa = owner.poa;
+      const poaNameGen  = poa.fullNameGenitive || poa.fullName;
+      const poaNumPart  = poa.poaNumber ? ` № ${poa.poaNumber}` : '';
+      const poaDatePart = poa.poaDate   ? ` от ${poa.poaDate}`  : '';
+      owner.poaSuffix =
+        `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+    } else {
+      owner.poaSuffix = '';
+    }
+  }
+  addPoaSuffix(owner1);
+  addPoaSuffix(owner2);
+  addPoaSuffix(owner3);
+
   const ownerBlocks = [owner1, owner2, owner3];
   const buyer  = buildPersonBlock('buyer-');
 
