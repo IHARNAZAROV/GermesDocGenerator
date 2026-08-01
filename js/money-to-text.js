@@ -63,36 +63,33 @@
   }
 
   /**
+   * Shared core: разбивает целое число на группы и возвращает массив
+   * словесных частей (без склейки и капитализации).
+   * @param {number} num     Целое неотрицательное число
+   * @param {'m'|'f'} gender Род для последней группы (сотни/единицы)
+   * @returns {string[]}
+   */
+  function _decompose(num, gender) {
+    const billions  = Math.floor(num / 1_000_000_000);
+    const millions  = Math.floor((num % 1_000_000_000) / 1_000_000);
+    const thousands = Math.floor((num % 1_000_000) / 1_000);
+    const remainder = num % 1_000;
+
+    const parts = [];
+    if (billions)  parts.push(threeDigits(billions,  'm') + ' ' + pluralForm(billions,  'миллиард', 'миллиарда', 'миллиардов'));
+    if (millions)  parts.push(threeDigits(millions,  'm') + ' ' + pluralForm(millions,  'миллион',  'миллиона',  'миллионов'));
+    if (thousands) parts.push(threeDigits(thousands, 'f') + ' ' + pluralForm(thousands, 'тысяча',   'тысячи',    'тысяч'));
+    if (remainder) parts.push(threeDigits(remainder, gender));
+    return parts;
+  }
+
+  /**
    * Converts the integer ruble amount to lowercase Russian words
    * (without the currency label).
    */
   function rublesInWords(rubles) {
     if (rubles === 0) return 'ноль';
-
-    const billions  = Math.floor(rubles / 1_000_000_000);
-    const millions  = Math.floor((rubles % 1_000_000_000) / 1_000_000);
-    const thousands = Math.floor((rubles % 1_000_000) / 1_000);
-    const remainder = rubles % 1_000;
-
-    const parts = [];
-
-    if (billions) {
-      const w = threeDigits(billions, 'm');
-      parts.push(w + ' ' + pluralForm(billions, 'миллиард', 'миллиарда', 'миллиардов'));
-    }
-    if (millions) {
-      const w = threeDigits(millions, 'm');
-      parts.push(w + ' ' + pluralForm(millions, 'миллион', 'миллиона', 'миллионов'));
-    }
-    if (thousands) {
-      const w = threeDigits(thousands, 'f');           // тысяча — feminine
-      parts.push(w + ' ' + pluralForm(thousands, 'тысяча', 'тысячи', 'тысяч'));
-    }
-    if (remainder) {
-      parts.push(threeDigits(remainder, 'm'));          // рубль — masculine
-    }
-
-    return parts.join(' ');
+    return _decompose(rubles, 'm').join(' ');
   }
 
   // ── main export ─────────────────────────────────────────────
@@ -145,27 +142,8 @@
     const num = parseInt(String(n), 10);
     if (isNaN(num) || num < 0) return '';
 
-    const billions  = Math.floor(num / 1_000_000_000);
-    const millions  = Math.floor((num % 1_000_000_000) / 1_000_000);
-    const thousands = Math.floor((num % 1_000_000) / 1_000);
-    const remainder = num % 1_000;
-
-    const parts = [];
-    if (billions) {
-      parts.push(threeDigits(billions, 'm') + ' ' + pluralForm(billions, 'миллиард', 'миллиарда', 'миллиардов'));
-    }
-    if (millions) {
-      parts.push(threeDigits(millions, 'm') + ' ' + pluralForm(millions, 'миллион', 'миллиона', 'миллионов'));
-    }
-    if (thousands) {
-      parts.push(threeDigits(thousands, 'f') + ' ' + pluralForm(thousands, 'тысяча', 'тысячи', 'тысяч'));
-    }
-    if (remainder) {
-      parts.push(threeDigits(remainder, gender));
-    }
-    if (parts.length === 0) return 'ноль';
-
-    const raw = parts.join(' ');
+    const parts = _decompose(num, gender);
+    const raw   = parts.length === 0 ? 'ноль' : parts.join(' ');
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 
