@@ -912,30 +912,21 @@ document.addEventListener('change', (e) => {
   if (!e.target.matches('.tpl-item input[type="checkbox"]')) return;
   updateSidebarStatus();
 
-  // Тост при выборе «Согласие на обработку данных»: сообщаем сколько файлов будет создано
-  const tplItem = e.target.closest('.tpl-item[data-template="soglasie-obrabotka"]');
-  if (tplItem && e.target.checked) {
-    const filledOwners = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
-    const n = filledOwners.length;
-    const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
-    showToast(
-      `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
-      'info',
-      4500
+  // Тост для шаблонов, генерирующих по одному файлу на собственника
+  const MULTI_FILE_TEMPLATES = ['soglasie-obrabotka', 'doverennost-pnd'];
+  if (e.target.checked) {
+    const matchedTemplate = MULTI_FILE_TEMPLATES.find(
+      key => e.target.closest(`.tpl-item[data-template="${key}"]`)
     );
-  }
-
-  // Тост при выборе «Доверенность ПНД»: сообщаем сколько файлов будет создано
-  const pndItem = e.target.closest('.tpl-item[data-template="doverennost-pnd"]');
-  if (pndItem && e.target.checked) {
-    const filledOwners = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
-    const n = filledOwners.length;
-    const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
-    showToast(
-      `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
-      'info',
-      4500
-    );
+    if (matchedTemplate) {
+      const n    = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k)).length;
+      const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
+      showToast(
+        `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
+        'info',
+        4500
+      );
+    }
   }
 });
 
