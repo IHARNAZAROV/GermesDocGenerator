@@ -1862,7 +1862,50 @@ function makeGenerate(key) {
 }
 
 const TEMPLATE_REGISTRY = {
-  'doverennost-pnd':    { label: 'Доверенность ПНД',                                                                    generate: makeGenerate('doverennost-pnd') },
+  'doverennost-pnd': {
+    label: 'Доверенность ПНД',
+    // Генерируем отдельный файл на каждого заполненного собственника
+    generate: async function(outputDir, options) {
+      const baseData = buildPlaceholderData();
+      const ownerKeys = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+      const results = [];
+      for (const ownerKey of ownerKeys) {
+        const owner = baseData[ownerKey];
+
+        // poaSuffix и signatoryLabel — аналогично согласию на обработку данных
+        let poaSuffix = '';
+        if (owner.poa && owner.poa.hasPoa) {
+          const poa = owner.poa;
+          const poaNameGen  = poa.fullNameGenitive || poa.fullName;
+          const poaNumPart  = poa.poaNumber ? ` № ${poa.poaNumber}` : '';
+          const poaDatePart = poa.poaDate   ? ` от ${poa.poaDate}`  : '';
+          poaSuffix = `, в лице ${poaNameGen}, ${poa.poaAction} согласно доверенности${poaNumPart}${poaDatePart}`;
+        }
+
+        let signatoryLabel = owner.initials || owner.fullName || '';
+        if (owner.poa && owner.poa.hasPoa) {
+          const poa = owner.poa;
+          const poaNumPart  = poa.poaNumber ? `№ ${poa.poaNumber}` : '';
+          const poaDatePart = poa.poaDate   ? `от ${poa.poaDate}`  : '';
+          const poaRef      = [poaNumPart, poaDatePart].filter(Boolean).join(' ');
+          signatoryLabel    = (poa.initials || poa.fullName) + (poaRef ? ` (доверенность ${poaRef})` : '');
+        }
+
+        // person — данные конкретного собственника для шаблона {{person.*}}
+        const person = { ...owner, poaSuffix, signatoryLabel };
+        const data   = { ...baseData, person };
+
+        // Имя файла берётся из фамилии самого собственника (не представителя)
+        const lastName = owner.lastName || owner.fullName || ownerKey;
+        const outName  = `Доверенность ПНД — ${lastName}.docx`;
+        const result = await window.electronAPI.generateDocument(
+          'doverennost-pnd', data, outputDir, { ...options, outOverride: outName }
+        );
+        results.push({ result, outName, label: `Доверенность ПНД — ${owner.initials || lastName}` });
+      }
+      return { _multiFile: true, results };
+    },
+  },
   'raspiska-klyuchi':   { label: 'Расписка в получении ключей',                                                          generate: makeGenerate('raspiska-klyuchi') },
   'reklama':            { label: 'Договор на оказание рекламных услуг',                                                  generate: makeGenerate('reklama') },
   'rastorzhenie':       { label: 'Соглашение о расторжении',                                                             generate: makeGenerate('rastorzhenie') },
