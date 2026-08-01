@@ -12,48 +12,7 @@ const LS_KEY = 'germesUI_v2';
 // ── Секции аккордеона ─────────────────────────────────────────
 const BLOCKS = ['ws-excel', 'ws-deal', 'ws-property', 'ws-owners', 'ws-buyer'];
 
-// ── Проверяемые поля: { id, label, block } ────────────────────
-// Соответствует логике handleCheckData в app.js
-const REQUIRED_FIELDS = [
-  // Сделка
-  { id: 'deal-Стоимость BYN',            label: 'Цена BYN',               block: 'ws-deal' },
-  { id: 'deal-Номер договора',            label: 'Номер договора',          block: 'ws-deal' },
-  { id: 'deal-Дата договора',            label: 'Дата договора',           block: 'ws-deal' },
-  { id: 'deal-Дата окончания договора',  label: 'Дата окончания',          block: 'ws-deal' },
-  // Объект
-  { id: 'property-Тип объекта',    label: 'Тип объекта',      block: 'ws-property' },
-  { id: 'property-Адрес',          label: 'Адрес',             block: 'ws-property' },
-  { id: 'property-Город',          label: 'Город',             block: 'ws-property' },
-  { id: 'property-Улица',          label: 'Улица',             block: 'ws-property' },
-  { id: 'property-Дом',            label: 'Дом',               block: 'ws-property' },
-  { id: 'property-Этаж',           label: 'Этаж',              block: 'ws-property' },
-  { id: 'property-Этажность',      label: 'Этажность',         block: 'ws-property' },
-  { id: 'property-Количество комнат', label: 'Кол-во комнат', block: 'ws-property' },
-  { id: 'property-Общая площадь',  label: 'Общая площадь',    block: 'ws-property' },
-  { id: 'property-Жилая площадь',  label: 'Жилая площадь',   block: 'ws-property' },
-  { id: 'property-Площадь кухни',  label: 'Площадь кухни',   block: 'ws-property' },
-  // Покупатель
-  { id: 'buyer-Фамилия',                 label: 'Покупатель: Фамилия',      block: 'ws-buyer' },
-  { id: 'buyer-Имя',                     label: 'Покупатель: Имя',           block: 'ws-buyer' },
-  { id: 'buyer-Отчество',                label: 'Покупатель: Отчество',      block: 'ws-buyer' },
-  { id: 'buyer-Дата рождения',           label: 'Покупатель: Дата рождения', block: 'ws-buyer' },
-  { id: 'buyer-Паспорт серия',           label: 'Покупатель: Паспорт серия', block: 'ws-buyer' },
-  { id: 'buyer-Паспорт номер',           label: 'Покупатель: Паспорт номер', block: 'ws-buyer' },
-  { id: 'buyer-Идентификационный номер', label: 'Покупатель: Идент. номер',  block: 'ws-buyer' },
-  { id: 'buyer-Кем выдан',              label: 'Покупатель: Кем выдан',     block: 'ws-buyer' },
-  { id: 'buyer-Дата выдачи',            label: 'Покупатель: Дата выдачи',   block: 'ws-buyer' },
-  { id: 'buyer-Адрес регистрации',       label: 'Покупатель: Адрес регистр.', block: 'ws-buyer' },
-];
-
-// Поля собственника №1 (базовые, всегда проверяются или при наличии)
-const OWNER1_FIELDS = [
-  { id: 'owner1-Фамилия',                 label: 'Собств.1: Фамилия',       block: 'ws-owners' },
-  { id: 'owner1-Имя',                     label: 'Собств.1: Имя',            block: 'ws-owners' },
-  { id: 'owner1-Паспорт серия',           label: 'Собств.1: Паспорт серия',  block: 'ws-owners' },
-  { id: 'owner1-Паспорт номер',           label: 'Собств.1: Паспорт номер',  block: 'ws-owners' },
-  { id: 'owner1-Идентификационный номер', label: 'Собств.1: Идент. номер',   block: 'ws-owners' },
-  { id: 'owner1-Адрес регистрации',       label: 'Собств.1: Адрес регистр.', block: 'ws-owners' },
-];
+// Поля вынесены в js/validation.js (window.Validator).
 
 // ── Все поля для прогресса (включая необязательные) ───────────
 // Считаем все видимые, не-readonly, не-hidden поля
@@ -70,73 +29,10 @@ function getAllFormInputs() {
 }
 
 // ── Вычислить незаполненные обязательные поля ─────────────────
+// Тонкая обёртка над единым валидатором (js/validation.js).
+// Smart Panel: покупатель обязателен только при наличии задатка.
 function getIssues() {
-  const issues = [];
-  const propTypeRaw = (document.getElementById('property-Тип объекта')?.value || '').trim().toLowerCase();
-  const isHouse      = propTypeRaw === 'дом' || propTypeRaw === 'жилой дом';
-  const isFlat       = propTypeRaw === 'квартира' || propTypeRaw === 'апартаменты' || propTypeRaw === 'комната';
-  const isCommercial = propTypeRaw === 'коммерческая недвижимость';
-
-  // Property-type-specific fields
-  const extraPropertyFields = [];
-  if (isHouse) {
-    extraPropertyFields.push(
-      { id: 'property-Кадастровый номер',   label: 'Кадастровый №',       block: 'ws-property' },
-      { id: 'property-Площадь участка',     label: 'Площадь участка',     block: 'ws-property' },
-      { id: 'property-Форма собственности', label: 'Форма собственности', block: 'ws-property' },
-    );
-  } else if (isFlat) {
-    extraPropertyFields.push(
-      { id: 'property-Инвентарный номер', label: 'Инвентарный №', block: 'ws-property' },
-    );
-  } else if (isCommercial) {
-    extraPropertyFields.push(
-      { id: 'property-Вид коммерческой недвижимости',        label: 'Вид комм. недвижимости',        block: 'ws-property' },
-      { id: 'property-Назначение коммерческой недвижимости', label: 'Назначение комм. недвижимости', block: 'ws-property' },
-    );
-  }
-
-  // Покупатель обязателен только если указана сумма задатка
-  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
-  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
-  const hasBuyer   = depositBYN !== '' || depositUSD !== '';
-
-  const baseFields  = hasBuyer ? REQUIRED_FIELDS : REQUIRED_FIELDS.filter(f => f.block !== 'ws-buyer');
-  const allRequired = [...baseFields, ...extraPropertyFields];
-
-  // Check owner1 if it has any data filled
-  const owner1HasData = OWNER1_FIELDS.some(f => {
-    const el = document.getElementById(f.id);
-    return el && el.value.trim() !== '';
-  });
-  if (owner1HasData) {
-    allRequired.push(...OWNER1_FIELDS);
-  }
-
-  // Check representative fields for each owner that has "Есть представитель" = "Да"
-  ['owner1', 'owner2', 'owner3'].forEach(prefix => {
-    const hasRepEl = document.getElementById(`${prefix}-Есть представитель`);
-    if (!hasRepEl || (hasRepEl.value || '').trim().toLowerCase() !== 'да') return;
-    const n = prefix.slice(-1);
-    [
-      { id: `${prefix}-Представитель фамилия`,      label: `Собств.${n}: Представитель фамилия`,   block: 'ws-owners' },
-      { id: `${prefix}-Представитель имя`,           label: `Собств.${n}: Представитель имя`,        block: 'ws-owners' },
-      { id: `${prefix}-Представитель паспорт серия`, label: `Собств.${n}: Представ. паспорт серия`,  block: 'ws-owners' },
-      { id: `${prefix}-Представитель паспорт номер`, label: `Собств.${n}: Представ. паспорт номер`,  block: 'ws-owners' },
-      { id: `${prefix}-Номер доверенности`,          label: `Собств.${n}: Номер доверен.`,           block: 'ws-owners' },
-    ].forEach(f => allRequired.push(f));
-  });
-
-  for (const f of allRequired) {
-    const el = document.getElementById(f.id);
-    if (!el) continue;
-    // Пропускаем поля, скрытые фильтром типа объекта
-    if (typeof isInputVisible === 'function' && !isInputVisible(el)) continue;
-    if (el.value.trim() === '') {
-      issues.push(f);
-    }
-  }
-  return issues;
+  return window.Validator.getValidationIssues({ requireBuyer: false });
 }
 
 
@@ -369,12 +265,6 @@ function updateNavBadges(issues) {
 
   // Статус документов
   updateDocsNavStatus();
-}
-
-function hasBlockData(blockId) {
-  const block = document.getElementById(blockId);
-  if (!block) return false;
-  return [...block.querySelectorAll('input[type="text"]')].some(el => el.value.trim() !== '');
 }
 
 function updateDocsNavStatus() {

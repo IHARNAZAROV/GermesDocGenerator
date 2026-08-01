@@ -534,89 +534,22 @@ function handleClearForm() {
 //  Check data (basic validation)
 // ============================================================
 
-// Вспомогательная: полный набор полей собственника N
-function ownerCheckFields(prefix, n) {
-  return [
-    [`${prefix}-Фамилия`,                 `Собственник ${n} → Фамилия`],
-    [`${prefix}-Имя`,                     `Собственник ${n} → Имя`],
-    [`${prefix}-Отчество`,                `Собственник ${n} → Отчество`],
-    [`${prefix}-Дата рождения`,           `Собственник ${n} → Дата рождения`],
-    [`${prefix}-Паспорт серия`,           `Собственник ${n} → Паспорт серия`],
-    [`${prefix}-Паспорт номер`,           `Собственник ${n} → Паспорт номер`],
-    [`${prefix}-Идентификационный номер`, `Собственник ${n} → Идент. номер`],
-    [`${prefix}-Кем выдан`,              `Собственник ${n} → Кем выдан`],
-    [`${prefix}-Дата выдачи`,            `Собственник ${n} → Дата выдачи`],
-    [`${prefix}-Адрес регистрации`,       `Собственник ${n} → Адрес регистрации`],
-    [`${prefix}-Доля собственности`,      `Собственник ${n} → Доля собственности`],
-  ];
-}
-
 function handleCheckData() {
-  // ── Базовые проверки из Smart Panel (getIssues — ui-controller.js) ─
-  // getIssues() доступна глобально: ui-controller.js загружается сразу
-  // после app.js, и к моменту клика оба скрипта уже выполнены.
-  const smartIssues = getIssues();
-  const missing     = smartIssues.map(f => f.label);
-  const checkedIds  = new Set(smartIssues.map(f => f.id));
+  // Единый валидатор (validation.js): покупатель всегда обязателен
+  const issues  = window.Validator.getValidationIssues({ requireBuyer: true });
+  const missing = issues.map(f => f.label);
+  const seen    = new Set(issues.map(f => f.id));
 
-  // chk добавляет поле только если его ещё нет в getIssues
-  function chk(id, label) {
-    if (checkedIds.has(id)) return;
+  // Скрытые поля (display:none), которые isInputVisible пропускает,
+  // но которые обязательны для генерации документов — проверяем напрямую
+  function chkHidden(id, label) {
+    if (seen.has(id)) return;
     const el = document.getElementById(id);
     if (el && isFieldEmpty(el.value)) missing.push(label);
   }
+  chkHidden('deal-Количество собственников', 'Сделка → Кол-во собственников');
+  chkHidden('deal-Ответственный риэлтер',    'Сделка → Риэлтер');
 
-  // ── Дополнительные поля: только кнопка, нет в Smart Panel ────
-  chk('deal-Количество собственников', 'Сделка → Кол-во собственников');
-  chk('deal-Ответственный риэлтер',    'Сделка → Риэлтер');
-
-  // Тип объекта нестандартный / не выбран → проверяем оба идентификатора
-  // (getIssues не имеет else-ветки для неизвестного типа)
-  const propTypeRaw = (getField('property-Тип объекта') || '').trim().toLowerCase();
-  const isHouseChk  = propTypeRaw === 'дом' || propTypeRaw === 'жилой дом';
-  const isFlatChk   = propTypeRaw === 'квартира' || propTypeRaw === 'апартаменты' || propTypeRaw === 'комната';
-  const isCommerChk = propTypeRaw === 'коммерческая недвижимость';
-  if (!isHouseChk && !isFlatChk && !isCommerChk) {
-    chk('property-Кадастровый номер', 'Объект → Кадастровый №');
-    chk('property-Инвентарный номер', 'Объект → Инвентарный №');
-  }
-
-  // Покупатель — при ручной проверке всегда обязателен
-  // (Smart Panel требует покупателя только при наличии задатка)
-  const depositBYN = (document.getElementById('deal-Сумма задатка BYN')?.value || '').trim();
-  const depositUSD = (document.getElementById('deal-Сумма задатка USD')?.value || '').trim();
-  if (depositBYN === '' && depositUSD === '') {
-    [
-      ['buyer-Фамилия',                 'Покупатель → Фамилия'],
-      ['buyer-Имя',                     'Покупатель → Имя'],
-      ['buyer-Отчество',                'Покупатель → Отчество'],
-      ['buyer-Дата рождения',           'Покупатель → Дата рождения'],
-      ['buyer-Паспорт серия',           'Покупатель → Паспорт серия'],
-      ['buyer-Паспорт номер',           'Покупатель → Паспорт номер'],
-      ['buyer-Идентификационный номер', 'Покупатель → Идент. номер'],
-      ['buyer-Кем выдан',              'Покупатель → Кем выдан'],
-      ['buyer-Дата выдачи',            'Покупатель → Дата выдачи'],
-      ['buyer-Адрес регистрации',       'Покупатель → Адрес регистрации'],
-    ].forEach(([id, label]) => chk(id, label));
-  }
-
-  // Собственник 1 — расширенный набор
-  // (Smart Panel проверяет только 6 базовых полей из OWNER1_FIELDS)
-  if (isOwnerPresent('owner1')) {
-    [
-      ['owner1-Отчество',           'Собственник 1 → Отчество'],
-      ['owner1-Дата рождения',      'Собственник 1 → Дата рождения'],
-      ['owner1-Кем выдан',         'Собственник 1 → Кем выдан'],
-      ['owner1-Дата выдачи',       'Собственник 1 → Дата выдачи'],
-      ['owner1-Доля собственности', 'Собственник 1 → Доля собственности'],
-    ].forEach(([id, label]) => chk(id, label));
-  }
-
-  // Собственники 2 и 3 — полный набор (Smart Panel их не проверяет)
-  if (isOwnerPresent('owner2')) ownerCheckFields('owner2', 2).forEach(([id, label]) => chk(id, label));
-  if (isOwnerPresent('owner3')) ownerCheckFields('owner3', 3).forEach(([id, label]) => chk(id, label));
-
-  // ── Результат ─────────────────────────────────────────────────
   if (missing.length === 0) {
     showToast('✔ Все поля заполнены');
   } else {
@@ -756,8 +689,8 @@ const BLOCK_COMPLETE_LABELS = {
 };
 
 function getRequiredIssueCountByBlock() {
-  if (typeof getIssues !== 'function') return null;
-  return getIssues().reduce((acc, issue) => {
+  if (!window.Validator) return null;
+  return window.Validator.getValidationIssues({ requireBuyer: false }).reduce((acc, issue) => {
     acc[issue.block] = (acc[issue.block] || 0) + 1;
     return acc;
   }, {});
