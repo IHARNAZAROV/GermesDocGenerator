@@ -673,8 +673,13 @@ function isOwnerPresent(ownerPrefix) {
   });
 }
 
+/** Возвращает массив ключей заполненных собственников, например ['owner1', 'owner2']. */
+function getActiveOwners() {
+  return ['owner1', 'owner2', 'owner3'].filter(isOwnerPresent);
+}
+
 function getOwnersCount() {
-  const count = ['owner1', 'owner2', 'owner3'].filter(p => isOwnerPresent(p)).length;
+  const count = getActiveOwners().length;
   return count > 0 ? count : 1;
 }
 
@@ -919,7 +924,7 @@ document.addEventListener('change', (e) => {
       key => e.target.closest(`.tpl-item[data-template="${key}"]`)
     );
     if (matchedTemplate) {
-      const n    = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k)).length;
+      const n    = getActiveOwners().length;
       const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
       showToast(
         `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
@@ -1804,7 +1809,7 @@ const TEMPLATE_REGISTRY = {
     // Генерируем отдельный файл на каждого заполненного собственника
     generate: async function(outputDir, options) {
       const baseData = buildPlaceholderData();
-      const ownerKeys = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+      const ownerKeys = getActiveOwners();
       const results = [];
       for (const ownerKey of ownerKeys) {
         const owner = baseData[ownerKey];
@@ -1854,7 +1859,7 @@ const TEMPLATE_REGISTRY = {
     // Генерируем отдельный файл на каждого заполненного собственника
     generate: async function(outputDir, options) {
       const baseData = buildPlaceholderData();
-      const ownerKeys = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+      const ownerKeys = getActiveOwners();
       const results = [];
       for (const ownerKey of ownerKeys) {
         const owner = baseData[ownerKey];
