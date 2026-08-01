@@ -1794,6 +1794,41 @@ function buildPlaceholderData() {
   property.remainderUSD      = '';
   property.remainderUSDWords = '';
 
+  // ── Подписант (seller) — данные для преамбулы и блоков подписей ──
+  // seller = данные того, кто фактически подписывает (представитель если есть, иначе собственник).
+  // Используется в шаблоне: {{seller.fullName}}, {{seller.address}}, {{seller.initials}} и т.д.
+  function buildSellerFromOwner(owner) {
+    const src = (owner.poa && owner.poa.hasPoa) ? owner.poa : owner;
+    return {
+      fullName:                    src.fullName                    || '',
+      initials:                    src.initials                    || '',
+      lastName:                    src.lastName                    || '',
+      firstName:                   src.firstName                   || '',
+      middleName:                  src.middleName                  || '',
+      address:                     src.address                     || '',
+      passport:                    src.passport                    || '',
+      passportSeries:              src.passportSeries              || '',
+      passportNumber:              src.passportNumber              || '',
+      passportIssuedBy:            src.passportIssuedBy            || '',
+      passportIssuedByInstrumental: src.passportIssuedByInstrumental || '',
+      passportIssueDate:           src.passportIssueDate           || '',
+      id:                          src.id                          || '',
+      phone:                       owner.phone                     || '', // телефон всегда от собственника
+      poaNumber:                   (owner.poa && owner.poa.hasPoa) ? (owner.poa.poaNumber || '') : '',
+      poaDate:                     (owner.poa && owner.poa.hasPoa) ? (owner.poa.poaDate   || '') : '',
+    };
+  }
+
+  // signatories — массив подписантов для loop-блоков в шаблоне Договора_реклама.
+  // Каждый элемент: { seller: {...} } — сохраняем ключ seller, чтобы {{seller.*}}
+  // внутри цикла {#signatories} работали без изменения шаблона.
+  const _activeOwners = [owner1, owner2, owner3].filter(o => o.fullName);
+  const signatories = (_activeOwners.length > 0 ? _activeOwners : [owner1])
+    .map(owner => ({ seller: buildSellerFromOwner(owner) }));
+
+  // seller на корневом уровне — для преамбулы договора (первый собственник / представитель)
+  const seller = signatories[0].seller;
+
   // ── Количество экземпляров ──────────────────────────────────
   // Зависит от числа заполненных собственников: каждый собственник
   // получает свой экземпляр, плюс один экземпляр для исполнителя.
@@ -1812,7 +1847,7 @@ function buildPlaceholderData() {
   const cb_3 = _pkg === 3 ? '☑' : '☐';
   const cb_4 = _pkg === 4 ? '☑' : '☐';
 
-  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, copies, cb_1, cb_2, cb_3, cb_4 };
+  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, copies, cb_1, cb_2, cb_3, cb_4, seller, signatories };
   } finally {
     _currentSnap = null;
   }
