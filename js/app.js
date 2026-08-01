@@ -1794,6 +1794,15 @@ function buildPlaceholderData() {
   property.remainderUSD      = '';
   property.remainderUSDWords = '';
 
+  // ── Количество экземпляров ──────────────────────────────────
+  // Зависит от числа заполненных собственников: каждый собственник
+  // получает свой экземпляр, плюс один экземпляр для исполнителя.
+  const _filledOwnerCount = [owner1, owner2, owner3].filter(o => o.fullName).length || 1;
+  const copies = {
+    count:      _filledOwnerCount + 1,
+    countWords: ['двух', 'трёх', 'четырёх'][_filledOwnerCount - 1] || String(_filledOwnerCount + 1),
+  };
+
   // ── Рекламный пакет — прейскурант ──────────────────────────
   // Устанавливается через модалку перед генерацией Договора_реклама.
   // 0 означает «не выбран» — все галочки пустые.
@@ -1803,7 +1812,7 @@ function buildPlaceholderData() {
   const cb_3 = _pkg === 3 ? '☑' : '☐';
   const cb_4 = _pkg === 4 ? '☑' : '☐';
 
-  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, cb_1, cb_2, cb_3, cb_4 };
+  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, copies, cb_1, cb_2, cb_3, cb_4 };
   } finally {
     _currentSnap = null;
   }
