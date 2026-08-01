@@ -991,6 +991,19 @@ document.addEventListener('change', (e) => {
       4500
     );
   }
+
+  // Тост при выборе «Доверенность ПНД»: сообщаем сколько файлов будет создано
+  const pndItem = e.target.closest('.tpl-item[data-template="doverennost-pnd"]');
+  if (pndItem && e.target.checked) {
+    const filledOwners = ['owner1', 'owner2', 'owner3'].filter(k => isOwnerPresent(k));
+    const n = filledOwners.length;
+    const word = n === 1 ? 'файл' : n < 5 ? 'файла' : 'файлов';
+    showToast(
+      `ℹ Заполнено собственников: ${n} — будет сформировано ${n} ${word}`,
+      'info',
+      4500
+    );
+  }
 });
 
 // React to manual edits / clear of the folder input
