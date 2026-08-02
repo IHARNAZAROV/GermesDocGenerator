@@ -99,6 +99,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectFolder: (defaultPath) =>
     ipcRenderer.invoke('dialog:selectFolder', optStr(defaultPath, 'defaultPath')),
 
+  // Restore a saved folder path on startup without re-opening the dialog
+  restoreFolder: (folderPath) =>
+    ipcRenderer.invoke('folder:restore', optStr(folderPath, 'folderPath')),
+
   // Open file with default OS app
   openFile: (filePath) =>
     ipcRenderer.invoke('shell:openFile', str(filePath, 'filePath')),

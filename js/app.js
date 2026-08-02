@@ -199,9 +199,26 @@ function restoreAppSettings() {
     const raw = localStorage.getItem(LS_SETTINGS_KEY);
     if (!raw) return;
     const s = JSON.parse(raw);
+
+    // Restore folder display text immediately so UI shows the path
     if (saveFolderInput && typeof s.saveFolder === 'string' && s.saveFolder) {
       saveFolderInput.value = s.saveFolder;
+
+      // Re-mint a valid session token for the saved path (no dialog needed)
+      if (window.electronAPI?.restoreFolder) {
+        window.electronAPI.restoreFolder(s.saveFolder).then((result) => {
+          if (result) {
+            saveFolderToken = result.token;
+          } else {
+            // Folder no longer exists — clear the stale value
+            saveFolderInput.value = '';
+            saveAppSettings();
+          }
+          updateSidebarStatus();
+        });
+      }
     }
+
     if (chkOpenAfter  && typeof s.openAfter === 'boolean') chkOpenAfter.checked  = s.openAfter;
     if (chkAddDate    && typeof s.addDate   === 'boolean') chkAddDate.checked    = s.addDate;
 

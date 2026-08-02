@@ -278,6 +278,18 @@ ipcMain.on('app:close-confirmed', () => {
 // ============================================================
 //  IPC — select output folder dialog
 // ============================================================
+// Restore a previously saved folder path on startup (no dialog — just re-mint a token)
+ipcMain.handle('folder:restore', (_event, folderPath) => {
+  if (typeof folderPath !== 'string' || !folderPath) return null;
+  try {
+    const stat = fs.statSync(folderPath);
+    if (!stat.isDirectory()) return null;
+  } catch {
+    return null; // folder no longer exists
+  }
+  return { path: folderPath, token: createFileToken(folderPath, 'folder') };
+});
+
 ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     title: 'Выбрать папку для сохранения',
