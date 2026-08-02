@@ -1,6 +1,18 @@
 'use strict';
 
 // ============================================================
+//  Утилита: экранирование HTML-спецсимволов
+// ============================================================
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ============================================================
 //  Динамическая генерация формы из FIELDS_CONFIG
 //  FIELD_MAP строится автоматически — не редактируйте вручную.
 //  Чтобы добавить/удалить поля:
@@ -2249,7 +2261,7 @@ async function loadPreviewTab(templateKey, data) {
     if (!result || !result.success) {
       previewContent.innerHTML =
         `<div style="padding:32px;color:var(--error-text);font-size:13px;">
-           ✖ Ошибка предпросмотра: ${result?.error || 'неизвестная ошибка'}
+           ✖ Ошибка предпросмотра: ${escapeHtml(result?.error || 'неизвестная ошибка')}
          </div>`;
       return;
     }
@@ -2262,7 +2274,7 @@ async function loadPreviewTab(templateKey, data) {
   } catch (err) {
     previewLoader.hidden = true;
     previewContent.innerHTML =
-      `<div style="padding:32px;color:var(--error-text);font-size:13px;">✖ ${err.message}</div>`;
+      `<div style="padding:32px;color:var(--error-text);font-size:13px;">✖ ${escapeHtml(err.message)}</div>`;
   }
 }
 
