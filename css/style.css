@@ -853,6 +853,52 @@ html, body {
 }
 .tab-pane { display: none; padding: 12px 14px; }
 .tab-pane.active { display: block; }
+
+/* Owner tab — status icon (○ / ✓) */
+.owner-tab-status {
+  display: inline-block;
+  font-size: 11px;
+  margin-right: 5px;
+  opacity: .55;
+  transition: color .15s, opacity .15s;
+}
+.owner-tab-status--filled {
+  color: var(--success, #28a745);
+  opacity: 1;
+}
+/* Remove (×) button inside a tab */
+.owner-tab-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-muted);
+  opacity: .6;
+  transition: background .15s, color .15s, opacity .15s;
+}
+.owner-tab-remove:hover {
+  background: var(--danger-light, #fde8e8);
+  color: var(--danger, #c0392b);
+  opacity: 1;
+}
+/* "+ Добавить собственника" button */
+.tab-btn--add {
+  margin-left: auto;
+  color: var(--brand);
+  border-style: dashed;
+  border-color: var(--brand-light, var(--border-light));
+  opacity: .75;
+}
+.tab-btn--add:hover {
+  opacity: 1;
+  background: var(--brand-xlight);
+  border-color: var(--brand);
+}
 .tab-inner-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -490,10 +490,11 @@
               <div class="ws-block-body">
                 <div class="ws-block-inner">
                   <div class="tabs-wrapper">
-                    <div class="tab-bar">
-                      <button class="tab-btn active" data-tab="owner1">Собственник 1</button>
-                      <button class="tab-btn" data-tab="owner2">Собственник 2</button>
-                      <button class="tab-btn" data-tab="owner3">Собственник 3</button>
+                    <div class="tab-bar" id="owner-tab-bar">
+                      <button class="tab-btn active" data-tab="owner1"><span class="owner-tab-status" id="tab-status-owner1">○</span>Собственник 1</button>
+                      <button class="tab-btn" data-tab="owner2" hidden><span class="owner-tab-status" id="tab-status-owner2">○</span>Собственник 2<span class="owner-tab-remove" data-remove="owner2" title="Убрать собственника">×</span></button>
+                      <button class="tab-btn" data-tab="owner3" hidden><span class="owner-tab-status" id="tab-status-owner3">○</span>Собственник 3<span class="owner-tab-remove" data-remove="owner3" title="Убрать собственника">×</span></button>
+                      <button class="tab-btn tab-btn--add" id="btn-add-owner" title="Добавить собственника">+ Добавить</button>
                     </div>
 
                     <div id="tab-pane-owner1" class="tab-pane active">

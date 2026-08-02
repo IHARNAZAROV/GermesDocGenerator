@@ -354,13 +354,14 @@ function onInputChange(el, currentValue) {
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(autoSave, 30000);
   }
-  // Re-evaluate contract availability whenever owner fields change
+  // Re-evaluate contract availability and tab status whenever owner fields change
   if (
     inputId.startsWith('owner1-') ||
     inputId.startsWith('owner2-') ||
     inputId.startsWith('owner3-')
   ) {
     updateContractAvailability();
+    updateOwnerTabStatuses();
   }
   // Показываем/скрываем блок доверенности собственника
   if (inputId === 'owner1-Есть представитель' ||
@@ -595,19 +596,116 @@ window.electronAPI?.onRequestSaveBeforeClose?.(async () => {
 });
 
 // ============================================================
-//  Owner tabs
+//  Owners count detection  (placed here — used by tab init below)
 // ============================================================
-const tabBtns  = document.querySelectorAll('.tab-btn[data-tab]');
-const tabPanes = document.querySelectorAll('.tab-pane');
+const OWNER_SIGNIFICANT_FIELDS = [
+  'Фамилия', 'Имя', 'Паспорт серия', 'Паспорт номер', 'Идентификационный номер',
+];
 
-function switchTab(tabId) {
-  tabBtns.forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tabId));
-  tabPanes.forEach((pane) => pane.classList.toggle('active', pane.id === 'tab-pane-' + tabId));
+function isOwnerPresent(ownerPrefix) {
+  return OWNER_SIGNIFICANT_FIELDS.some((field) => {
+    const el = document.getElementById(`${ownerPrefix}-${field}`);
+    return el && !isFieldEmpty(el.value);
+  });
 }
 
-tabBtns.forEach((btn) => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+// ============================================================
+//  Owner tabs — dynamic (1–3, add/remove)
+// ============================================================
+let ownerTabCount = 1; // how many owner tabs are currently visible
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-pane').forEach((pane) => {
+    pane.classList.toggle('active', pane.id === 'tab-pane-' + tabId);
+  });
+}
+
+/** Show/hide tabs and controls to match ownerTabCount. */
+function updateOwnerTabs() {
+  const keys = ['owner1', 'owner2', 'owner3'];
+  keys.forEach((key, i) => {
+    const btn = document.querySelector(`.tab-btn[data-tab="${key}"]`);
+    if (btn) btn.hidden = ownerTabCount < (i + 1);
+  });
+
+  // × remove button: only on the last visible tab (owner2 or owner3)
+  ['owner2', 'owner3'].forEach((key, i) => {
+    const rem = document.querySelector(`.owner-tab-remove[data-remove="${key}"]`);
+    if (rem) rem.hidden = ownerTabCount !== (i + 2);
+  });
+
+  // "+ Добавить" button: hidden when all 3 tabs are open
+  const addBtn = document.getElementById('btn-add-owner');
+  if (addBtn) addBtn.hidden = ownerTabCount >= 3;
+
+  updateOwnerTabStatuses();
+}
+
+/** Refresh ✓/○ icons on each owner tab. */
+function updateOwnerTabStatuses() {
+  ['owner1', 'owner2', 'owner3'].forEach((key) => {
+    const el = document.getElementById('tab-status-' + key);
+    if (!el) return;
+    const filled = isOwnerPresent(key);
+    el.textContent = filled ? '✓' : '○';
+    el.classList.toggle('owner-tab-status--filled', filled);
+  });
+}
+
+/** Clear all form fields belonging to a given owner prefix. */
+function clearOwnerFields(ownerPrefix) {
+  for (const [mapKey, inputId] of Object.entries(FIELD_MAP)) {
+    if (mapKey.startsWith(ownerPrefix + '-')) {
+      setInputValue(inputId, '');
+    }
+  }
+}
+
+/** After loading Excel, reveal tabs for every filled owner. */
+function syncOwnerTabsToData() {
+  const filled = ['owner1', 'owner2', 'owner3'].filter(isOwnerPresent).length;
+  ownerTabCount = Math.max(1, filled);
+  updateOwnerTabs();
+}
+
+// "+ Добавить собственника" button
+document.getElementById('btn-add-owner')?.addEventListener('click', () => {
+  if (ownerTabCount >= 3) return;
+  ownerTabCount++;
+  updateOwnerTabs();
+  switchTab('owner' + ownerTabCount);
 });
+
+// "×" remove buttons (event delegation on the tab-bar)
+document.getElementById('owner-tab-bar')?.addEventListener('click', (e) => {
+  const rem = e.target.closest('.owner-tab-remove');
+  if (!rem) return;
+  e.stopPropagation(); // don't trigger the parent tab-btn click
+  const key = rem.dataset.remove; // 'owner2' or 'owner3'
+  if (!key || key === 'owner1') return;
+  clearOwnerFields(key);
+  applyOwnerPoaVisibility(key);
+  ownerTabCount = Math.max(1, ownerTabCount - 1);
+  switchTab('owner' + ownerTabCount);
+  updateOwnerTabs();
+  refreshValidStates();
+  updateBlockCompletion(null);
+  updateContractAvailability();
+  updateSidebarStatus();
+});
+
+// Clicks on tab buttons (delegated, skips remove-button clicks)
+document.getElementById('owner-tab-bar')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab-btn[data-tab]');
+  if (!btn || e.target.closest('.owner-tab-remove')) return;
+  switchTab(btn.dataset.tab);
+});
+
+// Initial state
+updateOwnerTabs();
 
 // ============================================================
 //  Populate form from parsed data
@@ -638,6 +736,7 @@ function populateForm(data) {
   commitCurrentValues();
   refreshValidStates();
   btnSaveAs.disabled = false;
+  syncOwnerTabsToData(); // reveal tabs for filled owners, update icons
   switchTab('owner1');
   updateContractAvailability();
   applyAllOwnerPoaVisibility();
@@ -665,6 +764,8 @@ function handleClearForm() {
   btnSaveAs.disabled = true;
   if (commissionInput) commissionInput.value = '';
   setStatus('Готов к работе');
+  ownerTabCount = 1;
+  updateOwnerTabs();
   switchTab('owner1');
   resetContractAvailability();
   applyAllOwnerPoaVisibility();
@@ -801,20 +902,6 @@ function toInstrumental(str) {
     .replace(/(ный)(?=\s|$)/g,   'ным')
     .replace(/(ий)(?=\s|$)/g,    'им')
     .replace(/(ый)(?=\s|$)/g,    'ым');
-}
-
-// ============================================================
-//  Owners count detection
-// ============================================================
-const OWNER_SIGNIFICANT_FIELDS = [
-  'Фамилия', 'Имя', 'Паспорт серия', 'Паспорт номер', 'Идентификационный номер',
-];
-
-function isOwnerPresent(ownerPrefix) {
-  return OWNER_SIGNIFICANT_FIELDS.some((field) => {
-    const el = document.getElementById(`${ownerPrefix}-${field}`);
-    return el && !isFieldEmpty(el.value);
-  });
 }
 
 /** Возвращает массив ключей заполненных собственников, например ['owner1', 'owner2']. */
