@@ -869,11 +869,15 @@ function isBlockFilled(prefix) {
   });
 }
 
-/** Дебаунс-обёртка: откладывает updateBlockCompletion на 200 мс после последнего вызова */
-let _blockCompletionTimer = null;
+/** Дебаунс-обёртка: откладывает updateBlockCompletion на 200 мс после последнего вызова.
+ *  Таймер хранится per-prefix, чтобы быстрый ввод в разных секциях не сбрасывал друг друга. */
+const _blockCompletionTimers = new Map();
 function scheduleBlockCompletion(prefix) {
-  clearTimeout(_blockCompletionTimer);
-  _blockCompletionTimer = setTimeout(() => updateBlockCompletion(prefix), 200);
+  clearTimeout(_blockCompletionTimers.get(prefix));
+  _blockCompletionTimers.set(prefix, setTimeout(() => {
+    _blockCompletionTimers.delete(prefix);
+    updateBlockCompletion(prefix);
+  }, 200));
 }
 
 /** Обновляет badge и класс ws-block--complete для нужных блоков */
