@@ -292,6 +292,9 @@ ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
 //  IPC — open file with default OS application
 // ============================================================
 ipcMain.handle('shell:openExternal', async (_event, url) => {
+  let parsed;
+  try { parsed = new URL(url); } catch { return; }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'mailto:') return;
   await shell.openExternal(url);
 });
 
