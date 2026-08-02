@@ -178,10 +178,18 @@ const LS_SETTINGS_KEY = 'germesSettings_v1';
 
 function saveAppSettings() {
   try {
+    // Собираем состояние всех чекбоксов шаблонов
+    const tplChecked = {};
+    document.querySelectorAll('.tpl-item[data-template] input[type="checkbox"]').forEach((cb) => {
+      const key = cb.closest('.tpl-item')?.dataset.template;
+      if (key) tplChecked[key] = cb.checked;
+    });
+
     localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify({
       saveFolder:  saveFolderInput ? saveFolderInput.value : '',
       openAfter:   chkOpenAfter  ? chkOpenAfter.checked  : true,
       addDate:     chkAddDate    ? chkAddDate.checked     : false,
+      tplChecked,
     }));
   } catch (_) {}
 }
@@ -196,6 +204,16 @@ function restoreAppSettings() {
     }
     if (chkOpenAfter  && typeof s.openAfter === 'boolean') chkOpenAfter.checked  = s.openAfter;
     if (chkAddDate    && typeof s.addDate   === 'boolean') chkAddDate.checked    = s.addDate;
+
+    // Восстанавливаем состояние чекбоксов шаблонов
+    if (s.tplChecked && typeof s.tplChecked === 'object') {
+      document.querySelectorAll('.tpl-item[data-template] input[type="checkbox"]').forEach((cb) => {
+        const key = cb.closest('.tpl-item')?.dataset.template;
+        if (key && typeof s.tplChecked[key] === 'boolean') {
+          cb.checked = s.tplChecked[key];
+        }
+      });
+    }
   } catch (_) {}
 }
 
@@ -1014,10 +1032,12 @@ function applyObjectTypeVisibility() {
 function handleSelectAll() {
   document.querySelectorAll('.tpl-item:not(.tpl-item-disabled) input[type="checkbox"]').forEach((cb) => { cb.checked = true; });
   updateSidebarStatus();
+  saveAppSettings();
 }
 function handleDeselectAll() {
   document.querySelectorAll('.tpl-item input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
   updateSidebarStatus();
+  saveAppSettings();
 }
 
 // ============================================================
@@ -1045,6 +1065,7 @@ function updateSidebarStatus() {
 document.addEventListener('change', (e) => {
   if (!e.target.matches('.tpl-item input[type="checkbox"]')) return;
   updateSidebarStatus();
+  saveAppSettings();
 
   // Тост для шаблонов, генерирующих по одному файлу на собственника
   const MULTI_FILE_TEMPLATES = ['soglasie-obrabotka', 'doverennost-pnd'];
