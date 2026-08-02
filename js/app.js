@@ -766,6 +766,13 @@ function populateForm(data) {
 // ============================================================
 //  Clear form
 // ============================================================
+function confirmClearForm() {
+  const confirmed = window.confirm('Очистить форму? Все заполненные поля будут сброшены.');
+  if (!confirmed) return false;
+  handleClearForm();
+  return true;
+}
+
 function handleClearForm() {
   clearAllInputs();
   rowMap = {};
@@ -1326,7 +1333,7 @@ document.getElementById('btn-drop-change').addEventListener('click', handleChoos
 btnChooseFile.addEventListener('click', handleChooseFile);
 btnSave.addEventListener('click', handleSave);
 btnSaveAs.addEventListener('click', handleSaveAs);
-btnClear.addEventListener('click', handleClearForm);
+btnClear.addEventListener('click', () => confirmClearForm());
 if (btnCheck) btnCheck.addEventListener('click', handleCheckData);
 errorClose.addEventListener('click', hideError);
 btnSelectAll.addEventListener('click', handleSelectAll);
