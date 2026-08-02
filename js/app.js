@@ -894,9 +894,8 @@ function handleDeselectAll() {
 //  Sidebar status — count badge + warnings
 // ============================================================
 function updateSidebarStatus() {
-  const warningsEl = document.getElementById('sidebar-warnings');
-  const badgeEl    = document.getElementById('tpl-count-badge');
-  if (!warningsEl || !badgeEl) return;
+  const badgeEl = document.getElementById('tpl-count-badge');
+  if (!badgeEl) return;
 
   const hasFolder = saveFolderInput.value.trim() !== '';
   const checkedCount = document.querySelectorAll(
