@@ -571,7 +571,7 @@ async function handleSaveAs() {
 // ============================================================
 //  Close-app: main process asks renderer to save-then-close
 // ============================================================
-window.electronAPI.onRequestSaveBeforeClose(async () => {
+window.electronAPI?.onRequestSaveBeforeClose?.(async () => {
   await handleSave();
   window.electronAPI.closeApp();
 });
