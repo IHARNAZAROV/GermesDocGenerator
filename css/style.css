@@ -211,21 +211,7 @@ html, body {
   grid-template-columns: 1fr 344px;
   overflow: hidden;
 }
-.win-left {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  background: var(--bg);
-  padding: 14px 14px 10px;
-  gap: 10px;
-  border-right: 1px solid var(--border);
-}
-.win-right {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  overflow: hidden;
-}
+
 .win-right-scroll {
   flex: 1;
   overflow-y: auto;
@@ -3164,9 +3150,6 @@ html, body {
   color: var(--brand);
 }
 
-/* ── Compat: win-left no longer used, but keep class in case of legacy refs ── */
-.win-left { display: none; }
-.win-right { display: none; }
 
 /* ── Responsive: if window narrower than 900px collapse nav ── */
 @media (max-width: 900px) {
