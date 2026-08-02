@@ -27,6 +27,10 @@
 
   let _listeners  = [];
 
+  // Assigned in _init via bindDropdown; declared here so _renderMenu can close them
+  let _closeMenu     = () => {};
+  let _handleItemKey = () => {};
+
   // ── Helpers ───────────────────────────────────────────────
 
   function _getInitials(r) {
@@ -172,106 +176,28 @@
     });
   }
 
-  // ── Open / close ──────────────────────────────────────────
-
-  function _isOpen() {
-    const m = document.getElementById('realtor-menu');
-    return m && !m.hidden;
-  }
-
-  function _openMenu() {
-    const dropdown = document.getElementById('realtor-dropdown');
-    const menu     = document.getElementById('realtor-menu');
-    const trigger  = document.getElementById('realtor-trigger');
-    if (!menu) return;
-
-    _renderMenu();
-    menu.hidden = false;
-    dropdown?.setAttribute('aria-expanded', 'true');
-    trigger?.setAttribute('aria-expanded', 'true');
-
-    requestAnimationFrame(() => {
-      const sel   = menu.querySelector('.realtor-item--selected');
-      const first = menu.querySelector('.realtor-item');
-      (sel || first)?.focus();
-    });
-
-    setTimeout(() => document.addEventListener('pointerdown', _onOutside), 0);
-  }
-
-  function _closeMenu() {
-    const dropdown = document.getElementById('realtor-dropdown');
-    const menu     = document.getElementById('realtor-menu');
-    const trigger  = document.getElementById('realtor-trigger');
-    if (!menu) return;
-
-    menu.hidden = false; // briefly visible so animation plays
-    menu.classList.add('realtor-menu--closing');
-    setTimeout(() => {
-      menu.hidden = true;
-      menu.classList.remove('realtor-menu--closing');
-    }, 160);
-
-    dropdown?.setAttribute('aria-expanded', 'false');
-    trigger?.setAttribute('aria-expanded', 'false');
-    document.removeEventListener('pointerdown', _onOutside);
-    trigger?.focus();
-  }
-
-  function _onOutside(e) {
-    const dropdown = document.getElementById('realtor-dropdown');
-    if (dropdown && !dropdown.contains(e.target)) _closeMenu();
-  }
-
-  // ── Keyboard navigation ───────────────────────────────────
-
-  function _handleItemKey(e) {
-    const menu  = document.getElementById('realtor-menu');
-    if (!menu) return;
-    const items = Array.from(menu.querySelectorAll('.realtor-item:not(.realtor-item--empty)'));
-    const idx   = items.indexOf(document.activeElement);
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        items[Math.min(idx + 1, items.length - 1)]?.focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (idx <= 0) { _closeMenu(); break; }
-        items[Math.max(idx - 1, 0)]?.focus();
-        break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        document.activeElement?.click();
-        break;
-      case 'Escape':
-      case 'Tab':
-        e.preventDefault();
-        _closeMenu();
-        break;
-    }
-  }
-
   // ── Init ──────────────────────────────────────────────────
 
   function _init() {
-    const trigger = document.getElementById('realtor-trigger');
-    if (!trigger) return;
+    const dropdown = document.getElementById('realtor-dropdown');
+    const trigger  = document.getElementById('realtor-trigger');
+    const menu     = document.getElementById('realtor-menu');
+    if (!trigger || !menu) return;
 
-    trigger.addEventListener('click', e => {
-      e.stopPropagation();
-      _isOpen() ? _closeMenu() : _openMenu();
+    const dd = bindDropdown({
+      wrapper:          dropdown,
+      trigger,
+      menu,
+      itemSelector:     '.realtor-item:not(.realtor-item--empty)',
+      selectedSelector: '.realtor-item--selected',
+      closingClass:     'realtor-menu--closing',
+      extraAriaEls:     [dropdown],
+      onBeforeOpen:     _renderMenu,
+      stopPropagation:  true,
     });
-    trigger.addEventListener('keydown', e => {
-      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
-        e.preventDefault();
-        if (!_isOpen()) _openMenu();
-      } else if (e.key === 'Escape') {
-        _closeMenu();
-      }
-    });
+
+    _closeMenu     = dd.close;
+    _handleItemKey = dd.handleItemKey;
 
     RealtorService.onChange(r => { _updateTrigger(r); _renderMenu(); });
     _updateTrigger(RealtorService.getCurrent());

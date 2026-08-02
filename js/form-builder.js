@@ -492,55 +492,25 @@ function _setObjSelectOptions(inputId, options) {
 
 function _bindObjSelectMenuItems(wrapper) {
   const inputEl = wrapper.querySelector('input[type="text"]');
-  const trigger = wrapper.querySelector('.obj-sel-trigger');
   const menu    = wrapper.querySelector('.obj-sel-menu');
-  if (!trigger || !menu || !inputEl) return;
+  if (!menu || !inputEl) return;
 
-  function closeMenu() {
-    menu.classList.add('obj-sel-menu--closing');
-    setTimeout(() => {
-      menu.hidden = true;
-      menu.classList.remove('obj-sel-menu--closing');
-    }, 160);
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.focus();
-  }
+  // close / handleItemKey are set by _initObjTypeDropdowns via bindDropdown
+  // and stored on the wrapper element so dynamic option updates can reuse them.
+  const close         = wrapper._ddClose         || (() => {});
+  const handleItemKey = wrapper._ddHandleItemKey || (() => {});
 
   function selectValue(val) {
     inputEl.value = val;
     _syncObjSelLabel(wrapper);
     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-    closeMenu();
+    close();
   }
 
   menu.querySelectorAll('.obj-sel-item').forEach(li => {
-    li.addEventListener('click', () => selectValue(li.dataset.value));
+    li.addEventListener('click',        () => selectValue(li.dataset.value));
     li.addEventListener('pointerenter', () => li.focus());
-    li.addEventListener('keydown', e => {
-      const items = Array.from(menu.querySelectorAll('.obj-sel-item'));
-      const idx   = items.indexOf(document.activeElement);
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          items[Math.min(idx + 1, items.length - 1)]?.focus();
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          if (idx <= 0) { closeMenu(); return; }
-          items[Math.max(idx - 1, 0)]?.focus();
-          break;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          li.click();
-          break;
-        case 'Escape':
-        case 'Tab':
-          e.preventDefault();
-          closeMenu();
-          break;
-      }
-    });
+    li.addEventListener('keydown',      handleItemKey);
   });
 }
 
@@ -554,76 +524,32 @@ function _initObjTypeDropdowns() {
     // Синхронизируем начальное состояние (placeholder-стиль)
     _syncObjSelLabel(wrapper);
 
-    function isOpen() { return !menu.hidden; }
-
     function _positionMenu() {
-      const rect = trigger.getBoundingClientRect();
-      const menuW = Math.max(rect.width, 160);
-      // Проверяем, помещается ли меню снизу
+      const rect       = trigger.getBoundingClientRect();
+      const menuW      = Math.max(rect.width, 160);
       const spaceBelow = window.innerHeight - rect.bottom;
-      const menuH = menu.offsetHeight || 200;
-      if (spaceBelow < menuH && rect.top > menuH) {
-        // Открываем вверх
-        menu.style.top  = (rect.top - menuH - 5) + 'px';
-      } else {
-        menu.style.top  = (rect.bottom + 5) + 'px';
-      }
+      const menuH      = menu.offsetHeight || 200;
+      menu.style.top      = (spaceBelow < menuH && rect.top > menuH)
+        ? (rect.top - menuH - 5) + 'px'
+        : (rect.bottom + 5) + 'px';
       menu.style.left     = rect.left + 'px';
       menu.style.minWidth = menuW + 'px';
     }
 
-    function openMenu() {
-      menu.hidden = false;
-      trigger.setAttribute('aria-expanded', 'true');
-      _positionMenu();
-      setTimeout(() => document.addEventListener('pointerdown', onOutside), 0);
-      // Закрываем при скролле родителя
-      const scrollParent = trigger.closest('.work-area') || window;
-      scrollParent.addEventListener('scroll', _onScroll, { passive: true });
-      requestAnimationFrame(() => {
-        _positionMenu(); // уточняем после рендера
-        const sel   = menu.querySelector('.obj-sel-item--selected');
-        const first = menu.querySelector('.obj-sel-item');
-        (sel || first)?.focus();
-      });
-    }
-
-    function _onScroll() { if (isOpen()) closeMenu(); }
-
-    function closeMenu() {
-      menu.classList.add('obj-sel-menu--closing');
-      setTimeout(() => {
-        menu.hidden = true;
-        menu.classList.remove('obj-sel-menu--closing');
-      }, 160);
-      trigger.setAttribute('aria-expanded', 'false');
-      document.removeEventListener('pointerdown', onOutside);
-      const scrollParent = trigger.closest('.work-area') || window;
-      scrollParent.removeEventListener('scroll', _onScroll);
-      trigger.focus();
-    }
-
-    function selectValue(val) {
-      inputEl.value = val;
-      _syncObjSelLabel(wrapper);
-      // Уведомляем app.js через bubbling input event
-      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-      closeMenu();
-    }
-
-    function onOutside(e) {
-      if (!wrapper.contains(e.target)) closeMenu();
-    }
-
-    trigger.addEventListener('click', () => isOpen() ? closeMenu() : openMenu());
-    trigger.addEventListener('keydown', e => {
-      if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
-        e.preventDefault();
-        if (!isOpen()) openMenu();
-      } else if (e.key === 'Escape') {
-        closeMenu();
-      }
+    const { close, handleItemKey } = bindDropdown({
+      wrapper,
+      trigger,
+      menu,
+      itemSelector:    '.obj-sel-item',
+      closingClass:    'obj-sel-menu--closing',
+      onBeforeOpen:    _positionMenu,
+      onAfterOpenRaf:  _positionMenu,   // уточняем позицию после рендера
+      getScrollParent: () => trigger.closest('.work-area'),
     });
+
+    // Store on wrapper so _bindObjSelectMenuItems (called on dynamic option updates) can reuse them
+    wrapper._ddClose         = close;
+    wrapper._ddHandleItemKey = handleItemKey;
 
     _bindObjSelectMenuItems(wrapper);
   });
