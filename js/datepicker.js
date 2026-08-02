@@ -5,6 +5,13 @@
  * Открывается по клику на .cal-btn или на input.has-cal.
  * Формат: ДД.ММ.ГГГГ
  * Зависимостей нет. Подключается после form-builder.js.
+ *
+ * Архитектура:
+ *  - DOM-попап строится один раз в buildPopup().
+ *  - Один делегированный click-listener на popup (не на каждой кнопке).
+ *  - render() обновляет только изменяемые части:
+ *      календарь → текст заголовка + data-атрибуты nav + ячейки дней;
+ *      YM-пикер  → классы dp-ym-active на кнопках месяцев/лет.
  */
 
 (function () {
@@ -12,7 +19,7 @@
   // ── Русские названия ──────────────────────────────────────────
   const MONTHS_RU = [
     'Январь','Февраль','Март','Апрель','Май','Июнь',
-    'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
+    'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь',
   ];
   const DOW_RU = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
@@ -22,6 +29,17 @@
   let curYear  = 0;
   let curMonth = 0;      // 0-based
   let modeYM   = false;  // режим выбора месяца/года
+
+  // ── Кэшированные ссылки на узлы попапа ───────────────────────
+  let elCal;             // обёртка режима календаря
+  let elYM;              // обёртка режима YM-пикера
+  let elHeadTitle;       // <button class="dp-head-title"> — заголовок месяца/года
+  let elPrev, elNext;    // кнопки навигации
+  let elGrid;            // .dp-grid
+  let dowHeaders;        // массив из 7 статичных <div class="dp-dow">
+  let elYMMonthBtns;     // массив из 12 <button class="dp-ym-month">
+  let elYMYears;         // <div class="dp-ym-years"> — перестраивается при смене диапазона
+  let ymYearMin = NaN;   // нижняя граница текущего диапазона годов
 
   // ── Парсинг / форматирование ──────────────────────────────────
   function parseDDMMYYYY(str) {
@@ -38,13 +56,169 @@
   }
 
   // ── Создаём попап один раз ────────────────────────────────────
-  function ensurePopup() {
-    if (popup) return;
+  function buildPopup() {
     popup = document.createElement('div');
     popup.className = 'dp-popup';
     popup.setAttribute('role', 'dialog');
     popup.setAttribute('aria-modal', 'true');
+
+    // ── Режим: обычный календарь ──────────────────────────────
+    elCal = document.createElement('div');
+
+    // Заголовок навигации
+    const calHeader = document.createElement('div');
+    calHeader.className = 'dp-header';
+
+    elPrev = document.createElement('button');
+    elPrev.className = 'dp-nav dp-prev';
+    elPrev.title = 'Предыдущий месяц';
+    elPrev.innerHTML =
+      '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+      ' stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
+
+    elHeadTitle = document.createElement('button');
+    elHeadTitle.className = 'dp-head-title';
+    elHeadTitle.dataset.action = 'ymmode';
+
+    elNext = document.createElement('button');
+    elNext.className = 'dp-nav dp-next';
+    elNext.title = 'Следующий месяц';
+    elNext.innerHTML =
+      '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+      ' stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>';
+
+    calHeader.append(elPrev, elHeadTitle, elNext);
+
+    // Сетка (заголовки дней недели — статичные)
+    elGrid = document.createElement('div');
+    elGrid.className = 'dp-grid';
+    dowHeaders = DOW_RU.map((label, i) => {
+      const el = document.createElement('div');
+      el.className = 'dp-dow' + (i >= 5 ? ' dp-weekend' : '');
+      el.textContent = label;
+      return el;
+    });
+    elGrid.append(...dowHeaders);
+
+    // Подвал
+    const calFooter = document.createElement('div');
+    calFooter.className = 'dp-footer';
+    const btnToday = document.createElement('button');
+    btnToday.className = 'dp-today-btn';
+    btnToday.textContent = 'Сегодня';
+    const btnClear = document.createElement('button');
+    btnClear.className = 'dp-clear-btn';
+    btnClear.textContent = 'Очистить';
+    calFooter.append(btnToday, btnClear);
+
+    elCal.append(calHeader, elGrid, calFooter);
+
+    // ── Режим: выбор месяца/года ──────────────────────────────
+    elYM = document.createElement('div');
+    elYM.hidden = true;
+
+    const ymHeader = document.createElement('div');
+    ymHeader.className = 'dp-header';
+    const ymTitle = document.createElement('span');
+    ymTitle.className = 'dp-head-title';
+    ymTitle.textContent = 'Выберите месяц и год';
+    ymHeader.append(ymTitle);
+
+    const ymBody = document.createElement('div');
+    ymBody.className = 'dp-ym-body';
+
+    const elYMMonths = document.createElement('div');
+    elYMMonths.className = 'dp-ym-months';
+    elYMMonthBtns = MONTHS_RU.map((name, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'dp-ym-month';
+      btn.dataset.m = i;
+      btn.textContent = name;
+      return btn;
+    });
+    elYMMonths.append(...elYMMonthBtns);
+
+    elYMYears = document.createElement('div');
+    elYMYears.className = 'dp-ym-years';
+
+    ymBody.append(elYMMonths, elYMYears);
+
+    const ymFooter = document.createElement('div');
+    ymFooter.className = 'dp-footer';
+    const btnBack = document.createElement('button');
+    btnBack.className = 'dp-back-btn';
+    btnBack.textContent = '← Назад';
+    ymFooter.append(btnBack);
+
+    elYM.append(ymHeader, ymBody, ymFooter);
+
+    popup.append(elCal, elYM);
+
+    // ── Единственный делегированный обработчик ────────────────
+    popup.addEventListener('click', onPopupClick);
+
     document.body.appendChild(popup);
+  }
+
+  function ensurePopup() {
+    if (!popup) buildPopup();
+  }
+
+  // ── Делегированный обработчик кликов внутри попапа ───────────
+  function onPopupClick(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+
+    if (action === 'ymmode') {
+      modeYM = true;
+      render();
+      return;
+    }
+    if (btn.classList.contains('dp-nav')) {
+      curYear  = +btn.dataset.y;
+      curMonth = +btn.dataset.m;
+      render();
+      return;
+    }
+    if (btn.classList.contains('dp-day') && !btn.classList.contains('dp-other')) {
+      selectDate(new Date(+btn.dataset.y, +btn.dataset.mo, +btn.dataset.d));
+      return;
+    }
+    if (btn.classList.contains('dp-today-btn')) {
+      const now = new Date();
+      curYear  = now.getFullYear();
+      curMonth = now.getMonth();
+      selectDate(now);
+      return;
+    }
+    if (btn.classList.contains('dp-clear-btn')) {
+      if (target) {
+        target.value = '';
+        target.dispatchEvent(new Event('input',  { bubbles: true }));
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      close();
+      return;
+    }
+    if (btn.classList.contains('dp-back-btn')) {
+      modeYM = false;
+      render();
+      return;
+    }
+    if (btn.classList.contains('dp-ym-month')) {
+      curMonth = +btn.dataset.m;
+      modeYM   = false;
+      render();
+      return;
+    }
+    if (btn.classList.contains('dp-ym-year')) {
+      curYear = +btn.dataset.y;
+      modeYM  = false;
+      render();
+      return;
+    }
   }
 
   // ── Позиционирование ──────────────────────────────────────────
@@ -66,178 +240,110 @@
     }
   }
 
-  // ── Рендер режима выбора года/месяца ─────────────────────────
-  function renderYMPicker() {
-    const selected = parseDDMMYYYY(target.value);
-    const selY = selected ? selected.getFullYear() : null;
-    const selM = selected ? selected.getMonth()    : null;
-
-    // Диапазон лет: ±10 от текущего
-    const baseYear = curYear;
-    const years = [];
-    for (let y = baseYear - 7; y <= baseYear + 7; y++) years.push(y);
-
-    let html = `<div class="dp-header">
-      <span class="dp-head-title">Выберите месяц и год</span>
-    </div>
-    <div class="dp-ym-body">
-      <div class="dp-ym-months">`;
-
-    MONTHS_RU.forEach((name, i) => {
-      const active = (i === curMonth) ? ' dp-ym-active' : '';
-      html += `<button class="dp-ym-month${active}" data-m="${i}">${name}</button>`;
-    });
-
-    html += `</div><div class="dp-ym-years">`;
-
-    years.forEach(y => {
-      const active = (y === curYear) ? ' dp-ym-active' : '';
-      html += `<button class="dp-ym-year${active}" data-y="${y}">${y}</button>`;
-    });
-
-    html += `</div></div>
-    <div class="dp-footer">
-      <button class="dp-back-btn">← Назад</button>
-    </div>`;
-
-    popup.innerHTML = html;
-
-    popup.querySelector('.dp-back-btn').addEventListener('click', () => {
-      modeYM = false;
-      render();
-    });
-    popup.querySelectorAll('.dp-ym-month').forEach(btn => {
-      btn.addEventListener('click', () => {
-        curMonth = +btn.dataset.m;
-        modeYM = false;
-        render();
-      });
-    });
-    popup.querySelectorAll('.dp-ym-year').forEach(btn => {
-      btn.addEventListener('click', () => {
-        curYear = +btn.dataset.y;
-        // scroll to keep year visible and rerender
-        modeYM = false;
-        render();
-      });
-    });
-  }
-
-  // ── Рендер обычного календаря ─────────────────────────────────
-  function render() {
-    ensurePopup();
-    if (modeYM) { renderYMPicker(); positionPopup(target.closest('.input-wrap') || target); return; }
-
-    const today    = new Date();
-    today.setHours(0,0,0,0);
+  // ── Обновление сетки дней (только изменяемая часть) ──────────
+  function renderCalendar() {
+    const today   = new Date();
+    today.setHours(0, 0, 0, 0);
     const selected = parseDDMMYYYY(target.value);
     const selTime  = selected ? selected.getTime() : null;
 
-    // Первый день месяца → определяем с какого дня недели начинать
-    const firstDay = new Date(curYear, curMonth, 1);
-    // В России неделя начинается с Пн (1). JS: 0=Вс, 1=Пн…
-    let startDow = firstDay.getDay(); // 0-6
-    startDow = (startDow === 0) ? 6 : startDow - 1; // 0=Пн…6=Вс
+    // Заголовок и кнопки навигации
+    elHeadTitle.textContent = `${MONTHS_RU[curMonth]} ${curYear}`;
 
-    const daysInMonth  = new Date(curYear, curMonth + 1, 0).getDate();
-    const daysInPrevM  = new Date(curYear, curMonth, 0).getDate();
+    const prevM = curMonth === 0  ? { y: curYear - 1, m: 11 } : { y: curYear,     m: curMonth - 1 };
+    const nextM = curMonth === 11 ? { y: curYear + 1, m: 0  } : { y: curYear,     m: curMonth + 1 };
+    elPrev.dataset.y = prevM.y;  elPrev.dataset.m = prevM.m;
+    elNext.dataset.y = nextM.y;  elNext.dataset.m = nextM.m;
 
-    // Навигация
-    const prevMonth = curMonth === 0  ? { y: curYear - 1, m: 11 } : { y: curYear, m: curMonth - 1 };
-    const nextMonth = curMonth === 11 ? { y: curYear + 1, m: 0  } : { y: curYear, m: curMonth + 1 };
+    // Вычисляем сетку
+    const firstDay    = new Date(curYear, curMonth, 1);
+    let   startDow    = firstDay.getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1; // Пн=0…Вс=6
 
-    let html = `<div class="dp-header">
-      <button class="dp-nav dp-prev" data-y="${prevMonth.y}" data-m="${prevMonth.m}" title="Предыдущий месяц">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="dp-head-title" data-action="ymmode">${MONTHS_RU[curMonth]} ${curYear}</button>
-      <button class="dp-nav dp-next" data-y="${nextMonth.y}" data-m="${nextMonth.m}" title="Следующий месяц">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-    <div class="dp-grid">`;
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+    const daysInPrevM = new Date(curYear, curMonth,     0).getDate();
+    const totalCells  = Math.ceil((startDow + daysInMonth) / 7) * 7;
+    const trailing    = totalCells - startDow - daysInMonth;
 
-    // Заголовок дней недели
-    DOW_RU.forEach((d, i) => {
-      const we = i >= 5 ? ' dp-weekend' : '';
-      html += `<div class="dp-dow${we}">${d}</div>`;
-    });
+    // Строим только ячейки дней
+    const cells = [];
 
-    // Дни предыдущего месяца (серые)
     for (let i = 0; i < startDow; i++) {
-      const d = daysInPrevM - startDow + 1 + i;
-      html += `<button class="dp-day dp-other" tabindex="-1">${d}</button>`;
+      const btn = document.createElement('button');
+      btn.className = 'dp-day dp-other';
+      btn.tabIndex  = -1;
+      btn.textContent = daysInPrevM - startDow + 1 + i;
+      cells.push(btn);
     }
 
-    // Дни текущего месяца
     for (let d = 1; d <= daysInMonth; d++) {
-      const dt = new Date(curYear, curMonth, d);
-      const dow = (dt.getDay() + 6) % 7; // 0=Пн…6=Вс
-      const isToday = dt.getTime() === today.getTime();
-      const isSel   = selTime !== null && dt.getTime() === selTime;
-      const isWE    = dow >= 5;
-
+      const dt  = new Date(curYear, curMonth, d);
+      const dow = (dt.getDay() + 6) % 7;
       let cls = 'dp-day';
-      if (isSel)   cls += ' dp-selected';
-      if (isToday) cls += ' dp-today';
-      if (isWE)    cls += ' dp-weekend';
+      if (selTime !== null && dt.getTime() === selTime) cls += ' dp-selected';
+      if (dt.getTime() === today.getTime())             cls += ' dp-today';
+      if (dow >= 5)                                      cls += ' dp-weekend';
 
-      html += `<button class="${cls}" data-d="${d}" data-mo="${curMonth}" data-y="${curYear}">${d}</button>`;
+      const btn = document.createElement('button');
+      btn.className   = cls;
+      btn.dataset.d   = d;
+      btn.dataset.mo  = curMonth;
+      btn.dataset.y   = curYear;
+      btn.textContent = d;
+      cells.push(btn);
     }
 
-    // Дни следующего месяца (серые)
-    const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
-    const trailingDays = totalCells - startDow - daysInMonth;
-    for (let d = 1; d <= trailingDays; d++) {
-      html += `<button class="dp-day dp-other" tabindex="-1">${d}</button>`;
+    for (let d = 1; d <= trailing; d++) {
+      const btn = document.createElement('button');
+      btn.className = 'dp-day dp-other';
+      btn.tabIndex  = -1;
+      btn.textContent = d;
+      cells.push(btn);
     }
 
-    html += `</div>
-    <div class="dp-footer">
-      <button class="dp-today-btn">Сегодня</button>
-      <button class="dp-clear-btn">Очистить</button>
-    </div>`;
+    // Заменяем только ячейки дней; заголовки дней недели остаются
+    elGrid.replaceChildren(...dowHeaders, ...cells);
+  }
 
-    popup.innerHTML = html;
+  // ── Обновление YM-пикера (только классы) ─────────────────────
+  function renderYMPicker() {
+    // Активный месяц
+    elYMMonthBtns.forEach((btn, i) =>
+      btn.classList.toggle('dp-ym-active', i === curMonth));
 
-    // ── Обработчики ───────────────────────────────────────────
-    popup.querySelector('[data-action="ymmode"]').addEventListener('click', () => {
-      modeYM = true;
-      render();
-    });
-
-    popup.querySelectorAll('.dp-nav').forEach(btn => {
-      btn.addEventListener('click', () => {
-        curYear  = +btn.dataset.y;
-        curMonth = +btn.dataset.m;
-        render();
-      });
-    });
-
-    popup.querySelectorAll('.dp-day:not(.dp-other)').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const d = +btn.dataset.d;
-        const m = +btn.dataset.mo;
-        const y = +btn.dataset.y;
-        selectDate(new Date(y, m, d));
-      });
-    });
-
-    popup.querySelector('.dp-today-btn').addEventListener('click', () => {
-      const t = new Date();
-      curYear  = t.getFullYear();
-      curMonth = t.getMonth();
-      selectDate(t);
-    });
-
-    popup.querySelector('.dp-clear-btn').addEventListener('click', () => {
-      if (target) {
-        target.value = '';
-        target.dispatchEvent(new Event('input', { bubbles: true }));
-        target.dispatchEvent(new Event('change', { bubbles: true }));
+    // Диапазон лет: ±7 от curYear — перестраиваем только при смене диапазона
+    const minY = curYear - 7;
+    if (ymYearMin !== minY) {
+      ymYearMin = minY;
+      const yearBtns = [];
+      for (let y = minY; y <= curYear + 7; y++) {
+        const btn = document.createElement('button');
+        btn.className   = 'dp-ym-year';
+        btn.dataset.y   = y;
+        btn.textContent = y;
+        yearBtns.push(btn);
       }
-      close();
-    });
+      elYMYears.replaceChildren(...yearBtns);
+    }
+
+    // Активный год
+    elYMYears.querySelectorAll('.dp-ym-year').forEach(btn =>
+      btn.classList.toggle('dp-ym-active', +btn.dataset.y === curYear));
+  }
+
+  // ── Главная функция рендера ───────────────────────────────────
+  function render() {
+    ensurePopup();
+
+    if (modeYM) {
+      elCal.hidden = true;
+      elYM.hidden  = false;
+      renderYMPicker();
+    } else {
+      elYM.hidden  = true;
+      elCal.hidden = false;
+      renderCalendar();
+    }
 
     positionPopup(target.closest('.input-wrap') || target);
   }
@@ -279,12 +385,11 @@
 
   // ── Делегирование кликов по документу ────────────────────────
   document.addEventListener('mousedown', function (e) {
-    const calBtn = e.target.closest('.cal-btn');
+    const calBtn   = e.target.closest('.cal-btn');
     const calInput = e.target.closest('input.has-cal');
 
     if (calBtn) {
       e.preventDefault();
-      // Найти соответствующий input
       const inp = calBtn.closest('.input-wrap')?.querySelector('input.has-cal');
       if (!inp) return;
 
@@ -297,14 +402,11 @@
     }
 
     if (calInput) {
-      // Открываем при клике в поле если ещё не открыт для него
       if (popup && popup.classList.contains('dp-open') && target === calInput) return;
-      // Позволим браузеру поставить курсор — не preventDefault
       open(calInput);
       return;
     }
 
-    // Клик вне попапа → закрываем
     if (!isInsidePopup(e.target) && popup && popup.classList.contains('dp-open')) {
       close();
     }
@@ -327,14 +429,12 @@
 
     let v = inp.value.replace(/[^\d.]/g, '');
 
-    // Добавляем точки автоматически
-    if (/^\d{2}$/.test(v)) v += '.';
+    if (/^\d{2}$/.test(v))        v += '.';
     else if (/^\d{2}\.\d{2}$/.test(v)) v += '.';
 
     if (v !== inp.value) inp.value = v;
 
-    // Обновляем подсветку в открытом календаре — с дебаунсом,
-    // чтобы не перестраивать весь DOM попапа при каждом символе
+    // Обновляем подсветку в открытом календаре с дебаунсом
     if (popup && popup.classList.contains('dp-open') && target === inp) {
       clearTimeout(_renderTimer);
       _renderTimer = setTimeout(() => {
