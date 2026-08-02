@@ -41,6 +41,113 @@ const errorClose      = document.getElementById('error-close');
 const loader          = document.getElementById('loader');
 const toastContainer  = document.getElementById('toast-container');
 
+
+// ============================================================
+//  Modal controller — common Escape/overlay/focus handling
+// ============================================================
+class ModalController {
+  constructor(overlay, options = {}) {
+    this.overlay = overlay;
+    this.dialog = options.dialog || overlay?.querySelector('[role="dialog"]') || overlay?.firstElementChild || overlay;
+    this.closeOnOverlay = options.closeOnOverlay !== false;
+    this.closeOnEscape = options.closeOnEscape !== false;
+    this.initialFocus = options.initialFocus || null;
+    this.onClose = options.onClose || null;
+    this.shouldClose = options.shouldClose || null;
+    this.isDynamic = !!options.isDynamic;
+    this.isOpen = false;
+    this.previousFocus = null;
+
+    this._handleOverlayClick = this._handleOverlayClick.bind(this);
+    this._handleKeydown = this._handleKeydown.bind(this);
+  }
+
+  open({ initialFocus } = {}) {
+    if (!this.overlay || this.isOpen) return;
+    this.isOpen = true;
+    this.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    this.overlay.hidden = false;
+    this.overlay.addEventListener('click', this._handleOverlayClick);
+    document.addEventListener('keydown', this._handleKeydown);
+    requestAnimationFrame(() => this._focusInitial(initialFocus));
+  }
+
+  close(detail) {
+    if (!this.overlay || !this.isOpen) return;
+    if (this.shouldClose && !this.shouldClose(detail)) return;
+    this.isOpen = false;
+    this.overlay.removeEventListener('click', this._handleOverlayClick);
+    document.removeEventListener('keydown', this._handleKeydown);
+    if (this.isDynamic) {
+      this.overlay.remove();
+    } else {
+      this.overlay.hidden = true;
+    }
+    this.onClose?.(detail);
+    this._restoreFocus();
+  }
+
+  _handleOverlayClick(e) {
+    if (this.closeOnOverlay && e.target === this.overlay) this.close({ reason: 'overlay' });
+  }
+
+  _handleKeydown(e) {
+    if (e.key === 'Escape' && this.closeOnEscape) {
+      e.stopPropagation();
+      this.close({ reason: 'escape' });
+      return;
+    }
+    if (e.key === 'Tab') this._trapFocus(e);
+  }
+
+  _focusInitial(initialFocus) {
+    const target = this._resolveFocusTarget(initialFocus || this.initialFocus)
+      || this._focusableElements()[0]
+      || this.dialog;
+    target?.focus?.();
+  }
+
+  _resolveFocusTarget(target) {
+    if (!target) return null;
+    if (typeof target === 'string') return this.overlay.querySelector(target);
+    if (target instanceof HTMLElement) return target;
+    return null;
+  }
+
+  _focusableElements() {
+    if (!this.overlay) return [];
+    return [...this.overlay.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.hidden && el.getClientRects().length > 0);
+  }
+
+  _trapFocus(e) {
+    const focusable = this._focusableElements();
+    if (focusable.length === 0) {
+      e.preventDefault();
+      this.dialog?.focus?.();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  _restoreFocus() {
+    if (this.previousFocus && document.contains(this.previousFocus)) {
+      this.previousFocus.focus?.();
+    }
+    this.previousFocus = null;
+  }
+}
+
+window.ModalController = ModalController;
+
 // ============================================================
 //  Application state
 // ============================================================
@@ -1935,12 +2042,23 @@ window._reklamaPackage = 0;
   const btnClose   = document.getElementById('reklama-close');
 
   let _resolveModal = null;
+  const modal = new ModalController(overlay, {
+    initialFocus: '.reklama-radio, #reklama-cancel',
+    onClose: () => resolveModal(false),
+  });
+
+  function resolveModal(confirmed) {
+    if (_resolveModal) {
+      _resolveModal(confirmed);
+      _resolveModal = null;
+    }
+  }
 
   function openReklamaModal() {
     // Reset selection
     radios().forEach(r => { r.checked = false; });
     btnConfirm.disabled = true;
-    overlay.hidden = false;
+    modal.open();
 
     return new Promise((resolve) => {
       _resolveModal = resolve;
@@ -1948,11 +2066,8 @@ window._reklamaPackage = 0;
   }
 
   function closeModal(confirmed) {
-    overlay.hidden = true;
-    if (_resolveModal) {
-      _resolveModal(confirmed);
-      _resolveModal = null;
-    }
+    resolveModal(confirmed);
+    modal.close({ confirmed });
   }
 
   // Radio selection enables the Confirm button
@@ -1971,10 +2086,6 @@ window._reklamaPackage = 0;
 
   btnCancel.addEventListener('click',  () => closeModal(false));
   btnClose.addEventListener('click',   () => closeModal(false));
-  overlay.addEventListener('click',    (e) => { if (e.target === overlay) closeModal(false); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !overlay.hidden) closeModal(false);
-  });
 
   // Expose for use in handleGenerate and btnPreview
   window._openReklamaModal = openReklamaModal;
@@ -2105,10 +2216,16 @@ const previewLoader        = document.getElementById('preview-loader');
 const previewCloseBtn      = document.getElementById('preview-close');
 const previewCloseFooter   = document.getElementById('btn-preview-close-footer');
 
+const previewModal = new ModalController(previewOverlay, {
+  initialFocus: '#preview-close',
+  onClose: () => {
+    previewTabs.innerHTML = '';
+    previewContent.innerHTML = '';
+  },
+});
+
 function closePreviewModal() {
-  previewOverlay.hidden = true;
-  previewTabs.innerHTML = '';
-  previewContent.innerHTML = '';
+  previewModal.close();
 }
 
 async function loadPreviewTab(templateKey, data) {
@@ -2157,19 +2274,13 @@ function openPreviewModal(templateKeys) {
     previewTabs.appendChild(btn);
   });
 
-  previewOverlay.hidden = false;
+  previewModal.open({ initialFocus: '#preview-close' });
   previewContent.innerHTML = '';
   loadPreviewTab(templateKeys[0], data);
 }
 
 previewCloseBtn.addEventListener('click', closePreviewModal);
 previewCloseFooter.addEventListener('click', closePreviewModal);
-previewOverlay.addEventListener('click', (e) => {
-  if (e.target === previewOverlay) closePreviewModal();
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !previewOverlay.hidden) closePreviewModal();
-});
 
 btnPreview.addEventListener('click', async () => {
   const checked = [...document.querySelectorAll(
@@ -2205,20 +2316,14 @@ btnPreview.addEventListener('click', async () => {
   const siteLink  = document.getElementById('about-site-link');
   const emailLink = document.getElementById('about-email-link');
 
-  function openAbout()  { overlay.hidden = false; }
-  function closeAbout() { overlay.hidden = true; }
+  const modal = new ModalController(overlay, { initialFocus: '#about-close' });
+
+  function openAbout()  { modal.open(); }
+  function closeAbout() { modal.close(); }
 
   btnOpen.addEventListener('click', openAbout);
   btnClose.addEventListener('click', closeAbout);
   btnOk.addEventListener('click', closeAbout);
-
-  // Закрытие по клику на фон
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeAbout(); });
-
-  // Закрытие по Escape
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !overlay.hidden) closeAbout();
-  });
 
   // Открытие ссылок через Electron shell
   if (window.electronAPI?.openExternal) {
@@ -2259,18 +2364,13 @@ btnPreview.addEventListener('click', async () => {
     stepError.hidden    = (step !== 'error');
   }
 
-  function openModal() { overlay.hidden = false; }
-  function closeModal() { overlay.hidden = true; }
-
-  // Закрытие по клику на фон (только на шаге уведомления)
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay && !stepNotify.hidden) closeModal();
+  const modal = new ModalController(overlay, {
+    initialFocus: '#update-btn-confirm',
+    shouldClose: (detail) => !detail?.reason || !stepNotify.hidden,
   });
 
-  // Закрытие по Escape (только на шаге уведомления)
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !overlay.hidden && !stepNotify.hidden) closeModal();
-  });
+  function openModal() { modal.open(); }
+  function closeModal() { modal.close(); }
 
   // ── Получено событие «Найдено обновление» ─────────────────
   window.electronAPI.onUpdateAvailable(({ version }) => {

@@ -367,14 +367,14 @@
       </div>`;
     document.body.appendChild(overlay);
 
-    const close = () => overlay.remove();
+    const modal = new window.ModalController(overlay, {
+      initialFocus: '.recdocs-btn-cancel',
+      isDynamic: true,
+    });
+    const close = () => modal.close();
     overlay.querySelector('.recdocs-btn-cancel').addEventListener('click', close);
     overlay.querySelector('.recdocs-btn-yes').addEventListener('click', () => { close(); onYes(); });
-    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-
-    function onEsc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } }
-    document.addEventListener('keydown', onEsc);
-    setTimeout(() => overlay.querySelector('.recdocs-btn-cancel')?.focus(), 60);
+    modal.open();
   }
 
   // ── Модальное окно «Все документы» ────────────────────────
@@ -409,12 +409,12 @@
     const modalSearch = overlay.querySelector('#recdocs-modal-inp');
     const modalClear  = overlay.querySelector('#recdocs-modal-clear');
 
-    const close = () => overlay.remove();
+    const modal = new window.ModalController(overlay, {
+      initialFocus: '#recdocs-modal-inp',
+      isDynamic: true,
+    });
+    const close = () => modal.close();
     overlay.querySelector('.recdocs-modal-close').addEventListener('click', close);
-    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-
-    function onEsc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } }
-    document.addEventListener('keydown', onEsc);
 
     function renderModal(q) {
       const all      = load();
@@ -467,7 +467,7 @@
 
     modalSearch.addEventListener('input', () => renderModal(modalSearch.value));
     renderModal('');
-    setTimeout(() => modalSearch.focus(), 80);
+    modal.open();
   }
 
   // ── Привязка событий ──────────────────────────────────────
