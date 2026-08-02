@@ -152,6 +152,8 @@ window.ModalController = ModalController;
 //  Application state
 // ============================================================
 let currentFilePath = null;
+let currentFileToken = null;
+let saveFolderToken = null;
 let rowMap          = {};
 let originalValues  = {};
 let dirtyInputIds   = new Set();
@@ -468,7 +470,7 @@ async function handleSave() {
   }
   const updates = buildUpdates();
   try {
-    await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
+    await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
     commitCurrentValues();
     setStatus('Изменения сохранены');
     showToast('✔ Изменения сохранены');
@@ -485,7 +487,7 @@ async function autoSave() {
   setStatus('Автосохранение…');
   try {
     const updates = buildUpdates();
-    await window.electronAPI.writeExcel(currentFilePath, currentFilePath, updates);
+    await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
     commitCurrentValues();
     const now = new Date();
     const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -504,30 +506,33 @@ async function handleSaveAs() {
     ? currentFilePath.replace(/[^/\\]+$/, defaultName)
     : defaultName;
 
-  let targetPath;
+  let targetRef;
   try {
-    targetPath = await window.electronAPI.saveFileDialog(defaultPath);
+    targetRef = await window.electronAPI.saveFileDialog(defaultPath);
   } catch (err) {
     showToast('✖ Ошибка при открытии диалога: ' + err.message, 'error');
     return;
   }
-  if (!targetPath) return;
+  if (!targetRef) return;
+  const targetPath = targetRef.path;
+  const targetToken = targetRef.token;
 
   try {
     if (currentFilePath) {
       // Existing file loaded — copy its structure and write updates
       const updates = buildUpdates();
-      await window.electronAPI.writeExcel(currentFilePath, targetPath, updates);
+      await window.electronAPI.writeExcel(currentFileToken, targetToken, updates);
     } else {
       // No file loaded — build Excel from scratch using fields-config structure
       const fieldGroups = buildFieldGroups();
-      const result = await window.electronAPI.createExcelFromData(fieldGroups, targetPath);
+      const result = await window.electronAPI.createExcelFromData(fieldGroups, targetToken);
       if (!result.ok) throw new Error('Не удалось создать файл');
       // Bind the new rowMap so subsequent saves work via writeExcel normally
       rowMap = result.rowMap;
     }
 
     currentFilePath = targetPath;
+    currentFileToken = targetToken;
     filePathDisplay.value = targetPath;
     const baseName = targetPath.split(/[\\/]/).pop();
     dropFileName.textContent = baseName;
@@ -543,6 +548,7 @@ async function handleSaveAs() {
       type:  'excel',
       icon:  'excel',
       path:  targetPath,
+      token: currentFileToken,
       label: baseName,
     });
   } catch (err) {
@@ -622,6 +628,7 @@ function handleClearForm() {
   clearTimeout(autoSaveTimer); // не запускать автосохранение после очистки
   autoSaveTimer = null;
   currentFilePath = null;
+  currentFileToken = null;
   filePathDisplay.value = '';
   fileSuccess.hidden = true;
   btnSave.disabled = true;
@@ -1042,7 +1049,7 @@ document.addEventListener('change', (e) => {
 });
 
 // React to manual edits / clear of the folder input
-saveFolderInput.addEventListener('input', () => { updateSidebarStatus(); saveAppSettings(); });
+saveFolderInput.addEventListener('input', () => { saveFolderToken = null; updateSidebarStatus(); saveAppSettings(); });
 
 // Persist settings checkboxes on change
 if (chkOpenAfter) chkOpenAfter.addEventListener('change', saveAppSettings);
@@ -1064,7 +1071,13 @@ function setDropState(state) {
   dropZone.classList.toggle('drop-zone--loaded', state === 'success');
 }
 
-async function loadExcelFile(filePath) {
+async function loadExcelFile(fileRef) {
+  const filePath = fileRef && typeof fileRef === 'object' ? fileRef.path : fileRef;
+  const fileToken = fileRef && typeof fileRef === 'object' ? fileRef.token : null;
+  if (!filePath || !fileToken) {
+    showError('Файл должен быть выбран через диалог в текущей сессии.');
+    return;
+  }
   filePathDisplay.value = filePath;
   fileSuccess.hidden = true;
   setStatus('Чтение файла…');
@@ -1072,7 +1085,7 @@ async function loadExcelFile(filePath) {
 
   let data;
   try {
-    data = await window.electronAPI.readExcel(filePath);
+    data = await window.electronAPI.readExcel(fileToken);
   } catch (err) {
     hideLoader();
     setDropState('idle');
@@ -1091,6 +1104,7 @@ async function loadExcelFile(filePath) {
   }
 
   currentFilePath = filePath;
+  currentFileToken = fileToken;
   const baseName = filePath.split(/[\\/]/).pop();
   dropFileName.textContent = baseName;
   setDropState('success');
@@ -1104,21 +1118,22 @@ async function loadExcelFile(filePath) {
     type:  'excel',
     icon:  'excel',
     path:  filePath,
+    token: fileToken,
     label: baseName,
   });
 }
 
 async function handleChooseFile() {
   hideError();
-  let filePath;
+  let fileRef;
   try {
-    filePath = await window.electronAPI.openFileDialog();
+    fileRef = await window.electronAPI.openFileDialog();
   } catch (err) {
     showError('Не удалось открыть диалог выбора файла: ' + err.message);
     return;
   }
-  if (!filePath) return;
-  await loadExcelFile(filePath);
+  if (!fileRef) return;
+  await loadExcelFile(fileRef);
 }
 
 // ============================================================
@@ -1157,15 +1172,8 @@ dropZone.addEventListener('drop', async e => {
     return;
   }
 
-  // Electron 32+: webUtils.getPathForFile() через context bridge
-  const filePath = window.electronAPI.getPathForFile(file);
-  if (!filePath) {
-    setDropState(currentFilePath ? 'success' : 'idle');
-    showError('Не удалось получить путь к файлу.');
-    return;
-  }
-
-  await loadExcelFile(filePath);
+  setDropState(currentFilePath ? 'success' : 'idle');
+  showError('Для безопасности откройте Excel-файл через кнопку выбора файла.');
 });
 
 document.getElementById('btn-drop-browse').addEventListener('click', handleChooseFile);
@@ -1223,7 +1231,7 @@ if (btnScanTemplate) {
 btnBrowse.addEventListener('click', async () => {
   const current = saveFolderInput.value.trim() || undefined;
   const chosen = await window.electronAPI.selectFolder(current);
-  if (chosen) { saveFolderInput.value = chosen; updateSidebarStatus(); saveAppSettings(); }
+  if (chosen) { saveFolderInput.value = chosen.path; saveFolderToken = chosen.token; updateSidebarStatus(); saveAppSettings(); }
 });
 
 // ============================================================
@@ -2124,10 +2132,11 @@ async function _executeGenerate(toGenerate, outputDir, options) {
               type:  'word',
               icon:  key,
               path:  sub.path,
+              token: sub.token,
               label,
             });
             if (chkOpenAfter && chkOpenAfter.checked) {
-              window.electronAPI.openFile(sub.path);
+              window.electronAPI.openFile(sub.token);
             }
           } else {
             errors.push(`${label}: ${sub?.error || 'неизвестная ошибка'}`);
@@ -2143,10 +2152,11 @@ async function _executeGenerate(toGenerate, outputDir, options) {
           type:  'word',
           icon:  key,
           path:  result.path,
+          token: result.token,
           label: entry.label,
         });
         if (chkOpenAfter && chkOpenAfter.checked) {
-          window.electronAPI.openFile(result.path);
+          window.electronAPI.openFile(result.token);
         }
       } else {
         errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
@@ -2165,7 +2175,7 @@ async function _executeGenerate(toGenerate, outputDir, options) {
 btnGenerate.addEventListener('click', handleGenerate);
 
 async function handleGenerate() {
-  const outputDir = saveFolderInput.value.trim() || null;
+  const outputDir = saveFolderToken;
   const options   = { addDate: !!(chkAddDate && chkAddDate.checked) };
 
   // Validate: save folder must be selected

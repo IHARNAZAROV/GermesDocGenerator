@@ -38,6 +38,29 @@ function buildOutputPath(dir, baseName, addDate) {
   return path.join(dir, `${name}_${dd}-${mm}-${yyyy}${ext}`);
 }
 
+const sessionPaths = new Map();
+
+function createFileToken(filePath, kind) {
+  const token = `${kind}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+  sessionPaths.set(token, { path: filePath, kind });
+  return token;
+}
+
+function getSessionPath(token, expectedKind) {
+  if (typeof token !== 'string') throw new Error('Некорректный токен файла');
+  const entry = sessionPaths.get(token);
+  if (!entry || (expectedKind && entry.kind !== expectedKind)) {
+    throw new Error('Путь не был выбран в текущей сессии');
+  }
+  return entry.path;
+}
+
+function ensureExcelPath(filePath) {
+  const ext = path.extname(filePath || '').toLowerCase();
+  if (ext !== '.xlsx' && ext !== '.xls') throw new Error('Разрешены только Excel-файлы');
+  return filePath;
+}
+
 let mainWindow;
 let isDirty = false; // renderer notifies us when dirty state changes
 
@@ -122,7 +145,8 @@ ipcMain.handle('dialog:openFile', async () => {
     properties: ['openFile'],
   });
   if (result.canceled || result.filePaths.length === 0) return null;
-  return result.filePaths[0];
+  const filePath = ensureExcelPath(result.filePaths[0]);
+  return { path: filePath, token: createFileToken(filePath, 'excel') };
 });
 
 // ============================================================
@@ -135,14 +159,16 @@ ipcMain.handle('dialog:saveFile', async (_event, defaultPath) => {
     filters: [{ name: 'Excel файлы', extensions: ['xlsx'] }],
   });
   if (result.canceled || !result.filePath) return null;
-  return result.filePath;
+  const filePath = ensureExcelPath(result.filePath);
+  return { path: filePath, token: createFileToken(filePath, 'excel') };
 });
 
 // ============================================================
 //  IPC — read Excel
 // ============================================================
-ipcMain.handle('excel:read', async (_event, filePath) => {
+ipcMain.handle('excel:read', async (_event, fileToken) => {
   try {
+    const filePath = getSessionPath(fileToken, 'excel');
     const ExcelReader = require('./excel/excel-reader');
     return ExcelReader.readFile(filePath);
   } catch (err) {
@@ -155,8 +181,9 @@ ipcMain.handle('excel:read', async (_event, filePath) => {
 //  fieldGroups: { deal: {key: value}, property: {...}, ... }
 //  Returns { ok: true, rowMap: { "block-fieldKey": rowNumber } }
 // ============================================================
-ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) => {
+ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetToken) => {
   try {
+    const targetPath = getSessionPath(targetToken, 'excel');
     const fieldsConfig = require('./fields-config.json');
 
     // Инвертируем BLOCK_HEADERS из excel-reader: { deal: 'СДЕЛКА', ... }
@@ -206,8 +233,10 @@ ipcMain.handle('excel:createFromData', async (_event, fieldGroups, targetPath) =
 //  IPC — write Excel
 //  updates: { [rowNumber]: value }  — only column B is touched
 // ============================================================
-ipcMain.handle('excel:write', async (_event, sourcePath, targetPath, updates) => {
+ipcMain.handle('excel:write', async (_event, sourceToken, targetToken, updates) => {
   try {
+    const sourcePath = getSessionPath(sourceToken, 'excel');
+    const targetPath = getSessionPath(targetToken, 'excel');
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(sourcePath);
 
@@ -255,7 +284,8 @@ ipcMain.handle('dialog:selectFolder', async (_event, defaultPath) => {
     properties: ['openDirectory', 'createDirectory'],
   });
   if (result.canceled || result.filePaths.length === 0) return null;
-  return result.filePaths[0];
+  const folderPath = result.filePaths[0];
+  return { path: folderPath, token: createFileToken(folderPath, 'folder') };
 });
 
 // ============================================================
@@ -265,8 +295,9 @@ ipcMain.handle('shell:openExternal', async (_event, url) => {
   await shell.openExternal(url);
 });
 
-ipcMain.handle('shell:openFile', async (_event, filePath) => {
-  await shell.openPath(filePath);
+ipcMain.handle('shell:openFile', async (_event, fileToken) => {
+  const filePath = getSessionPath(fileToken);
+  return shell.openPath(filePath);
 });
 
 // ============================================================
@@ -310,14 +341,18 @@ ipcMain.handle('template:scan', async () => {
 // ============================================================
 //  IPC — единый универсальный хендлер генерации Word-документов
 // ============================================================
-ipcMain.handle('word:generate', async (_event, templateKey, data, outputDir, options = {}) => {
+ipcMain.handle('word:generate', async (_event, templateKey, data, outputToken, options = {}) => {
   const entry = TEMPLATE_FILES[templateKey];
   if (!entry) return { success: false, error: `Неизвестный ключ шаблона: ${templateKey}` };
   const templatePath = path.join(__dirname, 'templates', 'working', entry.tpl);
-  const resolvedDir  = outputDir || path.join(app.getPath('userData'), 'output');
+  const resolvedDir  = getSessionPath(outputToken, 'folder');
   // outOverride allows the caller to specify a custom output filename (e.g. per-owner consent docs)
   const baseName     = options.outOverride || entry.out;
   const outputPath   = buildOutputPath(resolvedDir, baseName, options.addDate);
   if (!fs.existsSync(resolvedDir)) fs.mkdirSync(resolvedDir, { recursive: true });
-  return generateWord(templatePath, outputPath, data);
+  const result = await generateWord(templatePath, outputPath, data);
+  if (result && result.success && result.path) {
+    result.token = createFileToken(result.path, 'generated');
+  }
+  return result;
 });

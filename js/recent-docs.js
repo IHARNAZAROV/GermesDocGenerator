@@ -328,14 +328,14 @@
 
       try {
         // loadExcelFile определена в app.js (глобальная функция)
-        await loadExcelFile(entry.path);
+        await loadExcelFile(entry);
       } catch {
         handleMissing(entry);
       }
     } else {
       // Word-документ — открыть через Electron
       try {
-        const opened = await window.electronAPI.openFile(entry.path);
+        const opened = await window.electronAPI.openFile(entry.token);
         if (opened && opened.error) handleMissing(entry);
       } catch {
         handleMissing(entry);
