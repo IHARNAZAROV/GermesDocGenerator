@@ -11,6 +11,14 @@
  * Код менять не нужно.
  */
 
+/** Генерирует HTML одного пункта кастомного dropdown */
+function _objSelItemHtml(opt) {
+  return `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
+       + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
+       + `<span class="obj-sel-item__check" aria-hidden="true"></span>`
+       + `</li>`;
+}
+
 // ── SVG иконка календаря ─────────────────────────────────────
 const CAL_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
   + '<rect x="3" y="4" width="18" height="18" rx="2"/>'
@@ -73,12 +81,7 @@ function htmlDate(groupId, field) {
 function htmlSelect(groupId, field) {
   const id   = inputId(groupId, field.key);
   const opts = (field.options || []);
-  const optHtml = opts.map(opt =>
-    `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
-    + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
-    + `<span class="obj-sel-item__check" aria-hidden="true"></span>`
-    + `</li>`
-  ).join('');
+  const optHtml = opts.map(_objSelItemHtml).join('');
 
   return `<div class="fr fr-sm" id="fr-${id}"><label>${escHtml(field.label)}</label>`
        + `<div class="input-wrap">`
@@ -482,12 +485,7 @@ function _setObjSelectOptions(inputId, options) {
   const normalizedOptions = Array.from(new Set((options || []).map(String).map(v => v.trim()).filter(Boolean)));
   if (current && !normalizedOptions.includes(current)) inputEl.value = '';
 
-  menu.innerHTML = normalizedOptions.map(opt =>
-    `<li class="obj-sel-item" role="option" tabindex="-1" data-value="${escHtml(opt)}" aria-selected="false">`
-    + `<span class="obj-sel-item__label">${escHtml(opt)}</span>`
-    + `<span class="obj-sel-item__check" aria-hidden="true"></span>`
-    + `</li>`
-  ).join('');
+  menu.innerHTML = normalizedOptions.map(_objSelItemHtml).join('');
   _syncObjSelLabel(wrapper);
   _bindObjSelectMenuItems(wrapper);
 }
