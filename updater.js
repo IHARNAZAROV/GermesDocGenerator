@@ -22,6 +22,9 @@ const { spawn }         = require('child_process');
 // ─── Настройки ──────────────────────────────────────────────────────────────
 const GITHUB_OWNER = 'IHARNAZAROV';
 const GITHUB_REPO  = 'GermesDocGenerator';
+// Токен для доступа к приватному репозиторию.
+// Права: repo (read). Замените на свой токен.
+const GITHUB_TOKEN = 'ghp_ВАШ_ТОКЕН_ЗДЕСЬ';
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -48,12 +51,14 @@ function findPortableAsset(assets) {
 function httpsGet(url, options = {}) {
   return new Promise((resolve, reject) => {
     const opts = Object.assign({ headers: { 'User-Agent': 'GermesDocGenerator-Updater' } }, options);
+    if (GITHUB_TOKEN) opts.headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
 
-    const request = (targetUrl) => {
-      https.get(targetUrl, opts, (res) => {
-        // Один редирект
+    const request = (targetUrl, withAuth = true) => {
+      const reqOpts = withAuth ? opts : { headers: { 'User-Agent': 'GermesDocGenerator-Updater' } };
+      https.get(targetUrl, reqOpts, (res) => {
+        // Один редирект — без токена (S3 отклоняет GitHub-авторизацию)
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
-          return request(res.headers.location);
+          return request(res.headers.location, false);
         }
         if (res.statusCode !== 200) {
           return reject(new Error(`HTTP ${res.statusCode} для ${targetUrl}`));
@@ -75,13 +80,17 @@ function httpsGet(url, options = {}) {
  */
 function downloadFile(url, destPath, onProgress) {
   return new Promise((resolve, reject) => {
-    const opts = { headers: { 'User-Agent': 'GermesDocGenerator-Updater' } };
+    const baseHeaders = { 'User-Agent': 'GermesDocGenerator-Updater' };
+    const authHeaders = GITHUB_TOKEN
+      ? Object.assign({}, baseHeaders, { 'Authorization': `Bearer ${GITHUB_TOKEN}` })
+      : baseHeaders;
 
-    const request = (targetUrl) => {
+    const request = (targetUrl, withAuth = true) => {
+      const opts = { headers: withAuth ? authHeaders : baseHeaders };
       https.get(targetUrl, opts, (res) => {
-        // Редирект (GitHub Assets всегда редиректит на S3)
+        // Редирект (GitHub Assets всегда редиректит на S3 — без токена!)
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
-          return request(res.headers.location);
+          return request(res.headers.location, false);
         }
         if (res.statusCode !== 200) {
           return reject(new Error(`HTTP ${res.statusCode} при скачивании`));
