@@ -2556,7 +2556,7 @@ html, body {
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   color: var(--text-muted);
-  transition: transform 220ms ease;
+  transition: transform 360ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .ws-block--open .ws-block-hdr-chevron { transform: rotate(180deg); }
 .ws-block--open .ws-block-hdr { border-bottom: 1px solid var(--border-light); }
@@ -2565,7 +2565,7 @@ html, body {
 .ws-block-body-outer {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 220ms cubic-bezier(.4, 0, .2, 1);
+  transition: grid-template-rows 360ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .ws-block-body-outer--open {
   grid-template-rows: 1fr;
@@ -2575,6 +2575,12 @@ html, body {
   min-height: 0;
   container-type: inline-size;
   container-name: block-body;
+  opacity: 0;
+  transition: opacity 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 40ms;
+}
+.ws-block-body-outer--open .ws-block-body {
+  opacity: 1;
+  transition: opacity 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 60ms;
 }
 /* overflow:visible на body больше не используется — меню использует position:fixed */
 
