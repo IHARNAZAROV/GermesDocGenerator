@@ -1,83 +1,19 @@
-// СПРАВОЧНИК РИЭЛТЕРОВ — редактируйте config/agents.json, не этот файл.
-// Этот файл генерируется вручную или скриптом при изменении config/agents.json.
-// Поля id, position, photo используются RealtorService для выпадающего меню в шапке.
-/* eslint-disable */
-window.AGENTS_CONFIG = {
-  "agents": [
-    {
-      "id": "moskalenko",
-      "matchKeys": ["москаленко", "moskalenko"],
-      "lastName": "Москаленко",
-      "firstName": "Екатерина",
-      "middleName": "Викторовна",
-      "fullName": "Москаленко Екатерина Викторовна",
-      "initials": "Москаленко Е.В.",
-      "position": "Риэлтер",
-      "photo": "assets/ekaterina-moskalenko.webp",
-      "phone": "",
-      "email": "",
-      "attestationNumber": "2030",
-      "attestationDate": "23.01.2025",
-      "attestationExpiry": "23.01.2030",
-      "cardNumber": "АВ 0028487",
-      "cardDate": "26.06.2026"
-    },
-
-    {
-      "id": "turko",
-      "matchKeys": ["турко", "turko"],
-      "lastName": "Турко",
-      "firstName": "Ольга",
-      "middleName": "Ростиславовна",
-      "fullName": "Турко Ольга Ростиславовна",
-      "initials": "Турко О.Р.",
-      "position": "Риэлтер",
-      "photo": "assets/olga-turko.webp",
-      "phone": "",
-      "email": "",
-      "attestationNumber": "1931",
-      "attestationDate": "29.02.2024",
-      "attestationExpiry": "28.02.2029",
-      "cardNumber": "АВ 0028488",
-      "cardDate": "26.06.2026"
-    },
-  
-
-    {
-      "id": "eismont",
-      "matchKeys": ["эйсмонт", "eismont"],
-      "lastName": "Эйсмонт",
-      "firstName": "Ольга",
-      "middleName": "Ивановна",
-      "fullName": "Эйсмонт Ольга Ивановна",
-      "initials": "Эйсмонт О.И.",
-      "position": "Риэлтер",
-      "photo": "assets/olga-eysmont.webp",
-      "phone": "",
-      "email": "",
-      "attestationNumber": "2448",
-      "attestationDate": "17.02.2026",
-      "attestationExpiry": "17.02.2031",
-      "cardNumber": "АВ 0028485",
-      "cardDate": "26.06.2026"
-    },
-      {
-      "id": "yushkevich",
-      "matchKeys": ["юшкевич", "yushkevich"],
-      "lastName": "Юшкевич",
-      "firstName": "Наталья",
-      "middleName": "Вячеславовна",
-      "fullName": "Юшкевич Наталья Вячеславовна",
-      "initials": "Юшкевич Н.В.",
-      "position": "Риэлтер",
-      "photo": "assets/natalya-yushkevich.webp",
-      "phone": "",
-      "email": "",
-      "attestationNumber": "1839",
-      "attestationDate": "17.11.2022",
-      "attestationExpiry": "17.11.2027",
-      "cardNumber": "АВ 0028486",
-      "cardDate": "26.06.2026"
-    },
-  ]
-};
+// СПРАВОЧНИК РИЭЛТЕРОВ — единственный источник данных: config/agents.json
+// Этот файл загружает его синхронно, чтобы window.AGENTS_CONFIG был готов
+// до того, как realtor-service.js и app.js начнут исполняться.
+/* eslint-disable no-sync */
+(function () {
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'config/agents.json', false); // синхронный запрос
+    xhr.send(null);
+    if (xhr.status === 200 || xhr.status === 0) {
+      window.AGENTS_CONFIG = JSON.parse(xhr.responseText);
+    } else {
+      throw new Error('HTTP ' + xhr.status);
+    }
+  } catch (e) {
+    console.error('[agents-config] Не удалось загрузить config/agents.json:', e);
+    window.AGENTS_CONFIG = { agents: [] };
+  }
+}());
