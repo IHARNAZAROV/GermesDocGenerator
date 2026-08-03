@@ -86,6 +86,7 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    checkForUpdates(mainWindow);
   });
 
   // Intercept close to handle unsaved changes
@@ -122,10 +123,6 @@ function createWindow() {
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
   createWindow();
-
-  // === Автообновление Portable ===
-  checkForUpdates(mainWindow);
-  // ================================
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

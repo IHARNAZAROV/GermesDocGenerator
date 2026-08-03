@@ -219,9 +219,6 @@ rm -f "$0"
  * @param {Electron.BrowserWindow} mainWindow
  */
 async function checkForUpdates(mainWindow) {
-  // Откладываем проверку на 3 секунды, чтобы не замедлять старт
-  await new Promise(r => setTimeout(r, 3000));
-
   let latestRelease;
   try {
     const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
