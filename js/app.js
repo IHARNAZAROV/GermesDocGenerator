@@ -1835,7 +1835,12 @@ function buildPlaceholderData() {
   const cb_3 = _pkg === 3 ? '☑' : '☐';
   const cb_4 = _pkg === 4 ? '☑' : '☐';
 
-  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, copies, cb_1, cb_2, cb_3, cb_4, seller, signatories };
+  // person — первый заполненный собственник (для шаблонов {{person.*}}:
+  // soglasie-obrabotka, doverennost-pnd). При генерации generate-функции
+  // переопределяют person конкретным собственником через { ...baseData, person }.
+  const person = [owner1, owner2, owner3].find(o => o.fullName) || owner1;
+
+  return { deal, property, owner1, owner2, owner3, buyer, agent, agency, keys, money, commission, deposit, copies, cb_1, cb_2, cb_3, cb_4, seller, signatories, person };
   } finally {
     _currentSnap = null;
   }
