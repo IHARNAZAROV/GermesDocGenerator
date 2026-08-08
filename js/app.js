@@ -387,6 +387,10 @@ function onInputChange(el, currentValue) {
     const prefix = inputId.replace('-Есть представитель', '');
     applyOwnerPoaVisibility(prefix);
   }
+  // Показываем/скрываем блок доверенности покупателя
+  if (inputId === 'buyer-Есть представитель') {
+    applyBuyerPoaVisibility();
+  }
   // Re-evaluate object-type-dependent field visibility
   if (inputId === 'property-Тип объекта') {
     applyObjectTypeVisibility();
@@ -757,6 +761,7 @@ function populateForm(data) {
   switchTab('owner1');
   updateContractAvailability();
   applyAllOwnerPoaVisibility();
+  applyBuyerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об обновлении формы
   document.dispatchEvent(new Event('form:populated'));
@@ -793,6 +798,7 @@ function handleClearForm() {
   switchTab('owner1');
   resetContractAvailability();
   applyAllOwnerPoaVisibility();
+  applyBuyerPoaVisibility();
   applyObjectTypeVisibility();
   // Уведомить UIController об очистке формы
   document.dispatchEvent(new Event('form:cleared'));
@@ -1498,6 +1504,58 @@ function applyAllOwnerPoaVisibility() {
   applyOwnerPoaVisibility('owner3');
 }
 
+// ── Данные представителя покупателя (для Word-шаблонов) ──────
+function buildBuyerPoaBlock() {
+  const p = 'buyer-';
+  const hasPoa = (getField(p + 'Есть представитель') || '').trim().toLowerCase() === 'да';
+
+  const lastName   = getField(p + 'Представитель фамилия')   || '';
+  const firstName  = getField(p + 'Представитель имя')        || '';
+  const middleName = getField(p + 'Представитель отчество')   || '';
+  const fullName   = [lastName, firstName, middleName].filter(Boolean).join(' ');
+  const initials   = lastName && firstName
+    ? lastName + ' ' + firstName[0] + '.' + (middleName ? middleName[0] + '.' : '')
+    : fullName;
+
+  const series = getField(p + 'Представитель паспорт серия') || '';
+  const number = getField(p + 'Представитель паспорт номер') || '';
+
+  const genitive = buildNameGenitive(lastName, firstName, middleName);
+  const dative   = buildNameDative(lastName, firstName, middleName);
+  const gender   = detectGender(middleName, firstName, lastName);
+
+  return {
+    hasPoa,
+    lastName,
+    firstName,
+    middleName,
+    fullName,
+    initials,
+    ...genitive,
+    ...dative,
+    passportSeries:   series,
+    passportNumber:   number,
+    passport:         [series, number].filter(Boolean).join(' '),
+    id:               getField(p + 'Представитель идент. номер')  || '',
+    passportIssueDate: getField(p + 'Представитель дата выдачи')  || '',
+    passportIssuedBy:  getField(p + 'Представитель кем выдан')    || '',
+    passportIssuedByInstrumental: toInstrumental(getField(p + 'Представитель кем выдан') || ''),
+    address:           getField(p + 'Представитель адрес')         || '',
+    poaNumber:         getField(p + 'Номер доверенности')          || '',
+    poaDate:           getField(p + 'Дата доверенности')           || '',
+    poaAction: gender === 'f' ? 'действующей' : 'действующего',
+  };
+}
+
+function applyBuyerPoaVisibility() {
+  const val = (getField('buyer-Есть представитель') || '').trim().toLowerCase();
+  const hasPoa = val === 'да';
+  const section = document.getElementById('ws-buyer');
+  if (!section) return;
+  const block = section.querySelector('.owner-poa-block');
+  if (block) block.hidden = !hasPoa;
+}
+
 // Поля, входящие в блок персоны (порядок важен для ключа кэша)
 const _PERSON_BLOCK_FIELDS = [
   'Фамилия', 'Имя', 'Отчество', 'Дата рождения',
@@ -1669,7 +1727,11 @@ function buildPlaceholderData() {
   addPoaSuffix(owner3);
 
   const ownerBlocks = [owner1, owner2, owner3];
-  const buyer  = buildPersonBlock('buyer-');
+  const buyer  = { ...buildPersonBlock('buyer-'), poa: buildBuyerPoaBlock() };
+
+  // ── Представитель покупателя: signatoryFields + poaSuffix ──
+  addSignatoryFields(buyer);
+  addPoaSuffix(buyer);
 
   // ── Риэлтер — единый источник правды: RealtorService ──────
   // RealtorService является основным источником текущего риэлтера.
@@ -2358,6 +2420,7 @@ btnPreview.addEventListener('click', async () => {
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
   applyAllOwnerPoaVisibility();
+  applyBuyerPoaVisibility();
   applyObjectTypeVisibility();
 
   // ── Collapsible template groups ───────────────────────────

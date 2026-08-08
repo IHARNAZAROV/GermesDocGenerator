@@ -681,6 +681,84 @@
         {
           "key": "Телефон",
           "label": "Телефон:"
+        },
+        {
+          "key": "Есть представитель",
+          "label": "Есть представитель:",
+          "type": "select",
+          "options": [
+            "Нет",
+            "Да"
+          ]
+        },
+        {
+          "key": "Представитель фамилия",
+          "label": "Фамилия:",
+          "col": 1,
+          "buyerPoaBlock": true,
+          "buyerPoaBlockTitle": "Данные представителя покупателя"
+        },
+        {
+          "key": "Представитель имя",
+          "label": "Имя:",
+          "col": 2,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель отчество",
+          "label": "Отчество:",
+          "col": 1,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель паспорт серия",
+          "label": "Паспорт серия:",
+          "col": 1,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель паспорт номер",
+          "label": "Паспорт номер:",
+          "col": 2,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель идент. номер",
+          "label": "Идент. номер:",
+          "col": "full",
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель дата выдачи",
+          "label": "Дата выдачи:",
+          "type": "date",
+          "col": 1,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель кем выдан",
+          "label": "Кем выдан:",
+          "col": 2,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Представитель адрес",
+          "label": "Адрес регистр.:",
+          "col": "full",
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Номер доверенности",
+          "label": "Номер доверен.:",
+          "col": 1,
+          "buyerPoaBlock": true
+        },
+        {
+          "key": "Дата доверенности",
+          "label": "Дата доверен.:",
+          "type": "date",
+          "col": 2,
+          "buyerPoaBlock": true
         }
       ]
     }

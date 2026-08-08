@@ -158,6 +158,20 @@
       }
     });
 
+    // Покупатель: поля представителя если выбрано «Да»
+    if (needBuyer) {
+      const buyerRepEl = document.getElementById('buyer-Есть представитель');
+      if ((buyerRepEl?.value || '').trim().toLowerCase() === 'да') {
+        required.push(
+          { id: 'buyer-Представитель фамилия',      label: 'Покупатель: Представитель фамилия',   block: 'ws-buyer' },
+          { id: 'buyer-Представитель имя',           label: 'Покупатель: Представитель имя',        block: 'ws-buyer' },
+          { id: 'buyer-Представитель паспорт серия', label: 'Покупатель: Представ. паспорт серия',  block: 'ws-buyer' },
+          { id: 'buyer-Представитель паспорт номер', label: 'Покупатель: Представ. паспорт номер',  block: 'ws-buyer' },
+          { id: 'buyer-Номер доверенности',          label: 'Покупатель: Номер доверен.',           block: 'ws-buyer' },
+        );
+      }
+    }
+
     const issues = [];
     const seen   = new Set();
 

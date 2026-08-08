@@ -42,6 +42,9 @@ const SECTION_CONTAINERS = {
 // Секции собственников: рендерятся в две колонки (.tab-inner-grid > div)
 const OWNER_SECTIONS = new Set(['owner1', 'owner2', 'owner3']);
 
+// Секции покупателя: основные поля + скрытый блок представителя
+const BUYER_SECTIONS = new Set(['buyer']);
+
 // Секции с двухколоночным layout через col-свойство поля
 const TWO_COL_SECTIONS = new Set(['property', 'extras', 'deal-prices']);
 
@@ -411,6 +414,34 @@ function buildForm(config) {
       if (poaFields.length > 0) {
         const title = poaFields.find(f => f.ownerPoaBlockTitle)?.ownerPoaBlockTitle
           || 'Данные представителя';
+        poaWrap.innerHTML =
+          `<div class="owner-poa-block" hidden>`
+          + `<div class="owner-poa-block__title">${escHtml(title)}</div>`
+          + renderOwnerPoaTwoCol(groupId, poaFields)
+          + `</div>`;
+      }
+      continue;
+    }
+
+    // Для секции покупателя: основные поля + скрытый блок представителя
+    if (BUYER_SECTIONS.has(sectionId)) {
+      const groupId     = entries[0]?.groupId;
+      const allFields   = entries.map(e => e.field);
+      const regularFields = allFields.filter(f => !f.buyerPoaBlock);
+      const poaFields     = allFields.filter(f =>  f.buyerPoaBlock);
+
+      container.innerHTML = renderFields(groupId, regularFields);
+
+      // Блок представителя покупателя (скрыт по умолчанию)
+      let poaWrap = container.parentElement?.querySelector('.buyer-poa-wrap');
+      if (!poaWrap) {
+        poaWrap = document.createElement('div');
+        poaWrap.className = 'buyer-poa-wrap';
+        container.insertAdjacentElement('afterend', poaWrap);
+      }
+      if (poaFields.length > 0) {
+        const title = poaFields.find(f => f.buyerPoaBlockTitle)?.buyerPoaBlockTitle
+          || 'Данные представителя покупателя';
         poaWrap.innerHTML =
           `<div class="owner-poa-block" hidden>`
           + `<div class="owner-poa-block__title">${escHtml(title)}</div>`
