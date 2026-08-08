@@ -558,7 +558,8 @@ function _initObjTypeDropdowns() {
     function _positionMenu() {
       const rect       = trigger.getBoundingClientRect();
       const menuW      = Math.max(rect.width, 160);
-      const spaceBelow = window.innerHeight - rect.bottom;
+      const BOTTOM_MARGIN = 12;
+      const spaceBelow = window.innerHeight - rect.bottom - BOTTOM_MARGIN;
       const menuH      = menu.offsetHeight || 200;
       menu.style.top      = (spaceBelow < menuH && rect.top > menuH)
         ? (rect.top - menuH - 5) + 'px'

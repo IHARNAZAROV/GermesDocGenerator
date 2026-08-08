@@ -3134,6 +3134,8 @@ html, body {
   top: 0;
   left: 0;
   min-width: 120px;
+  max-height: calc(100vh - 20px);
+  overflow-y: auto;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 12px;
