@@ -204,7 +204,7 @@ window.FIELDS_CONFIG = {
           "key": "Кадастровый номер",
           "label": "Кадастровый №:",
           "objectType": "дом",
-          "col": 2
+          "col": 1
         },
         {
           "key": "Площадь участка",
@@ -222,7 +222,7 @@ window.FIELDS_CONFIG = {
           "key": "Инвентарный номер",
           "label": "Инвентарный №:",
           "objectType": "жилое",
-          "col": 2
+          "col": 1
         }
       ]
     },
