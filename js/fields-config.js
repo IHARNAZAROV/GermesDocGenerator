@@ -221,7 +221,7 @@ window.FIELDS_CONFIG = {
         {
           "key": "Инвентарный номер",
           "label": "Инвентарный №:",
-          "objectType": "квартира",
+          "objectType": "жилое",
           "col": 2
         }
       ]

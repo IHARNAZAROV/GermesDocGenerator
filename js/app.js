@@ -1110,6 +1110,8 @@ function applyObjectTypeVisibility() {
       el.style.display = isHouse ? '' : 'none';
     } else if (type === 'квартира') {
       el.style.display = isFlat ? '' : 'none';
+    } else if (type === 'жилое') {
+      el.style.display = (isHouse || isFlat) ? '' : 'none';
     } else if (type === 'коммерческая недвижимость') {
       el.style.display = isCommercial ? '' : 'none';
     }

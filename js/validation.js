@@ -89,6 +89,7 @@
         { id: 'property-Кадастровый номер',   label: 'Объект: Кадастровый №',       block: 'ws-property' },
         { id: 'property-Площадь участка',     label: 'Объект: Площадь участка',     block: 'ws-property' },
         { id: 'property-Форма собственности', label: 'Объект: Форма собственности', block: 'ws-property' },
+        { id: 'property-Инвентарный номер',   label: 'Объект: Инвентарный №',       block: 'ws-property' },
       ];
     }
     if (t === 'квартира' || t === 'апартаменты' || t === 'комната') {
