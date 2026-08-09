@@ -296,6 +296,10 @@
       "value": "",
       "description": "Дата выдачи паспорта собственника №1"
     },
+    "passportDetails": {
+      "value": "",
+      "description": "Полный блок паспорта собственника №1: «Паспорт серии ..., номер ..., выдан ... ...». Плейсхолдер в Word: {{owner1.passportDetails}}"
+    },
     "address": {
       "value": "",
       "description": "Адрес регистрации собственника №1"
@@ -388,6 +392,10 @@
       "passportIssueDate": {
         "value": "",
         "description": "Дата выдачи паспорта представителя собственника №1"
+      },
+      "passportDetails": {
+        "value": "",
+        "description": "Полный блок паспорта представителя собственника №1: «Паспорт серии ..., номер ..., выдан ... ...». Пустой, если представителя нет. Плейсхолдер в Word: {{owner1.poa.passportDetails}}"
       },
       "passportIssuedBy": {
         "value": "",
@@ -508,6 +516,10 @@
       "value": "",
       "description": "Дата выдачи паспорта собственника №2"
     },
+    "passportDetails": {
+      "value": "",
+      "description": "Полный блок паспорта собственника №2: «Паспорт серии ..., номер ..., выдан ... ...». Плейсхолдер в Word: {{owner2.passportDetails}}"
+    },
     "address": {
       "value": "",
       "description": "Адрес регистрации собственника №2"
@@ -600,6 +612,10 @@
       "passportIssueDate": {
         "value": "",
         "description": "Дата выдачи паспорта представителя собственника №2"
+      },
+      "passportDetails": {
+        "value": "",
+        "description": "Полный блок паспорта представителя собственника №2: «Паспорт серии ..., номер ..., выдан ... ...». Пустой, если представителя нет. Плейсхолдер в Word: {{owner2.poa.passportDetails}}"
       },
       "passportIssuedBy": {
         "value": "",
@@ -720,6 +736,10 @@
       "value": "",
       "description": "Дата выдачи паспорта собственника №3"
     },
+    "passportDetails": {
+      "value": "",
+      "description": "Полный блок паспорта собственника №3: «Паспорт серии ..., номер ..., выдан ... ...». Плейсхолдер в Word: {{owner3.passportDetails}}"
+    },
     "address": {
       "value": "",
       "description": "Адрес регистрации собственника №3"
@@ -812,6 +832,10 @@
       "passportIssueDate": {
         "value": "",
         "description": "Дата выдачи паспорта представителя собственника №3"
+      },
+      "passportDetails": {
+        "value": "",
+        "description": "Полный блок паспорта представителя собственника №3: «Паспорт серии ..., номер ..., выдан ... ...». Пустой, если представителя нет. Плейсхолдер в Word: {{owner3.poa.passportDetails}}"
       },
       "passportIssuedBy": {
         "value": "",
@@ -932,6 +956,10 @@
       "value": "",
       "description": "Дата выдачи паспорта покупателя"
     },
+    "passportDetails": {
+      "value": "",
+      "description": "Полный блок паспорта покупателя: «Паспорт серии ..., номер ..., выдан ... ...». Плейсхолдер в Word: {{buyer.passportDetails}}"
+    },
     "address": {
       "value": "",
       "description": "Адрес регистрации покупателя"
@@ -943,6 +971,16 @@
     "email": {
       "value": "",
       "description": "Электронная почта покупателя"
+    },
+    "poa": {
+      "hasPoa": {
+        "value": false,
+        "description": "true если у покупателя есть представитель. Используйте {#buyer.poa.hasPoa}...{/buyer.poa.hasPoa} для условных блоков в шаблоне Word."
+      },
+      "passportDetails": {
+        "value": "",
+        "description": "Полный блок паспорта представителя покупателя: «Паспорт серии ..., номер ..., выдан ... ...». Пустой, если представителя нет. Плейсхолдер в Word: {{buyer.poa.passportDetails}}"
+      }
     }
   },
   "agent": {
@@ -1125,6 +1163,10 @@
       "value": "",
       "description": "Серия и номер паспорта собственника. Плейсхолдер в Word: {{person.passport}}"
     },
+    "passportDetails": {
+      "value": "",
+      "description": "Полный блок паспорта собственника: «Паспорт серии ..., номер ..., выдан ... ...». Плейсхолдер в Word: {{person.passportDetails}}"
+    },
     "address": {
       "value": "",
       "description": "Адрес регистрации собственника. Плейсхолдер в Word: {{person.address}}"
@@ -1149,6 +1191,10 @@
       "fullNameGenitive": {
         "value": "",
         "description": "Полное ФИО представителя в родительном падеже (КОГО?). Вычисляется автоматически. Плейсхолдер в Word: {{person.poa.fullNameGenitive}}"
+      },
+      "passportDetails": {
+        "value": "",
+        "description": "Полный блок паспорта представителя: «Паспорт серии ..., номер ..., выдан ... ...». Пустой, если представителя нет. Плейсхолдер в Word: {{person.poa.passportDetails}}"
       },
       "poaNumber": {
         "value": "",

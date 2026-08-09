@@ -1445,6 +1445,28 @@ function findPoaOwnerBySelectValue(value, ownerBlocks) {
       || null;
 }
 
+// ── Составной блок паспортных данных для Word-шаблонов ───────
+// Пример результата: «Паспорт серии MP, номер 1234567, выдан
+// Лидским РОВД 01.02.2020.»
+function buildPassportDetails({ passportSeries, passportNumber, passportIssuedBy, passportIssueDate, enabled = true }) {
+  if (!enabled) return '';
+
+  const series = String(passportSeries || '').trim();
+  const number = String(passportNumber || '').trim();
+  const issuedBy = String(passportIssuedBy || '').trim();
+  const issueDate = String(passportIssueDate || '').trim();
+  const passportParts = [];
+
+  if (series) passportParts.push(`Паспорт серии ${series}`);
+  else if (number) passportParts.push('Паспорт');
+  if (number) passportParts.push(`номер ${number}`);
+
+  const issuerParts = [issuedBy, issueDate].filter(Boolean).join(' ');
+  if (issuerParts) passportParts.push(`выдан ${issuerParts}`);
+
+  return passportParts.length ? `${passportParts.join(', ')}.` : '';
+}
+
 // ── Данные представителя собственника (для Word-шаблонов) ────
 function buildOwnerPoaBlock(ownerPrefix) {
   const p  = ownerPrefix + '-';
@@ -1481,6 +1503,13 @@ function buildOwnerPoaBlock(ownerPrefix) {
     passportIssueDate: getField(p + 'Представитель дата выдачи')  || '',
     passportIssuedBy:  getField(p + 'Представитель кем выдан')    || '',
     passportIssuedByInstrumental: toInstrumental(getField(p + 'Представитель кем выдан') || ''),
+    passportDetails:   buildPassportDetails({
+      passportSeries: series,
+      passportNumber: number,
+      passportIssuedBy: getField(p + 'Представитель кем выдан'),
+      passportIssueDate: getField(p + 'Представитель дата выдачи'),
+      enabled: hasPoa,
+    }),
     address:           getField(p + 'Представитель адрес')         || '',
     poaNumber:         getField(p + 'Номер доверенности')          || '',
     poaDate:           getField(p + 'Дата доверенности')           || '',
@@ -1540,6 +1569,13 @@ function buildBuyerPoaBlock() {
     passportIssueDate: getField(p + 'Представитель дата выдачи')  || '',
     passportIssuedBy:  getField(p + 'Представитель кем выдан')    || '',
     passportIssuedByInstrumental: toInstrumental(getField(p + 'Представитель кем выдан') || ''),
+    passportDetails:   buildPassportDetails({
+      passportSeries: series,
+      passportNumber: number,
+      passportIssuedBy: getField(p + 'Представитель кем выдан'),
+      passportIssueDate: getField(p + 'Представитель дата выдачи'),
+      enabled: hasPoa,
+    }),
     address:           getField(p + 'Представитель адрес')         || '',
     poaNumber:         getField(p + 'Номер доверенности')          || '',
     poaDate:           getField(p + 'Дата доверенности')           || '',
@@ -1599,6 +1635,12 @@ function buildPersonBlock(prefix) {
     passportIssuedBy:             getField(prefix + 'Кем выдан')              || '',
     passportIssuedByInstrumental: toInstrumental(getField(prefix + 'Кем выдан') || ''),
     passportIssueDate:            getField(prefix + 'Дата выдачи')            || '',
+    passportDetails:              buildPassportDetails({
+      passportSeries: series,
+      passportNumber: number,
+      passportIssuedBy: getField(prefix + 'Кем выдан'),
+      passportIssueDate: getField(prefix + 'Дата выдачи'),
+    }),
     address:                      getField(prefix + 'Адрес регистрации')      || '',
     phone:                        getField(prefix + 'Телефон')                || '',
     email:                        '',
