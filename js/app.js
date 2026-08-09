@@ -1457,14 +1457,14 @@ function buildPassportDetails({ passportSeries, passportNumber, passportIssuedBy
   const issueDate = String(passportIssueDate || '').trim();
   const passportParts = [];
 
-  if (series) passportParts.push(`Паспорт серии ${series}`);
+  if (series) passportParts.push(`паспорт серии ${series}`);
   else if (number) passportParts.push('Паспорт');
   if (number) passportParts.push(`номер ${number}`);
 
   const issuerParts = [issuedBy, issueDate].filter(Boolean).join(' ');
   if (issuerParts) passportParts.push(`выдан ${issuerParts}`);
 
-  return passportParts.length ? `${passportParts.join(', ')}.` : '';
+  return passportParts.length ? `${passportParts.join(', ')}` : '';
 }
 
 // ── Данные представителя собственника (для Word-шаблонов) ────
