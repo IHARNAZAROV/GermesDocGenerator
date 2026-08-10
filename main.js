@@ -145,7 +145,7 @@ function normalizeAiBaseUrl(baseUrl) {
 
 ipcMain.handle('ai:generateAd', async (_event, config, data) => {
   try {
-    const apiKey = String(config?.apiKey || '').trim();
+    const apiKey = String(config?.apiKey || process.env.GERMES_AI_API_KEY || '').trim();
     const model = String(config?.model || '').trim();
     if (!apiKey) return { ok: false, error: 'Укажите API-ключ нейросети' };
     if (!model) return { ok: false, error: 'Укажите модель нейросети' };
@@ -153,6 +153,14 @@ ipcMain.handle('ai:generateAd', async (_event, config, data) => {
     const baseUrl = normalizeAiBaseUrl(config?.baseUrl);
     const endpoint = new URL(baseUrl + '/chat/completions');
     if (endpoint.protocol !== 'https:') return { ok: false, error: 'Адрес API должен начинаться с https://' };
+
+    const platform = String(config?.platform || 'kufar');
+    const platformNames = { kufar: 'Kufar.by', realt: 'realt.by', social: 'социальные сети' };
+    const platformInstructions = {
+      kufar: 'Формат для Kufar.by: цепляющий заголовок, компактное описание, преимущества списком, важные параметры и цена. Тон — продающий, но без чрезмерных обещаний.',
+      realt: 'Формат для realt.by: более деловой и подробный текст, акцент на характеристиках объекта, адресе, площади, планировке, условиях и юридически корректных формулировках.',
+      social: 'Формат для социальных сетей: короткий эмоциональный пост, первые строки должны привлекать внимание, добавь аккуратные эмодзи, призыв написать/позвонить, но не добавляй хэштеги если данных мало.'
+    };
 
     const payload = {
       model,
@@ -164,7 +172,7 @@ ipcMain.handle('ai:generateAd', async (_event, config, data) => {
         },
         {
           role: 'user',
-          content: 'Сгенерируй готовый текст объявления о продаже/рекламе объекта недвижимости на основании этих данных JSON:\n' + JSON.stringify(data || {}, null, 2)
+          content: 'Площадка: ' + (platformNames[platform] || platformNames.kufar) + '\n' + (platformInstructions[platform] || platformInstructions.kufar) + '\nСгенерируй готовый текст объявления о продаже/рекламе объекта недвижимости на основании этих данных JSON:\n' + JSON.stringify(data || {}, null, 2)
         }
       ]
     };

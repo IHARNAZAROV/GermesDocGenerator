@@ -1964,6 +1964,7 @@ const aiAdCopy     = document.getElementById('ai-ad-copy');
 const aiApiBaseUrl = document.getElementById('ai-api-base-url');
 const aiApiKey     = document.getElementById('ai-api-key');
 const aiModel      = document.getElementById('ai-model');
+const aiPlatform   = document.getElementById('ai-platform');
 const aiAdOutput   = document.getElementById('ai-ad-output');
 const AI_SETTINGS_KEY = 'germesAiAdSettings_v1';
 const aiAdModal = aiAdOverlay ? new ModalController(aiAdOverlay, { initialFocus: '#ai-ad-generate' }) : null;
@@ -1972,7 +1973,8 @@ function restoreAiSettings() {
   try {
     const settings = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || '{}');
     if (aiApiBaseUrl) aiApiBaseUrl.value = settings.baseUrl || 'https://api.openai.com/v1';
-    if (aiModel) aiModel.value = settings.model || 'gpt-4o-mini';
+    if (aiModel) aiModel.value = settings.model || 'claude-opus-5';
+    if (aiPlatform) aiPlatform.value = settings.platform || 'kufar';
     if (aiApiKey) aiApiKey.value = settings.apiKey || '';
   } catch (_) {}
 }
@@ -1981,7 +1983,8 @@ function saveAiSettings() {
   try {
     localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify({
       baseUrl: aiApiBaseUrl?.value?.trim() || 'https://api.openai.com/v1',
-      model: aiModel?.value?.trim() || 'gpt-4o-mini',
+      model: aiModel?.value?.trim() || 'claude-opus-5',
+      platform: aiPlatform?.value || 'kufar',
       apiKey: aiApiKey?.value?.trim() || '',
     }));
   } catch (_) {}
@@ -2007,6 +2010,7 @@ async function handleAiAdGenerate() {
       baseUrl: aiApiBaseUrl.value,
       apiKey: aiApiKey.value,
       model: aiModel.value,
+      platform: aiPlatform.value,
     }, data);
     if (!result?.ok) throw new Error(result?.error || 'Неизвестная ошибка API');
     aiAdOutput.value = result.text;
