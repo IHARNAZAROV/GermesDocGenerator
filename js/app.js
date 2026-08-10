@@ -36,6 +36,7 @@ const btnSaveAs       = document.getElementById('btn-save-as');
 const btnClear        = document.getElementById('btn-clear');
 const btnCheck        = document.getElementById('btn-check');
 const btnGenerate     = document.getElementById('btn-generate');
+const btnAiAd        = document.getElementById('btn-ai-ad');
 const btnPreview      = document.getElementById('btn-preview');
 const btnSelectAll    = document.getElementById('btn-select-all');
 const btnDeselectAll  = document.getElementById('btn-deselect-all');
@@ -1951,6 +1952,85 @@ function buildPlaceholderData() {
     _currentSnap = null;
   }
 }
+
+
+// ============================================================
+//  AI advertisement generation
+// ============================================================
+const aiAdOverlay  = document.getElementById('ai-ad-overlay');
+const aiAdClose    = document.getElementById('ai-ad-close');
+const aiAdGenerate = document.getElementById('ai-ad-generate');
+const aiAdCopy     = document.getElementById('ai-ad-copy');
+const aiApiBaseUrl = document.getElementById('ai-api-base-url');
+const aiApiKey     = document.getElementById('ai-api-key');
+const aiModel      = document.getElementById('ai-model');
+const aiAdOutput   = document.getElementById('ai-ad-output');
+const AI_SETTINGS_KEY = 'germesAiAdSettings_v1';
+const aiAdModal = aiAdOverlay ? new ModalController(aiAdOverlay, { initialFocus: '#ai-ad-generate' }) : null;
+
+function restoreAiSettings() {
+  try {
+    const settings = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || '{}');
+    if (aiApiBaseUrl) aiApiBaseUrl.value = settings.baseUrl || 'https://api.openai.com/v1';
+    if (aiModel) aiModel.value = settings.model || 'gpt-4o-mini';
+    if (aiApiKey) aiApiKey.value = settings.apiKey || '';
+  } catch (_) {}
+}
+
+function saveAiSettings() {
+  try {
+    localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify({
+      baseUrl: aiApiBaseUrl?.value?.trim() || 'https://api.openai.com/v1',
+      model: aiModel?.value?.trim() || 'gpt-4o-mini',
+      apiKey: aiApiKey?.value?.trim() || '',
+    }));
+  } catch (_) {}
+}
+
+function openAiAdModal() {
+  restoreAiSettings();
+  aiAdModal?.open({ initialFocus: aiApiKey?.value ? '#ai-ad-generate' : '#ai-api-key' });
+}
+
+async function handleAiAdGenerate() {
+  if (!window.electronAPI?.generateAd) {
+    showToast('✖ Генерация объявлений недоступна в этой версии', 'error');
+    return;
+  }
+  saveAiSettings();
+  aiAdGenerate.disabled = true;
+  const oldText = aiAdGenerate.textContent;
+  aiAdGenerate.textContent = 'Генерация…';
+  try {
+    const data = buildPlaceholderData();
+    const result = await window.electronAPI.generateAd({
+      baseUrl: aiApiBaseUrl.value,
+      apiKey: aiApiKey.value,
+      model: aiModel.value,
+    }, data);
+    if (!result?.ok) throw new Error(result?.error || 'Неизвестная ошибка API');
+    aiAdOutput.value = result.text;
+    showToast('✔ Объявление сгенерировано');
+  } catch (err) {
+    showToast('✖ ' + err.message, 'error', 6000);
+  } finally {
+    aiAdGenerate.disabled = false;
+    aiAdGenerate.textContent = oldText;
+  }
+}
+
+async function handleAiAdCopy() {
+  const text = aiAdOutput?.value?.trim();
+  if (!text) return showToast('✖ Нет текста для копирования', 'error');
+  await navigator.clipboard.writeText(text);
+  showToast('✔ Текст скопирован');
+}
+
+btnAiAd?.addEventListener('click', openAiAdModal);
+aiAdClose?.addEventListener('click', () => aiAdModal?.close({ reason: 'button' }));
+aiAdGenerate?.addEventListener('click', handleAiAdGenerate);
+aiAdCopy?.addEventListener('click', handleAiAdCopy);
+restoreAiSettings();
 
 // ============================================================
 // Вспомогательная функция: создаёт метод generate для заданного ключа шаблона
