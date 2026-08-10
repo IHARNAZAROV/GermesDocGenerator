@@ -117,6 +117,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       options !== undefined ? obj(options, 'options') : undefined,
     ),
 
+  // AI advertisement generation
+  generateAd: (config, data) =>
+    ipcRenderer.invoke(
+      'ai:generateAd',
+      obj(config, 'config'),
+      obj(data, 'data'),
+    ),
+
   // Template scanning
   scanTemplate: () =>
     ipcRenderer.invoke('template:scan'),

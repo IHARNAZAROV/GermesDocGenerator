@@ -133,6 +133,67 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
+
+// ============================================================
+//  IPC — AI advertisement generation (OpenAI-compatible API)
+// ============================================================
+function normalizeAiBaseUrl(baseUrl) {
+  const raw = String(baseUrl || '').trim().replace(/\/+$/, '');
+  if (!raw) return 'https://api.openai.com/v1';
+  return raw.endsWith('/chat/completions') ? raw.slice(0, -'/chat/completions'.length) : raw;
+}
+
+ipcMain.handle('ai:generateAd', async (_event, config, data) => {
+  try {
+    const apiKey = String(config?.apiKey || '').trim();
+    const model = String(config?.model || '').trim();
+    if (!apiKey) return { ok: false, error: 'Укажите API-ключ нейросети' };
+    if (!model) return { ok: false, error: 'Укажите модель нейросети' };
+
+    const baseUrl = normalizeAiBaseUrl(config?.baseUrl);
+    const endpoint = new URL(baseUrl + '/chat/completions');
+    if (endpoint.protocol !== 'https:') return { ok: false, error: 'Адрес API должен начинаться с https://' };
+
+    const payload = {
+      model,
+      temperature: 0.7,
+      messages: [
+        {
+          role: 'system',
+          content: 'Ты опытный русскоязычный копирайтер агентства недвижимости. Создавай честные объявления для рекламных площадок без выдуманных фактов. Если данных не хватает, не придумывай их. Пиши структурированно: заголовок, описание, преимущества, объект/адрес, цена, контакты. Избегай запрещённых обещаний и дискриминационных формулировок.'
+        },
+        {
+          role: 'user',
+          content: 'Сгенерируй готовый текст объявления о продаже/рекламе объекта недвижимости на основании этих данных JSON:\n' + JSON.stringify(data || {}, null, 2)
+        }
+      ]
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await response.text();
+    let json;
+    try { json = JSON.parse(text); } catch (_) { json = null; }
+    if (!response.ok) {
+      const message = json?.error?.message || text || ('HTTP ' + response.status);
+      return { ok: false, error: message };
+    }
+
+    const adText = json?.choices?.[0]?.message?.content;
+    if (!adText) return { ok: false, error: 'API не вернул текст объявления' };
+    return { ok: true, text: String(adText).trim() };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
 // ============================================================
 //  IPC — file open dialog
 // ============================================================
