@@ -1972,7 +1972,7 @@ const aiAdModal = aiAdOverlay ? new ModalController(aiAdOverlay, { initialFocus:
 function restoreAiSettings() {
   try {
     const settings = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || '{}');
-    if (aiApiBaseUrl) aiApiBaseUrl.value = settings.baseUrl || 'https://api.openai.com/v1';
+    if (aiApiBaseUrl) aiApiBaseUrl.value = settings.baseUrl || '';
     if (aiModel) aiModel.value = settings.model || 'claude-opus-5';
     if (aiPlatform) aiPlatform.value = settings.platform || 'kufar';
     if (aiApiKey) aiApiKey.value = settings.apiKey || '';
@@ -1982,7 +1982,7 @@ function restoreAiSettings() {
 function saveAiSettings() {
   try {
     localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify({
-      baseUrl: aiApiBaseUrl?.value?.trim() || 'https://api.openai.com/v1',
+      baseUrl: aiApiBaseUrl?.value?.trim() || '',
       model: aiModel?.value?.trim() || 'claude-opus-5',
       platform: aiPlatform?.value || 'kufar',
       apiKey: aiApiKey?.value?.trim() || '',

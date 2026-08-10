@@ -139,7 +139,7 @@ app.on('window-all-closed', () => {
 // ============================================================
 function normalizeAiBaseUrl(baseUrl) {
   const raw = String(baseUrl || '').trim().replace(/\/+$/, '');
-  if (!raw) return 'https://api.openai.com/v1';
+  if (!raw) return '';
   return raw.endsWith('/chat/completions') ? raw.slice(0, -'/chat/completions'.length) : raw;
 }
 
@@ -151,6 +151,7 @@ ipcMain.handle('ai:generateAd', async (_event, config, data) => {
     if (!model) return { ok: false, error: 'Укажите модель нейросети' };
 
     const baseUrl = normalizeAiBaseUrl(config?.baseUrl);
+    if (!baseUrl) return { ok: false, error: 'Укажите API Base URL вашего провайдера. Не используйте OpenAI URL, если ваш ключ выдан другим сервисом.' };
     const endpoint = new URL(baseUrl + '/chat/completions');
     if (endpoint.protocol !== 'https:') return { ok: false, error: 'Адрес API должен начинаться с https://' };
 
@@ -190,7 +191,10 @@ ipcMain.handle('ai:generateAd', async (_event, config, data) => {
     let json;
     try { json = JSON.parse(text); } catch (_) { json = null; }
     if (!response.ok) {
-      const message = json?.error?.message || text || ('HTTP ' + response.status);
+      let message = json?.error?.message || text || ('HTTP ' + response.status);
+      if (/Country, region, or territory not supported/i.test(message)) {
+        message = 'Провайдер отклонил запрос: Country, region, or territory not supported. Обычно это значит, что сейчас используется URL OpenAI. Укажите API Base URL сервиса, где создан ваш ключ.';
+      }
       return { ok: false, error: message };
     }
 
