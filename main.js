@@ -310,8 +310,22 @@ ipcMain.handle('shell:openExternal', async (_event, url) => {
 });
 
 ipcMain.handle('shell:openFile', async (_event, fileToken) => {
-  const filePath = getSessionPath(fileToken);
-  return shell.openPath(filePath);
+  try {
+    // This channel is shared by generated Word files and recent Excel files.
+    const filePath = getSessionPath(fileToken);
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: `Файл не найден: ${filePath}` };
+    }
+
+    const error = await shell.openPath(filePath);
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, path: filePath };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });
 
 // ============================================================

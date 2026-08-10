@@ -2150,6 +2150,22 @@ async function _executeGenerate(toGenerate, outputDir, options) {
   let successCount = 0;
   const errors = [];
 
+  async function openGeneratedFile(token, fileName) {
+    if (!token) {
+      showToast(`✖ Не удалось открыть ${fileName}: отсутствует токен файла`, 'error', 6000);
+      return;
+    }
+
+    try {
+      const opened = await window.electronAPI.openFile(token);
+      if (opened && opened.success === false) {
+        showToast(`✖ Не удалось открыть ${fileName}: ${opened.error || 'неизвестная ошибка'}`, 'error', 6000);
+      }
+    } catch (err) {
+      showToast(`✖ Не удалось открыть ${fileName}: ${err.message}`, 'error', 6000);
+    }
+  }
+
   showLoader();
   let results;
   try {
@@ -2160,7 +2176,8 @@ async function _executeGenerate(toGenerate, outputDir, options) {
     hideLoader();
   }
 
-  results.forEach((r, i) => {
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
     const key   = toGenerate[i];
     const entry = TEMPLATE_REGISTRY[key];
     if (r.status === 'fulfilled') {
@@ -2168,7 +2185,7 @@ async function _executeGenerate(toGenerate, outputDir, options) {
 
       // ── Мульти-файловый результат (напр. Согласие на обработку данных) ──
       if (result && result._multiFile) {
-        result.results.forEach(({ result: sub, label }) => {
+        for (const { result: sub, label } of result.results) {
           if (sub && sub.success) {
             successCount++;
             window.RecentDocs?.push({
@@ -2180,13 +2197,13 @@ async function _executeGenerate(toGenerate, outputDir, options) {
               label,
             });
             if (chkOpenAfter && chkOpenAfter.checked) {
-              window.electronAPI.openFile(sub.token);
+              await openGeneratedFile(sub.token, sub.path.split(/[/\\]/).pop());
             }
           } else {
             errors.push(`${label}: ${sub?.error || 'неизвестная ошибка'}`);
           }
-        });
-        return;
+        }
+        continue;
       }
 
       if (result && result.success) {
@@ -2200,7 +2217,7 @@ async function _executeGenerate(toGenerate, outputDir, options) {
           label: entry.label,
         });
         if (chkOpenAfter && chkOpenAfter.checked) {
-          window.electronAPI.openFile(result.token);
+          await openGeneratedFile(result.token, result.path.split(/[/\\]/).pop());
         }
       } else {
         errors.push(`${entry.label}: ${result?.error || 'неизвестная ошибка'}`);
@@ -2208,7 +2225,7 @@ async function _executeGenerate(toGenerate, outputDir, options) {
     } else {
       errors.push(`${entry.label}: ${r.reason?.message || 'неизвестная ошибка'}`);
     }
-  });
+  }
 
   if (successCount > 0) {
     showToast(`✔ Сформировано: ${successCount} из ${toGenerate.length}`);
