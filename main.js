@@ -133,6 +133,79 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
+
+// ============================================================
+//  IPC — AI advertisement generation (OpenAI-compatible API)
+// ============================================================
+function normalizeAiBaseUrl(baseUrl) {
+  const raw = String(baseUrl || '').trim().replace(/\/+$/, '');
+  if (!raw) return '';
+  return raw.endsWith('/chat/completions') ? raw.slice(0, -'/chat/completions'.length) : raw;
+}
+
+ipcMain.handle('ai:generateAd', async (_event, config, data) => {
+  try {
+    const apiKey = String(config?.apiKey || process.env.GERMES_AI_API_KEY || '').trim();
+    const model = String(config?.model || '').trim();
+    if (!apiKey) return { ok: false, error: 'Укажите API-ключ нейросети' };
+    if (!model) return { ok: false, error: 'Укажите модель нейросети' };
+
+    const baseUrl = normalizeAiBaseUrl(config?.baseUrl);
+    if (!baseUrl) return { ok: false, error: 'Укажите API Base URL вашего провайдера. Не используйте OpenAI URL, если ваш ключ выдан другим сервисом.' };
+    const endpoint = new URL(baseUrl + '/chat/completions');
+    if (endpoint.protocol !== 'https:') return { ok: false, error: 'Адрес API должен начинаться с https://' };
+
+    const platform = String(config?.platform || 'kufar');
+    const platformNames = { kufar: 'Kufar.by', realt: 'realt.by', social: 'социальные сети' };
+    const platformInstructions = {
+      kufar: 'Формат для Kufar.by: цепляющий заголовок, компактное описание, преимущества списком, важные параметры и цена. Тон — продающий, но без чрезмерных обещаний.',
+      realt: 'Формат для realt.by: более деловой и подробный текст, акцент на характеристиках объекта, адресе, площади, планировке, условиях и юридически корректных формулировках.',
+      social: 'Формат для социальных сетей: короткий эмоциональный пост, первые строки должны привлекать внимание, добавь аккуратные эмодзи, призыв написать/позвонить, но не добавляй хэштеги если данных мало.'
+    };
+
+    const payload = {
+      model,
+      temperature: 0.7,
+      messages: [
+        {
+          role: 'system',
+          content: 'Ты опытный русскоязычный копирайтер агентства недвижимости. Создавай честные объявления для рекламных площадок без выдуманных фактов. Если данных не хватает, не придумывай их. Пиши структурированно: заголовок, описание, преимущества, объект/адрес, цена, контакты. Избегай запрещённых обещаний и дискриминационных формулировок.'
+        },
+        {
+          role: 'user',
+          content: 'Площадка: ' + (platformNames[platform] || platformNames.kufar) + '\n' + (platformInstructions[platform] || platformInstructions.kufar) + '\nСгенерируй готовый текст объявления о продаже/рекламе объекта недвижимости на основании этих данных JSON:\n' + JSON.stringify(data || {}, null, 2)
+        }
+      ]
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await response.text();
+    let json;
+    try { json = JSON.parse(text); } catch (_) { json = null; }
+    if (!response.ok) {
+      let message = json?.error?.message || text || ('HTTP ' + response.status);
+      if (/Country, region, or territory not supported/i.test(message)) {
+        message = 'Провайдер отклонил запрос: Country, region, or territory not supported. Обычно это значит, что сейчас используется URL OpenAI. Укажите API Base URL сервиса, где создан ваш ключ.';
+      }
+      return { ok: false, error: message };
+    }
+
+    const adText = json?.choices?.[0]?.message?.content;
+    if (!adText) return { ok: false, error: 'API не вернул текст объявления' };
+    return { ok: true, text: String(adText).trim() };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
 // ============================================================
 //  IPC — file open dialog
 // ============================================================

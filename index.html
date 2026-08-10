@@ -132,6 +132,19 @@
         </div>
       </div>
 
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-group">
+        <button class="save-bar-btn toolbar-ai-ad" id="btn-ai-ad" type="button" title="Сгенерировать объявление для рекламных площадок">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z"/>
+            <path d="M19 15l.9 2.6L22 18.5l-2.1.9L19 22l-.9-2.6-2.1-.9 2.1-.9L19 15z"/>
+          </svg>
+          Объявление AI
+        </button>
+      </div>
+
       <div class="toolbar-spacer"></div>
 
       <!-- ── REALTOR DROPDOWN ─────────────────────────────── -->
@@ -730,6 +743,31 @@
     </div>
 
   </div><!-- /app-wrapper -->
+
+
+  <!-- ===== AI AD MODAL ===== -->
+  <div class="ai-ad-overlay" id="ai-ad-overlay" hidden>
+    <div class="ai-ad-modal" role="dialog" aria-modal="true" aria-labelledby="ai-ad-title">
+      <div class="ai-ad-header">
+        <h3 id="ai-ad-title">Генерация объявления нейросетью</h3>
+        <button class="ai-ad-close" id="ai-ad-close" title="Закрыть">✕</button>
+      </div>
+      <div class="ai-ad-body">
+        <p class="ai-ad-hint">Используются текущие данные формы. Если форма заполнена из Excel, объявление будет создано по данным шаблона.</p>
+        <div class="ai-ad-grid">
+          <label>API Base URL<input id="ai-api-base-url" type="text" placeholder="URL вашего API, например https://.../v1"></label>
+          <label>Модель<input id="ai-model" type="text" placeholder="claude-opus-5"></label>
+          <label>Площадка<select id="ai-platform"><option value="kufar">Kufar.by</option><option value="realt">realt.by</option><option value="social">Соц сети</option></select></label>
+          <label class="ai-ad-full">API-ключ<input id="ai-api-key" type="password" placeholder="sk-..."></label>
+        </div>
+        <textarea id="ai-ad-output" class="ai-ad-output" placeholder="Здесь появится текст объявления…"></textarea>
+      </div>
+      <div class="ai-ad-footer">
+        <button class="ai-ad-secondary" id="ai-ad-copy" type="button">Копировать текст</button>
+        <button class="ai-ad-primary" id="ai-ad-generate" type="button">Сгенерировать</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== REKLAMA PACKAGE MODAL ===== -->
   <div class="reklama-overlay" id="reklama-overlay" hidden>
