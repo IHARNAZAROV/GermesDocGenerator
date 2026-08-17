@@ -1,0 +1,1 @@
+- [IPC error contract](ipc-error-contract.md) — Electron IPC handlers resolve {ok:false,error} instead of throwing; callers must check result.ok before committing state.

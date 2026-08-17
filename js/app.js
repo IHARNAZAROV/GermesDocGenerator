@@ -366,6 +366,8 @@ function onInputChange(el, currentValue) {
   updateDirtyState();
   // Remove valid indicator immediately when field is cleared while typing
   if (!current) el.classList.remove('input-valid');
+  // Черновик: сохраняем в localStorage при любом вводе (защита от крэша)
+  scheduleDraftSave();
   // Автосохранение: запускаем/сбрасываем дебаунс только если файл уже открыт
   if (currentFilePath) {
     clearTimeout(autoSaveTimer);
@@ -410,6 +412,8 @@ function commitCurrentValues() {
   }
   dirtyInputIds.clear();
   updateDirtyState();
+  // Данные зафиксированы (сохранены в файл или загружены из файла) — черновик больше не нужен
+  clearDraft();
 }
 
 // Event delegation: один слушатель на общий предок вместо N слушателей на каждый input.
@@ -436,6 +440,99 @@ document.getElementById('deal-body').addEventListener('input', (e) => {
   if (e.target.dataset.numeric) applyNumericFormat(e.target);
   onInputChange(e.target, e.target.value);
 });
+
+// ============================================================
+//  Draft (черновик) — защита от потери данных при крэше
+//  Все поля формы сохраняются в localStorage с дебаунсом.
+//  Черновик очищается после успешного сохранения в файл
+//  (commitCurrentValues) и при очистке формы.
+// ============================================================
+const LS_DRAFT_KEY = 'app_draft_v1';
+const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 дней
+let draftSaveTimer = null;
+
+function saveDraft() {
+  try {
+    const fields = snapshotFields();
+    const hasData = Object.values(fields).some((v) => v !== '');
+    // Сохраняем черновик если есть данные ИЛИ есть несохранённые изменения
+    // (пользователь мог намеренно стереть все поля загруженного файла —
+    // это тоже несохранённое изменение, которое нельзя терять)
+    if (!hasData && dirtyInputIds.size === 0) { clearDraft(); return; }
+    localStorage.setItem(LS_DRAFT_KEY, JSON.stringify({
+      ts: Date.now(),
+      filePath: currentFilePath || null,
+      fields,
+    }));
+  } catch (_) { /* localStorage может быть недоступен — не критично */ }
+}
+
+function scheduleDraftSave() {
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraft, 1500);
+}
+
+function clearDraft() {
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = null;
+  try { localStorage.removeItem(LS_DRAFT_KEY); } catch (_) {}
+}
+
+/** При старте: если найден свежий черновик — предложить восстановить. */
+function tryRestoreDraft() {
+  let draft = null;
+  try {
+    const raw = localStorage.getItem(LS_DRAFT_KEY);
+    if (raw) draft = JSON.parse(raw);
+  } catch (_) { return; }
+  if (!draft || !draft.fields) return;
+
+  // Слишком старый черновик не предлагаем
+  if (!draft.ts || Date.now() - draft.ts > DRAFT_MAX_AGE_MS) { clearDraft(); return; }
+
+  const filledCount = Object.values(draft.fields).filter((v) => v !== '').length;
+  if (filledCount === 0) { clearDraft(); return; }
+
+  const when = new Date(draft.ts).toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+  const src = draft.filePath ? `\nФайл: ${draft.filePath}` : '';
+  const ok = window.confirm(
+    `Найден несохранённый черновик от ${when} (заполнено полей: ${filledCount}).${src}\n\nВосстановить данные?`
+  );
+  if (!ok) { clearDraft(); return; }
+
+  // Восстанавливаем значения полей
+  for (const [inputId, value] of Object.entries(draft.fields)) {
+    if (FIELD_IDS.has(inputId)) setInputValue(inputId, value);
+  }
+
+  // Помечаем восстановленные поля как несохранённые (dirty),
+  // чтобы кнопки сохранения активировались и статус был честным
+  for (const inputId of FIELD_IDS) {
+    const el = document.getElementById(inputId);
+    if (el && !el.readOnly && el.value.trim() !== '') {
+      dirtyInputIds.add(inputId);
+      el.classList.add('input-dirty');
+    }
+  }
+
+  // Пересчёт производных полей и синхронизация UI (как после загрузки Excel)
+  autoUpdatePropis();
+  autoUpdateCommission();
+  refreshValidStates();
+  syncOwnerTabsToData();
+  switchTab('owner1');
+  updateContractAvailability();
+  applyAllOwnerPoaVisibility();
+  applyBuyerPoaVisibility();
+  applyObjectTypeVisibility();
+  document.dispatchEvent(new Event('form:populated'));
+  updateBlockCompletion(null);
+  updateDirtyState();
+  btnSaveAs.disabled = false;
+  showToast('✔ Черновик восстановлен');
+}
 
 // Set/clear valid indicator when user leaves a field.
 // Using focusout (bubbles) for event delegation.
@@ -522,7 +619,8 @@ async function handleSave() {
   }
   const updates = buildUpdates();
   try {
-    await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
+    const result = await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
+    if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
     commitCurrentValues();
     setStatus('Изменения сохранены');
     showToast('✔ Изменения сохранены');
@@ -539,7 +637,8 @@ async function autoSave() {
   setStatus('Автосохранение…');
   try {
     const updates = buildUpdates();
-    await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
+    const result = await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
+    if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
     commitCurrentValues();
     const now = new Date();
     const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -573,7 +672,8 @@ async function handleSaveAs() {
     if (currentFilePath) {
       // Existing file loaded — copy its structure and write updates
       const updates = buildUpdates();
-      await window.electronAPI.writeExcel(currentFileToken, targetToken, updates);
+      const result = await window.electronAPI.writeExcel(currentFileToken, targetToken, updates);
+      if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
     } else {
       // No file loaded — build Excel from scratch using fields-config structure
       const fieldGroups = buildFieldGroups();
@@ -613,7 +713,15 @@ async function handleSaveAs() {
 // ============================================================
 window.electronAPI?.onRequestSaveBeforeClose?.(async () => {
   await handleSave();
-  window.electronAPI.closeApp();
+  // Закрываем только если сохранение действительно прошло:
+  // если файла не было, handleSave() делегирует в handleSaveAs(),
+  // а пользователь мог отменить диалог или сохранение упало с ошибкой.
+  // В этих случаях dirtyInputIds не очистится — окно остаётся открытым.
+  if (dirtyInputIds.size === 0) {
+    window.electronAPI.closeApp();
+  } else {
+    setStatus('Закрытие отменено — есть несохранённые изменения');
+  }
 });
 
 // ============================================================
@@ -785,6 +893,7 @@ function handleClearForm() {
   dirtyInputIds.clear();
   clearTimeout(autoSaveTimer); // не запускать автосохранение после очистки
   autoSaveTimer = null;
+  clearDraft(); // очистка формы — осознанное действие, черновик больше не нужен
   currentFilePath = null;
   currentFileToken = null;
   filePathDisplay.value = '';
@@ -2476,6 +2585,8 @@ btnPreview.addEventListener('click', async () => {
 
   // Restore persistent settings (папка, чекбоксы)
   restoreAppSettings();
+  // Черновик: предложить восстановить несохранённые данные (после крэша и т. п.)
+  tryRestoreDraft();
   // Initial sidebar state on app load
   updateSidebarStatus();
   // Скрываем условные поля при старте (тип объекта не выбран)
