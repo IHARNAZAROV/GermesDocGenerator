@@ -611,9 +611,13 @@ function buildDefaultSaveAsName() {
 //  Save
 // ============================================================
 async function handleSave() {
-  if (dirtyInputIds.size === 0) return;
+  if (dirtyInputIds.size === 0) {
+    showToast('Нет несохранённых изменений', 'info');
+    return;
+  }
   // No file loaded — delegate to Save As which will create a new file from scratch
   if (!currentFilePath) {
+    setStatus('Выберите файл для сохранения…');
     await handleSaveAs();
     return;
   }
@@ -1429,6 +1433,14 @@ document.getElementById('btn-drop-change').addEventListener('click', handleChoos
 btnChooseFile.addEventListener('click', handleChooseFile);
 btnSave.addEventListener('click', handleSave);
 btnSaveAs.addEventListener('click', handleSaveAs);
+
+// Ctrl+S / Cmd+S — глобальный шорткат сохранения
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    handleSave();
+  }
+});
 btnClear.addEventListener('click', () => confirmClearForm());
 if (btnCheck) btnCheck.addEventListener('click', handleCheckData);
 errorClose.addEventListener('click', hideError);
