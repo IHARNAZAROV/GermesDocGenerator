@@ -507,6 +507,13 @@ function tryRestoreDraft() {
     if (FIELD_IDS.has(inputId)) setInputValue(inputId, value);
   }
 
+  // Фиксируем восстановленные значения как «оригинал» черновика,
+  // чтобы onInputChange корректно отслеживал дальнейшие изменения
+  for (const inputId of FIELD_IDS) {
+    const el = document.getElementById(inputId);
+    if (el) originalValues[inputId] = el.value.trim();
+  }
+
   // Помечаем восстановленные поля как несохранённые (dirty),
   // чтобы кнопки сохранения активировались и статус был честным
   for (const inputId of FIELD_IDS) {
@@ -621,10 +628,15 @@ async function handleSave() {
     await handleSaveAs();
     return;
   }
+  // rowMap пустой — файл загружен, но структура не распознана; не коммитим
+  if (Object.keys(rowMap).length === 0) {
+    showToast('✖ Структура файла не определена — сохраните через «Сохранить как»', 'error');
+    return;
+  }
   const updates = buildUpdates();
   try {
     const result = await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
-    if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
+    if (!result?.ok) throw new Error(result?.error || 'Неизвестная ошибка записи');
     commitCurrentValues();
     setStatus('Изменения сохранены');
     showToast('✔ Изменения сохранены');
@@ -638,11 +650,14 @@ async function handleSave() {
 // ============================================================
 async function autoSave() {
   if (!currentFilePath || dirtyInputIds.size === 0) return;
+  // Не автосохраняем если rowMap пустой — обновления были бы пустыми,
+  // но commitCurrentValues() очистила бы черновик
+  if (Object.keys(rowMap).length === 0) return;
   setStatus('Автосохранение…');
   try {
     const updates = buildUpdates();
     const result = await window.electronAPI.writeExcel(currentFileToken, currentFileToken, updates);
-    if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
+    if (!result?.ok) throw new Error(result?.error || 'Неизвестная ошибка записи');
     commitCurrentValues();
     const now = new Date();
     const hhmm = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -677,13 +692,15 @@ async function handleSaveAs() {
       // Existing file loaded — copy its structure and write updates
       const updates = buildUpdates();
       const result = await window.electronAPI.writeExcel(currentFileToken, targetToken, updates);
-      if (result && result.ok === false) throw new Error(result.error || 'Неизвестная ошибка записи');
+      if (!result?.ok) throw new Error(result?.error || 'Неизвестная ошибка записи');
     } else {
       // No file loaded — build Excel from scratch using fields-config structure
       const fieldGroups = buildFieldGroups();
       const result = await window.electronAPI.createExcelFromData(fieldGroups, targetToken);
-      if (!result.ok) throw new Error('Не удалось создать файл');
+      if (!result?.ok) throw new Error(result?.error || 'Не удалось создать файл');
       // Bind the new rowMap so subsequent saves work via writeExcel normally
+      if (!result.rowMap || Object.keys(result.rowMap).length === 0)
+        throw new Error('Файл создан, но структура строк не получена');
       rowMap = result.rowMap;
     }
 
@@ -1351,6 +1368,14 @@ async function loadExcelFile(fileRef) {
     return;
   }
 
+  // main.js возвращает {ok:false, error} при ошибке чтения — проверяем явно
+  if (data.ok === false) {
+    setDropState('idle');
+    showError('Не удалось прочитать файл: ' + (data.error || 'Неизвестная ошибка'));
+    setStatus('Ошибка чтения файла');
+    return;
+  }
+
   currentFilePath = filePath;
   currentFileToken = fileToken;
   const baseName = filePath.split(/[\\/]/).pop();
@@ -1486,8 +1511,12 @@ if (btnScanTemplate) {
 // ============================================================
 btnBrowse.addEventListener('click', async () => {
   const current = saveFolderInput.value.trim() || undefined;
-  const chosen = await window.electronAPI.selectFolder(current);
-  if (chosen) { saveFolderInput.value = chosen.path; saveFolderToken = chosen.token; updateSidebarStatus(); saveAppSettings(); }
+  try {
+    const chosen = await window.electronAPI.selectFolder(current);
+    if (chosen) { saveFolderInput.value = chosen.path; saveFolderToken = chosen.token; updateSidebarStatus(); saveAppSettings(); }
+  } catch (err) {
+    showToast('✖ Не удалось открыть диалог выбора папки: ' + err.message, 'error');
+  }
 });
 
 // ============================================================
