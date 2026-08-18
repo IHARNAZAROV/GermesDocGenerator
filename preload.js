@@ -75,7 +75,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createExcelFromData: (fieldGroups, targetPath) =>
     ipcRenderer.invoke(
       'excel:createFromData',
-      arr(fieldGroups, 'fieldGroups'),
+      obj(fieldGroups, 'fieldGroups'),
       str(targetPath, 'targetPath'),
     ),
 
