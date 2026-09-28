@@ -22,9 +22,7 @@ const { spawn }         = require('child_process');
 // ─── Настройки ──────────────────────────────────────────────────────────────
 const GITHUB_OWNER = 'IHARNAZAROV';
 const GITHUB_REPO  = 'GermesDocGenerator';
-// Токен для доступа к приватному репозиторию.
-// Права: repo (read). Замените на свой токен.
-const GITHUB_TOKEN = 'ghp_ВАШ_ТОКЕН_ЗДЕСЬ';
+// Публичные релизы доступны без токена. Не встраивайте токен в desktop-сборку.
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -35,30 +33,26 @@ function findPortableAsset(assets) {
   if (!assets || assets.length === 0) return null;
   const exeAssets = assets.filter(a => a.name.toLowerCase().endsWith('.exe'));
   // 1. Ищем явно portable
-  const portable = exeAssets.find(a => a.name.toLowerCase().includes('portable'));
+  const portable = exeAssets.find(a =>
+    a.name.toLowerCase().includes('portable') && !a.name.toLowerCase().includes('setup'));
   if (portable) return portable;
-  // 2. Любой .exe, который не является installer/setup
+  // 2. Обычное имя portable-сборки: contract-generator-<version>.exe
   const standalone = exeAssets.find(a => !a.name.toLowerCase().includes('setup'));
-  if (standalone) return standalone;
-  // 3. Первый попавшийся .exe
-  return exeAssets[0] || null;
+  return standalone || null;
 }
 
 /**
  * Делает HTTPS GET-запрос и возвращает тело ответа как строку.
- * Автоматически следует за одним редиректом (302/301).
+ * Автоматически следует за редиректами (302/301).
  */
 function httpsGet(url, options = {}) {
   return new Promise((resolve, reject) => {
     const opts = Object.assign({ headers: { 'User-Agent': 'GermesDocGenerator-Updater' } }, options);
-    if (GITHUB_TOKEN) opts.headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
 
-    const request = (targetUrl, withAuth = true) => {
-      const reqOpts = withAuth ? opts : { headers: { 'User-Agent': 'GermesDocGenerator-Updater' } };
-      https.get(targetUrl, reqOpts, (res) => {
-        // Один редирект — без токена (S3 отклоняет GitHub-авторизацию)
+    const request = (targetUrl) => {
+      https.get(targetUrl, opts, (res) => {
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
-          return request(res.headers.location, false);
+          return request(res.headers.location);
         }
         if (res.statusCode !== 200) {
           return reject(new Error(`HTTP ${res.statusCode} для ${targetUrl}`));
@@ -80,17 +74,12 @@ function httpsGet(url, options = {}) {
  */
 function downloadFile(url, destPath, onProgress) {
   return new Promise((resolve, reject) => {
-    const baseHeaders = { 'User-Agent': 'GermesDocGenerator-Updater' };
-    const authHeaders = GITHUB_TOKEN
-      ? Object.assign({}, baseHeaders, { 'Authorization': `Bearer ${GITHUB_TOKEN}` })
-      : baseHeaders;
-
-    const request = (targetUrl, withAuth = true) => {
-      const opts = { headers: withAuth ? authHeaders : baseHeaders };
+    const opts = { headers: { 'User-Agent': 'GermesDocGenerator-Updater' } };
+    const request = (targetUrl) => {
       https.get(targetUrl, opts, (res) => {
-        // Редирект (GitHub Assets всегда редиректит на S3 — без токена!)
+        // GitHub Assets может перенаправить загрузку на другое хранилище.
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
-          return request(res.headers.location, false);
+          return request(res.headers.location);
         }
         if (res.statusCode !== 200) {
           return reject(new Error(`HTTP ${res.statusCode} при скачивании`));
@@ -234,8 +223,7 @@ async function checkForUpdates(mainWindow) {
     const body   = await httpsGet(apiUrl);
     latestRelease = JSON.parse(body);
   } catch (err) {
-    // Тихо — нет интернета или API недоступен
-    console.log('[updater] Не удалось получить данные о релизе:', err.message);
+    console.error('[updater] Не удалось проверить обновления:', err.message);
     return;
   }
 
@@ -253,7 +241,7 @@ async function checkForUpdates(mainWindow) {
   const assetUrl = asset ? asset.browser_download_url : null;
 
   if (!assetUrl) {
-    console.log('[updater] Portable-ассет не найден в релизе.');
+    console.error(`[updater] Релиз ${remoteVersion} не содержит Portable .exe — обновление недоступно.`);
     return;
   }
 
