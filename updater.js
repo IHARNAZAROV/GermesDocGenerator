@@ -1,13 +1,10 @@
 /**
- * updater.js — Модуль автообновления для Portable-версии
+ * updater.js — Проверка релизов и обновление Portable-версии
  *
  * Логика:
- *  1. При старте запрашивает GitHub Releases API
- *  2. Сравнивает tag_name с текущей версией app.getVersion()
- *  3. Если есть обновление — уведомляет renderer (событие update-available)
- *  4. При согласии пользователя скачивает portable .exe с прогрессом
- *  5. Генерирует .bat (Windows) / .sh (POSIX) скрипт-замену
- *  6. Запускает скрипт detached и вызывает app.quit()
+ *  1. При старте запрашивает опубликованные GitHub Releases без токена
+ *  2. Выбирает самую новую версию с подходящим .exe (пропускает неполные релизы)
+ *  3. Portable скачивает и заменяет себя; установленная версия открывает страницу установщика
  */
 
 'use strict';
@@ -39,6 +36,11 @@ function findPortableAsset(assets) {
   // 2. Обычное имя portable-сборки: contract-generator-<version>.exe
   const standalone = exeAssets.find(a => !a.name.toLowerCase().includes('setup'));
   return standalone || null;
+}
+
+function findInstallerAsset(assets) {
+  return (assets || []).find(a =>
+    a.name.toLowerCase().endsWith('.exe') && a.name.toLowerCase().includes('setup')) || null;
 }
 
 /**
@@ -113,17 +115,20 @@ function downloadFile(url, destPath, onProgress) {
 }
 
 /**
- * Сравнивает две версии в формате «1.2.3».
- * Возвращает true, если remoteVersion > localVersion.
+ * Сравнивает числовые версии из 2–4 частей, например 2.0.7 и 2.0.6.1.
+ * Некорректные теги не участвуют в выборе обновления.
  */
-function isNewer(remoteVersion, localVersion) {
-  const parse = v => v.replace(/^v/, '').split('.').map(Number);
-  const [rMaj, rMin, rPatch] = parse(remoteVersion);
-  const [lMaj, lMin, lPatch] = parse(localVersion);
+function parseVersion(value) {
+  if (typeof value !== 'string' || !/^v?\d+(?:\.\d+){1,3}$/i.test(value)) return null;
+  return value.replace(/^v/i, '').split('.').map(Number);
+}
 
-  if (rMaj !== lMaj) return rMaj > lMaj;
-  if (rMin !== lMin) return rMin > lMin;
-  return rPatch > lPatch;
+function compareVersions(a, b) {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const difference = (a[i] || 0) - (b[i] || 0);
+    if (difference) return difference;
+  }
+  return 0;
 }
 
 /**
@@ -217,49 +222,67 @@ rm -f "$0"
  * @param {Electron.BrowserWindow} mainWindow
  */
 async function checkForUpdates(mainWindow) {
-  let latestRelease;
+  let releases;
   try {
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases?per_page=100`;
     const body   = await httpsGet(apiUrl);
-    latestRelease = JSON.parse(body);
+    releases = JSON.parse(body);
+    if (!Array.isArray(releases)) throw new Error('Некорректный ответ GitHub Releases API');
   } catch (err) {
     console.error('[updater] Не удалось проверить обновления:', err.message);
     return;
   }
 
-  const remoteVersion = (latestRelease.tag_name || '').replace(/^v/, '');
   const localVersion  = app.getVersion();
-
-  if (!remoteVersion || !isNewer(remoteVersion, localVersion)) {
-    console.log(`[updater] Обновлений нет. Текущая версия: ${localVersion}, последняя: ${remoteVersion}`);
+  const localParts = parseVersion(localVersion);
+  if (!localParts) {
+    console.error(`[updater] Некорректная версия приложения: ${localVersion}`);
     return;
   }
 
-  // Ищем portable-ассет в релизе
-  const assets   = latestRelease.assets || [];
-  const asset    = findPortableAsset(assets);
-  const assetUrl = asset ? asset.browser_download_url : null;
-
-  if (!assetUrl) {
-    console.error(`[updater] Релиз ${remoteVersion} не содержит Portable .exe — обновление недоступно.`);
+  // Только electron-builder Portable задаёт этот путь к настоящему исполняемому файлу.
+  const portable = process.platform === 'win32' && !!process.env.PORTABLE_EXECUTABLE_FILE;
+  const candidates = releases
+    .filter(release => release && !release.draft && !release.prerelease)
+    .map(release => {
+      const version = parseVersion(release.tag_name);
+      const asset = portable
+        ? findPortableAsset(release.assets)
+        : findInstallerAsset(release.assets);
+      return { release, version, asset };
+    })
+    .filter(({ release, version, asset }) =>
+      version && compareVersions(version, localParts) > 0 &&
+      asset && typeof asset.browser_download_url === 'string' &&
+      (portable || typeof release.html_url === 'string'))
+    .sort((a, b) => compareVersions(b.version, a.version));
+  const selected = candidates[0];
+  if (!selected) {
+    console.log(`[updater] Нет более нового опубликованного релиза с подходящим .exe для версии ${localVersion}.`);
     return;
   }
 
+  const { release, asset } = selected;
+  const remoteVersion = release.tag_name.replace(/^v/i, '');
   console.log(`[updater] Найдено обновление ${remoteVersion}. Ассет: ${asset.name}`);
 
   // Уведомляем renderer
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-available', {
       version:  remoteVersion,
-      assetUrl,
+      mode: portable ? 'portable' : 'manual',
+      releaseUrl: portable ? undefined : release.html_url,
+      assetUrl: asset.browser_download_url,
       assetName: asset.name,
     });
   }
 
-  // Слушаем согласие пользователя (один раз)
-  ipcMain.once('update-start-download', () => {
-    startDownloadAndReplace(mainWindow, assetUrl, asset.name, remoteVersion);
-  });
+  if (portable) {
+    // Слушаем согласие пользователя (один раз)
+    ipcMain.once('update-start-download', () => {
+      startDownloadAndReplace(mainWindow, asset.browser_download_url, asset.name, remoteVersion);
+    });
+  }
 }
 
 /**
@@ -280,6 +303,11 @@ async function startDownloadAndReplace(mainWindow, assetUrl, assetName, newVersi
       mainWindow.webContents.send('update-error', { message });
     }
   };
+
+  if (process.platform === 'win32' && !process.env.PORTABLE_EXECUTABLE_FILE) {
+    sendError('Автоматическая замена файла доступна только в Portable-версии. Скачайте установщик с GitHub.');
+    return;
+  }
 
   try {
     console.log(`[updater] Начинаем загрузку ${assetName} → ${destPath}`);

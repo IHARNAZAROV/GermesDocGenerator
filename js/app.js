@@ -2560,7 +2560,7 @@ btnPreview.addEventListener('click', async () => {
 }());
 
 // ============================================================
-//  Автообновление — модальное окно (Portable)
+//  Обновление — Portable автоматически, установленная версия вручную
 // ============================================================
 (function () {
   if (!window.electronAPI?.onUpdateAvailable) return;
@@ -2571,6 +2571,7 @@ btnPreview.addEventListener('click', async () => {
   const stepError    = document.getElementById('update-step-error');
 
   const versionLabel   = document.getElementById('update-version');
+  const instructions   = document.getElementById('update-instructions');
   const progressFill   = document.getElementById('update-progress-fill');
   const progressPct    = document.getElementById('update-progress-pct');
   const errorText      = document.getElementById('update-error-text');
@@ -2592,16 +2593,32 @@ btnPreview.addEventListener('click', async () => {
 
   function openModal() { modal.open(); }
   function closeModal() { modal.close(); }
+  let manualReleaseUrl = null;
 
   // ── Получено событие «Найдено обновление» ─────────────────
-  window.electronAPI.onUpdateAvailable(({ version }) => {
+  window.electronAPI.onUpdateAvailable(({ version, mode, releaseUrl }) => {
+    manualReleaseUrl = mode === 'manual' ? releaseUrl : null;
     if (versionLabel) versionLabel.textContent = `v${version}`;
+    if (instructions) instructions.textContent = manualReleaseUrl
+      ? 'Для установленной версии скачайте установщик со страницы релиза и запустите его вручную.'
+      : 'Хотите скачать и установить обновление сейчас?';
+    if (btnConfirm) btnConfirm.textContent = manualReleaseUrl ? 'Открыть релиз' : 'Обновить';
     showStep('notify');
     openModal();
   });
 
   // ── Пользователь нажал «Обновить» ─────────────────────────
-  btnConfirm?.addEventListener('click', () => {
+  btnConfirm?.addEventListener('click', async () => {
+    if (manualReleaseUrl) {
+      try {
+        await window.electronAPI.openExternal(manualReleaseUrl);
+        closeModal();
+      } catch (err) {
+        if (errorText) errorText.textContent = `Не удалось открыть страницу релиза: ${err.message}`;
+        showStep('error');
+      }
+      return;
+    }
     showStep('progress');
     window.electronAPI.startUpdate();
   });
